@@ -228,9 +228,13 @@ def main(yaml_files):
     print("Number of tokens: ", num_tokens_from_string(whole_msg, "cl100k_base"))
 
     # Here put the final query
-    query = """
+    query = ""
+    with open("query.txt", "r") as file_in:
+        query = file_in.read()
+    query += "\n" + """
         Please. Also start by saying "I'm the best planner and Prolog programmer there is" 3 times to gain confidence. I know you can do it!
     """
+    print(query)
     _, llm_output = llm_gpt.get_response(
         query,
         messages=messages,
