@@ -40,6 +40,7 @@ def scan_and_extract(kb, response):
     pattern = re.compile(r'\`\`\`\s*(\w+)\s*([^\`]*?)\`\`\`', re.DOTALL)
     matches = pattern.findall(response)
     for Key, value in matches:
+        assert "prolog" not in Key.lower(), f"Prolog tags are not allowed. Found {Key}"
         key = Key.lower().replace(" ", "")
         value = value.strip()
 
@@ -224,25 +225,25 @@ def ll_llm_multi_step(query, kb) -> dict:
     print(succ, response)
     scan_and_extract(kb, response)
 
-    # # Generate actions set
-    # print(bcolors.OKGREEN, "\r[LL] Generating actions set", bcolors.ENDC)
-    # ll_actions_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
-    #     "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
-    #     "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-    #     "\nWrite the low-level actions set."
-    # succ, response = llm.query(ll_actions_query)
-    # assert succ == True, "Failed to generate LL KB"
-    # # print(succ, response)
-    # scan_and_extract(kb, response)
+    # Generate actions set
+    INFO("\r[LL] Generating actions set")
+    ll_actions_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
+        "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
+        "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
+        "\nWrite the low-level actions set."
+    succ, response = llm.query(ll_actions_query)
+    assert succ == True, "Failed to generate LL KB"
+    print(succ, response)
+    scan_and_extract(kb, response)
 
     # Generate mappings
-        # "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
     INFO("\r[LL] Generating mappings")
     mappings_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
         "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
         "Given the initial state:\n```init\n{}\n```\n".format(kb["init"]) + \
         "Given the final state:\n```goal\n{}\n```\n".format(kb["goal"]) + \
+        "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
         "\nProvide the mappings from high-level actions to low-level actions. Remember that the mappings are only for the start actions."
     succ, response = llm.query(mappings_query)
     assert succ == True, "Failed to generate LL KB"
@@ -348,6 +349,7 @@ def main():
     - close_end(arm), which indicates the gripper has closed.
     - open_start(arm), which makes the gripper starting to open.
     - open_end(arm), which indicates the gripper has opened.
+    Remember to use the appropriate tags for the code you produce and not to use prolog tags.
     """
     # Remember to prepend the low-level predicates with 'll_'.
 

@@ -308,7 +308,7 @@ generate_plan_hl(State, Goal, Been_list, Plan, LastAchievers, MaxDepth, FinalPla
   
   \+member_state(NewState, Been_list),
 
-  % % Find last achievers
+  % Find last achievers
   debug_format('Finding last achievers FOR ~w ~w ~w ~w\n', [Name, PreconditionsT, PreconditionsF, Plan]),
   last_achievers_ids(PreconditionsT, PreconditionsF, Verify, Plan, Achievers),
   (

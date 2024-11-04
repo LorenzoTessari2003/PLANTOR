@@ -201,6 +201,7 @@ generate_plan(State, Goal, Been_list, Plan, LastAchievers, MaxDepth, FinalPlan, 
 
   % Find last achievers
   debug_format('Finding last achievers for ~w ~w ~w ~w\n', [Name, PreconditionsT, PreconditionsF, Plan]),
+  leash(-all), trace,
   last_achievers_ids(PreconditionsT, PreconditionsF, Verify, Plan, Achievers),
   (
     functor(Name, ActionNameFull, _), sub_string(ActionNameFull, Value, _, _, '_end'), sub_string(ActionNameFull, _, Value, _, ActionName) 

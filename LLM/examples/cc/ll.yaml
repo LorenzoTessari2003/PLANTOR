@@ -2,9 +2,9 @@ entries:
   system_msg:
     role: 'system'
     content: "You are a helpful assistant. Your role is to do a consistency check on the description
-    of the environment, which is divided in high-level, low-level and a combination of the two. Some
-    examples are provided to aid you, please follow them. Explain the chain of thoughts that led you 
-    to your conclusion. If the scenario is feasible, write OK, otherwise write PROBLEM."
+      of the environment, which is divided in high-level, low-level and a combination of the two. 
+      Some examples are provided to aid you, please follow them. Explain the chain of thoughts that 
+      led you to your conclusion. If the scenario is feasible, write OK, otherwise write PROBLEM."
     
   convo:
     ############################################################################
@@ -40,13 +40,13 @@ entries:
       Q:
         role: 'user'
         content: | 
-          Consider the following low-level description of a scenario. State if this scenario is feasible or
-          not. Please write OK if it is, PROBLEM, if it is not. Also describe you thought process. 
-          Given an initial state in which there are two blocks b1, b2 in position (1,1) and (2,2) 
-          respectively, move the block b1 to position (3,3) and place b2 on top of b1 using 2 
-          agents, which are initially available and it will also be available at the end. The agents
-          are robotics arm that can pick and move objects around. The initial positions of the
-          arms are (0,0) and (0,0), while it does not matter where they are at the end.
+          Consider the following low-level description of a scenario. State if this scenario is
+          feasible or not. Please write OK if it is, PROBLEM, if it is not. Also describe you
+          thought process. Given an initial state in which there are two blocks b1, b2 in position
+          (1,1) and (2,2) respectively, move the block b1 to position (3,3) and place b2 on top of
+          b1 using 2 agents, which are initially available and it will also be available at the end.
+          The agents are robotics arm that can pick and move objects around. The initial positions
+          of the arms are (0,0) and (0,0), while it does not matter where they are at the end.  
 
       A:
         role : 'assistant'
@@ -63,13 +63,13 @@ entries:
       Q:
         role: 'user'
         content: | 
-          Consider the following low-level description of a scenario. State if this scenario is feasible or
-          not. Please write OK if it is, PROBLEM, if it is not. Also describe you thought process. 
-          Given an initial state in which there are two blocks b1, b2 in position (1,1) and (2,2) 
-          respectively, move the block b1 to position (3,3) and place b2 on top of b1 using 1 
-          agent, which is initially available and it will also be available at the end. The agent
-          is a car-like robot. Its initial position is (0,0) and it does not matter where they are 
-          at the end.
+          Consider the following low-level description of a scenario. State if this scenario is
+          feasible or not. Please write OK if it is, PROBLEM, if it is not. Also describe you
+          thought process. Given an initial state in which there are two blocks b1, b2 in position
+          (1,1) and (2,2) respectively, move the block b1 to position (3,3) and place b2 on top of
+          b1 using 1 agent, which is initially available and it will also be available at the end.
+          The agent is a car-like robot. Its initial position is (0,0) and it does not matter where
+          they are at the end.
 
       A:
         role : 'assistant'
@@ -119,30 +119,35 @@ entries:
         role: 'user'
         content: | 
           Given the following high-level description of a scenario. 
-          There are 7 blocks on a table. In the initial state of the simulation, block b1 is in position (2,2), block b2 is in 
-          position (4,4), block b4 is in position (8,8). Block b5 is on top of block b1 in position (2,2) and block b3 is on 
-          top of block b2 in position (4,4). After moving the blocks around during the simulation, at the end, we have b5 on 
-          top of block b4, both in position (8,8), and the remaining blocks b1, b2 and b3 are in the same positions as in the 
-          initial state. The position of other blocks, such as b6, is irrelevant at the moment and can be considered as random
-          positions on the table. Please explicitly assign these positions when generating the knowledge base.
+          There are 7 blocks on a table. In the initial state of the simulation, block b1 is in
+          position (2,2), block b2 is in position (4,4), block b4 is in position (8,8). Block b5 is
+          on top of block b1 in position (2,2) and block b3 is on top of block b2 in position
+          (4,4). After moving the blocks around during the simulation, at the end, we have b5 on
+          top of block b4, both in position (8,8), and the remaining blocks b1, b2 and b3 are in the
+          same positions as in the initial state. The position of other blocks, such as b6, is
+          irrelevant at the moment and can be considered as random positions on the table. Please
+          explicitly assign these positions when generating the knowledge base.
           There are 8 agents with a robotic arm. 
           The agents can:
-          - Move a block from a position on the table to another position on the table. At the beginning, the block must be
-            free, i.e., there is no other block on top of it, and the agent must be available. At the end, the final position
-            on the table must still be free, i.e., there are no blocks occupying it. After the execution of the action, the
-            agent is available again, the block is in the new position. The previous position has been freed as soon as the 
-            action starts. 
-          - Move a block B1 from a position on the table, to the top of another block B2. At the beginning, the B1 must be 
-            free and the agent must be available. To complete the action, B2 must be free. At the end, B1 is on top of B2,
-            and the agent is available again. The previous position of B1 has been freed as soon as the action starts.
-          - Move a block B1 from the top of another block B2 to the table. At the beginning, B1 must be on top of B2, B1 must 
-            be free and the agent must be available. At the end, B1 is on the table in a new position, and the agent is 
-            available again. B2 becomes free (since the block it had on top has been removed) as soon as the action starts.
-          - Move a block B1 from the top of another block B2 to the top of another block B3. At the beginning, B1 must be on
-            top of B2, B1 must be free and the agent must be available. To complete the action, B3 must be free, i.e., not 
-            have any other block on top of it. At the end, B1 is on top of B3, and the agent is available again. B2 becomes 
-            free as soon as the action starts.
-          
+          - Move a block from a position on the table to another position on the table. At the
+          beginning, the block must be free, i.e., there is no other block on top of it, and the
+          agent must be available. At the end, the final position on the table must still be free,
+          i.e., there are no blocks occupying it. After the execution of the action, the agent is
+          available again, the block is in the new position. The previous position has been freed as
+          soon as the  action starts. 
+          - Move a block B1 from a position on the table, to the top of another block B2. At the
+            beginning, the B1 must be free and the agent must be available. To complete the action,
+            B2 must be free. At the end, B1 is on top of B2, and the agent is available again. The
+            previous position of B1 has been freed as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the table. At the beginning, B1 must
+            be on top of B2, B1 must be free and the agent must be available. At the end, B1 is on
+            the table in a new position, and the agent is available again. B2 becomes free (since
+            the block it had on top has been removed) as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the top of another block B3. At the
+            beginning, B1 must be on top of B2, B1 must be free and the agent must be available. To
+            complete the action, B3 must be free, i.e., not have any other block on top of it. At
+            the end, B1 is on top of B3, and the agent is available again. B2 becomes free as soon
+            as the action starts.
           
           Consider the following low-level description of the same scenario. State if this scenario 
           is feasible or not. Please write OK if it is, PROBLEM, if it is not. Also describe you 

@@ -440,5 +440,6 @@ last_achievers_ids(PreT, PreF, Verify, [ID-HA|TA], Achievers, RetAchievers):-
     last_achievers_ids(PreT, PreF, Verify, TA, NewAchievers, RetAchievers).
 
 last_achievers_ids(PreT, PreF, Verify, Plan, RetAchievers):-
+    debug_format('Calling last_achievers_ids with\nPreT: ~w\nPreF: ~w\nVerify: ~w\nPlan: ~w\nAchivers: ~w~n', [PreT, PreF, Verify, Plan, []]),
     last_achievers_ids(PreT, PreF, Verify, Plan, [], RetAchievers).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
