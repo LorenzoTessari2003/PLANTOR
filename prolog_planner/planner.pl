@@ -1,8 +1,7 @@
 :- ensure_loaded('full_planner.pl').
 
-plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources) :-
-  % disable_debug,
-  enable_debug,
+plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources, ResourcesList, LLActions) :-
+  disable_debug,
   init_state(Init),
   goal_state(Goal),
   % trace(apply_action_map),
@@ -30,9 +29,19 @@ plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources) :-
   print_list(TTActionList),
   nl,nl,nl,
 
+  extract_ll_actions(LLActions),
+  debug_format('Low-level Action:~n'),
+  print_list(LLActions),
+  nl,nl,nl,
+
   extract_resources_number(Resources),
   debug_format('Resources:~n'),
   print_list(Resources),
+  nl,nl,nl,
+
+  extract_resources_list(ResourcesList),
+  debug_format('Resources list:~n'),
+  print_list(ResourcesList),
   nl,nl,nl,
 
   extract_resources_per_action(TTActionList, Resources, ActionXResources),
@@ -44,7 +53,7 @@ plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources) :-
 
   true.
 
-plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources) :-
+plan(_Actions, _AdjMatrix, _TTActionList, _Resources, _ActionXResources, _ResourcesList, _LLActionsList) :-
   init_state(Init),
   goal_state(Goal),
   % trace(apply_action_map),
@@ -55,5 +64,7 @@ plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources) :-
   format('Could not generate TO plan').
 
 plan :-
-  plan(_, _, _, _, _).  
+  disable_debug,
+  plan(_, _, _, _, _, _, _).  
+
 

@@ -10,7 +10,7 @@
 %   clear(b1), clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 % goal_state([
@@ -20,8 +20,26 @@
 %   clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
+
+init_state([
+  ontable(b1), ontable(b2),
+  at(b1,1,1), at(b2,2,2), 
+  clear(b1), clear(b2),
+  available(a1),
+  % ----
+  ll_arm_at(a1,0,0)
+]).
+
+goal_state([
+  ontable(b1), ontable(b2),
+  at(b1,3,3), at(b2,4,4), 
+  clear(b1), clear(b2),
+  available(a1),
+  % ----
+  ll_arm_at(a1,_,_)
+]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,7 +53,7 @@
 %   clear(b3), clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -45,7 +63,7 @@
 %   clear(b1), clear(b3),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,7 +74,7 @@
 %   clear(b3), clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -66,7 +84,7 @@
 %   clear(b1), clear(b3),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,7 +95,7 @@
 %   clear(b1), clear(b2), clear(b3),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -88,7 +106,7 @@
 %   clear(b3), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,7 +117,7 @@
 %   clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -109,7 +127,7 @@
 %   clear(b1), clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -121,7 +139,7 @@
 %   clear(b2), clear(b3),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -132,7 +150,7 @@
 %   clear(b1), clear(b2),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,7 +162,7 @@
 %   clear(b2), clear(b3), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -155,7 +173,7 @@
 %   clear(b2), clear(b4), 
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -166,7 +184,7 @@
 %   clear(b1), clear(b2), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -177,7 +195,7 @@
 %   clear(b3), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -188,7 +206,7 @@
 %   clear(b1), clear(b2), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -199,7 +217,7 @@
 %   clear(b3), clear(b4),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -217,7 +235,7 @@
 %   clear(b1), clear(b2), clear(b4), clear(b5),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,0,0)
+%   ll_arm_at(a1,0,0)
 % ]).
 
 
@@ -228,29 +246,29 @@
 %   clear(b3), clear(b4), clear(b5),
 %   available(a1),
 %   % ----
-%   ll_at_arm(a1,_,_)
+%   ll_arm_at(a1,_,_)
 % ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-init_state([
-  ontable(b1), ontable(b2), on(b3,b2),
-  at(b1,1,1), at(b2,2,2), at(b3,2,2),
-  clear(b1), clear(b3),
-  available(a1),
-  % ----
-  ll_at_arm(a1,0,0)
-]).
+% init_state([
+%   ontable(b1), ontable(b2), on(b3,b2),
+%   at(b1,1,1), at(b2,2,2), at(b3,2,2),
+%   clear(b1), clear(b3),
+%   available(a1),
+%   % ----
+%   ll_arm_at(a1,0,0)
+% ]).
 
 
-goal_state([
-  ontable(b1), ontable(b2), ontable(b3),
-  at(b1,3,3), at(b2,4,4), at(b3,0,0),
-  clear(b1), clear(b2), clear(b3),
-  available(a1),
-  % ----
-  ll_at_arm(a1,_,_)
-]).
+% goal_state([
+%   ontable(b1), ontable(b2), ontable(b3),
+%   at(b1,3,3), at(b2,4,4), at(b3,0,0),
+%   clear(b1), clear(b2), clear(b3),
+%   available(a1),
+%   % ----
+%   ll_arm_at(a1,_,_)
+% ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

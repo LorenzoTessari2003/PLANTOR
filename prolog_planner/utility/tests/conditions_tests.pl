@@ -17,10 +17,25 @@ test_last_achievers_ids_now :-
     ],
     [pos(1,1), pos(2,2), block(b6), agent(a2)],
     [0-move_block_table_to_table_start(a1,b4,8,8,2,2)],
-    []
+    B
   ),
-  format('Finished\n'),
+  format('Finished ~w\n', [B]),
   true.
+
+test(L):-
+  length(L, Len),
+  format('Maybe I need to use Len ~w\n', [Len]),
+  append([], [Len], L1),
+  (
+    format('Trying to understand why Prolog sucks so much\n'),
+    Len > 3 
+    ->(
+      format('List is longer than 3 ~w\n', [Len])
+    );(
+      format('List is not longer than 3 ~w\n', [Len])
+    )
+  ),
+  format(L1).
 
 % test_achievers_4 :-
 %   achiever(

@@ -15,28 +15,22 @@ except:
 
 
 def main():
-    data_dict = PrologLib.execTest(kb_path="/home/enrico/Projects/prolog_planner/kb.pl")
-
-    #  for i in range(len(data_dict["adj_matrix"][0])):
-    #      if i not in [1, 13]:
-    #          data_dict["adj_matrix"][0][i] = 0
-
-    #  for i in range(len(data_dict["adj_matrix"])):
-    #      if i != 36:
-    #          data_dict["adj_matrix"][i][37] = 0
-
-    # return
+    data_dict = PrologLib.execTest()#kb_path="/home/enrico/Projects/prolog_planner/output/kb.pl")
 
     milp_solver = MILPSolver(
         data_dict["tt_actions"],
         data_dict["actions"],
         data_dict["adj_matrix"],
         data_dict["resources"],
+        data_dict["resources_list"],
+        data_dict["ll_actions_list"]
     )
 
     milp_solver.solve()
-    os.makedirs("output", exist_ok=True)
-    milp_solver.draw_graph_from_matrix(os.path.join("output", "MILP.html"), open_browser=False)
+    
+    # milp_solver.draw_graph_from_matrix(os.path.join("output", "MILP.html"), open_browser=True)
+
+    milp_solver.extract_BT()
 
     # bt = BehaviourTree(stn)
     # bt.draw()

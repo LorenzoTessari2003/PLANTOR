@@ -56,7 +56,8 @@ entries:
           (2,2) and b3 is on top of b1 in position (1,1). There are 2 agents with a robotic arm that
           are available at the beginning and will be available at the end, which can be used to pick
           objects. Their initial position is (0,0) for agent a1 and (10,10) for agent a2. We do not
-          care about their position in the final state."
+          care about their position in the final state. The end-effector, which is a gripper of the
+          arms are open at the beginning, but we do not care about their state at the end."
           Please update the high-level initial and final states to reflect the changes in the 
           description for the low-level.
           Remember to prepend the low-level predicates with "ll_" to avoid conflicts with the 
@@ -72,7 +73,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,3,3),
             clear(b1), clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10)
+            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10),
+            ll_gripper(a1,open), ll_gripper(a2,open)
           ]).
           ```
           ```goal
@@ -81,7 +83,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,1,1),
             clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_)
+            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+            ll_gripper(a1,_), ll_gripper(a2,_)
           ]).
           ```
           Indeed, the only difference is the information regarding the position of the agent with
@@ -147,7 +150,8 @@ entries:
           (2,2) and b3 is on top of b1 in position (1,1). There are 2 agents with a robotic arm that
           are available at the beginning and will be available at the end, which can be used to pick
           objects. Their initial position is (0,0) for agent a1 and (10,10) for agent a2. We do not
-          care about their position in the final state."
+          care about their position in the final state. The end-effector, which is a gripper of the
+          arms are open at the beginning, but we do not care about their state at the end."
           Please update the high-level initial and final states to reflect the changes in the 
           description for the low-level.
           Remember to prepend the low-level predicates with "ll_" to avoid conflicts with the 
@@ -163,7 +167,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,3,3),
             clear(b1), clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10)
+            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10),
+            ll_gripper(a1,open), ll_gripper(a2,open)
           ]).
           ```
           ```goal
@@ -172,7 +177,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,1,1),
             clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_)
+            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+            ll_gripper(a1,_), ll_gripper(a2,_)
           ]).
           ```
           Indeed, the only difference is the information regarding the position of the agent with
@@ -238,7 +244,8 @@ entries:
           (2,2) and b3 is on top of b1 in position (1,1). There are 2 agents with a robotic arm that
           are available at the beginning and will be available at the end, which can be used to pick
           objects. Their initial position is (0,0) for agent a1 and (10,10) for agent a2. We do not
-          care about their position in the final state."
+          care about their position in the final state. The end-effector, which is a gripper of the
+          arms are open at the beginning, but we do not care about their state at the end."
           Please update the high-level initial and final states to reflect the changes in the 
           description for the low-level.
           Remember to prepend the low-level predicates with "ll_" to avoid conflicts with the 
@@ -254,7 +261,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,3,3),
             clear(b1), clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10)
+            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10),
+            ll_gripper(a1,open), ll_gripper(a2,open)
           ]).
           ```
           ```goal
@@ -263,7 +271,8 @@ entries:
             at(b1,1,1), at(b2,2,2), at(b3,1,1),
             clear(b2), clear(b3),
             available(a1), available(a2),
-            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_)
+            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+            ll_gripper(a1,_), ll_gripper(a2,_)
           ]).
           ```
           Indeed, the only difference is the information regarding the position of the agent with

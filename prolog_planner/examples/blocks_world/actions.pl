@@ -48,23 +48,23 @@ action(
 action(
   move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
   [available(Agent), on(Block1, Block2), at(Block1, X1, Y1), at(Block2, X1, Y1), clear(Block1)],
-  [moving_onblock_to_table(_, Block1, _, _, _, _), on(_, Block1), ontable(Block1), at(_, X2, Y2)],
+  [moving_onblock_to_table(_, Block1, _, _, _, _, _), on(_, Block1), ontable(Block1), at(_, X2, Y2)],
   [],
   [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2), Block1 \= Block2],
   [
     del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
-    add(moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)), add(clear(Block2))
+    add(moving_onblock_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2))
   ]
 ).
 action(
   move_onblock_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
-  [moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)],
+  [moving_onblock_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2)],
   [at(_, X2, Y2)],
   [],
   [agent(Agent)],
   [
-    del(moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)),
-    add(ontable(Block1)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+    del(moving_onblock_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+    add(ontable(Block1)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent)), add(clear(Block2))
   ]
 ).
 % Move Block1 from (X1,Y1) on top of another block to the top of block Block2 in (X2,Y2). Notice that we are not removing the predicates for Block2 yet as the action is not concluded yet.

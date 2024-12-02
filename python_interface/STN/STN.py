@@ -32,6 +32,9 @@ class SimpTempNet(Graph):
             if not super(SimpTempNet, self).has_edge(t, it + 1):
                 super(SimpTempNet, self).add_edge(t, it + 1, weight=0, label="from {} to {}".format(t, it + 1))
 
+    def __init__(self, stn_root):
+        
+
     def getEnd(self, node_id):
         return self.nodes[node_id]['related'][0]
 

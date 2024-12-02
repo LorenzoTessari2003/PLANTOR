@@ -72,7 +72,7 @@ verify([H|T]) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function checks if an action is applicable, i.e., checks if the 
 % preconditions are met and the final conditions are not met
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,29 +81,44 @@ is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify) :
 
 is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
     verify(Verify),
-    % debug_format('Grounded ~w\n', [Verify]),
-    (
-        conditions_met_wrapper(PreconditionsT, State)
-        ->(
-            % debug_format('Checked that the preconditions are met ~w in state ~w\n', [PreconditionsT, State]),
-            (
-                conditions_not_met_wrapper(PreconditionsF, State)
-                ->(
-                    true
-                );(
-                    % which_conditions_met_wrapper(FinalConditionsF, State, R),
-                    % debug_format('Precondition ~w is met in state ~w, but should not\n', [R, State]),
-                    fail
-                )
-            )
+    debug_format('Grounded ~w\n', [Verify]),
+    conditions_met_wrapper(PreconditionsT, State)
+    *->(
+        debug_format('Checked that the preconditions are met ~w in state ~w\n', [PreconditionsT, State]),
+        conditions_not_met_wrapper(PreconditionsF, State)
+        *->(
+            debug_format('No no-no precontion is met in state ~w\n', [State])
         );(
-            % debug_format('Some precondition is not met in state ~w\n', [State]),
-            % which_conditions_not_met_wrapper(PreconditionsT, State, R), 
-            % debug_format('Precondition ~w is not met in state ~w\n', [R, State]), 
+            debug_format('Some no-no precontions are met in state ~w\n', [State]),
             fail
         )
+    );(
+        debug_format('Some precondition are not present in state ~w\n', [State]),
+        fail
     ),
     true.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WORKING
+% is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
+%     verify(Verify),
+%     debug_format('Grounded ~w\n', [Verify]),
+%     conditions_met_wrapper(PreconditionsT, State)
+%     *->(
+%         debug_format('Checked that the preconditions are met ~w in state ~w\n', [PreconditionsT, State]),
+%         conditions_not_met_wrapper(PreconditionsF, State)
+%         *->(
+%             debug_format('No no-no precontion is met in state ~w\n', [State])
+%         );(
+%             debug_format('Some no-no precontions are met in state ~w\n', [State]),
+%             fail
+%         )
+%     );(
+%         debug_format('Some precondition are not present in state ~w\n', [State]),
+%         fail
+%     ),
+%     true.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -443,3 +458,4 @@ last_achievers_ids(PreT, PreF, Verify, Plan, RetAchievers):-
     debug_format('Calling last_achievers_ids with\nPreT: ~w\nPreF: ~w\nVerify: ~w\nPlan: ~w\nAchivers: ~w~n', [PreT, PreF, Verify, Plan, []]),
     last_achievers_ids(PreT, PreF, Verify, Plan, [], RetAchievers).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

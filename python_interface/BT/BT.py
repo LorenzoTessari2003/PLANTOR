@@ -132,16 +132,17 @@ class BehaviourTree(nx.DiGraph):
 
 def toBTfromSTNRec(bt : BehaviourTree, stn : SimpTempNet, action_id, used, level, parent) -> None:
     """
-    @brief This returns a flow, that is a list of lists of nodes
+    @brief This returns a bt as a flow, that is a list of lists of nodes
     """
     action = stn.nodes(data=True)[action_id]
 
+    # Check if the action is used
     if action in used:
         # bt.add_bt_node(BT_WAIT_ACTION(action, level, parent))
         return
-
     used.append(action)
 
+    # Check if the action has children, if not, it is the end node of the BT
     action_children = stn.out_edges(action_id)
     action_parents  = stn.in_edges(action_id)
     if len(action_children) == 0:

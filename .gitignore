@@ -1,3 +1,4 @@
+*.html
 .venv
 __pycache__
 test.pl
@@ -21,6 +22,8 @@ fibonacci/
 .idea
 
 .vscode/
+
+drawer.*
 
 #*.png
 

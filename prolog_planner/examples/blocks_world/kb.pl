@@ -21,9 +21,10 @@ block(b5).
 
 agent(a1).
 agent(a2).
+% agent(a3).
 
-arm(a1).
-arm(a2).
+ll_arm(a1).
+ll_arm(a2).
 
 resources(agent(_)).
-resources(arm(_)).
+resources(ll_arm(_)).

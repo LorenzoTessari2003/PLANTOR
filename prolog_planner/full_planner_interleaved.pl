@@ -175,15 +175,7 @@ generate_plan(State, Goal, _Been_list, Plan, LastAchievers, _MaxDepth, Plan, Las
 generate_plan(State, Goal, Been_list, Plan, LastAchievers, MaxDepth, FinalPlan, FinalLastAchievers) :-
   \+equal_set(State, Goal),
   length(Plan, Length), 
-  (
-    Length < MaxDepth ->
-    (
-      format('Length is fine ~w\n', [Length])
-    );(
-      format('Length is too long ~w\n', [Length]),
-      fail
-    )
-  ),
+  Length < MaxDepth,
   % Check new action
   action(Name, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
   debug_format('\n\nChecking action ~w for state: ~w\n', [Name, State]),

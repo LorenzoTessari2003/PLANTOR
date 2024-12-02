@@ -1,7 +1,8 @@
-from pyswip import Prolog, Functor, Variable, Query
-import os
+import pyswip
+
 
 from . import PLANNER_PATH
+
 
 def extract_actions(actions) -> list:
     """
@@ -20,6 +21,10 @@ def extract_actions(actions) -> list:
 
         ret.append(action)
     return ret
+
+
+###############################################################################
+
 
 def extract_resources(resources) -> dict:
     """
@@ -41,6 +46,51 @@ def extract_resources(resources) -> dict:
         else:
             raise ValueError(f"Resource {resource} is duplicated")
     return ret
+
+
+###############################################################################
+
+
+def extract_resources_list(resources_list) -> list:
+    """
+    Resources have the form ResourceName-ResourceList, which, when obtained by 
+    PySWI, becomes -(ResourceName, ResourceList), so we need to extract these 
+    values as a list of strings.
+
+    Args:
+        resources_list (list): A list of Functors containing the resources.
+
+    Returns:
+        dict: A dictionary where the key is the resource name and the value
+            is the list of resources. For examples:
+            ret['agent']=['agent(a1)', 'agent(a2)'].
+    """
+    ret = {}
+    for i in range(len(resources_list)):
+        resource_name = str(resources_list[i].args[0])
+        resource_list = [str(x) for x in resources_list[i].args[1]]
+        ret[resource_name] = resource_list
+    return ret
+
+
+###############################################################################
+
+
+def extract_ll_actions_list(ll_actions_list) -> list:
+    """
+    Extracts the low-level actions from the list of low-level actions.
+
+    Args:
+        ll_actions_list (list): A list of Atoms containing the low-level actions.
+
+    Returns:
+        list: A list of strings containing the low-level actions.
+    """
+    return [str(x) for x in ll_actions_list]
+
+
+###############################################################################
+
 
 def extract_tt_actions(tt_actions, res_x_action) -> dict:
     """
@@ -75,6 +125,10 @@ def extract_tt_actions(tt_actions, res_x_action) -> dict:
 
     return ret
 
+
+###############################################################################
+
+
 def execTest(query = "plan", kb_path = "") -> dict:
     """
     Looks for the planner in the prolog_planner directory and executes the query specified in the argument.
@@ -90,42 +144,48 @@ def execTest(query = "plan", kb_path = "") -> dict:
     """
     print(f"Executing {query} from Prolog")
     
-    prolog = Prolog()
+    prolog = pyswip.Prolog()
     # planner_path = os.path.join(os.getcwd(), "..", "prolog_planner")
     print(f"Looking for planner at {PLANNER_PATH}")
     if kb_path != "":
         prolog.consult(kb_path)
     prolog.consult(PLANNER_PATH)
 
-    planner = Functor(query, 5)
-    actions_var = Variable()
-    tt_actions_var = Variable()
-    adj_matrix_var = Variable()
-    resources_var = Variable()
-    res_x_actions_var = Variable()
+    planner = pyswip.Functor(query, 7)
+    actions_var = pyswip.Variable()
+    tt_actions_var = pyswip.Variable()
+    adj_matrix_var = pyswip.Variable()
+    resources_var = pyswip.Variable()
+    res_x_actions_var = pyswip.Variable()
+    resources_list = pyswip.Variable()
+    ll_actions_list_var = pyswip.Variable()
 
-    sol = Query(planner(actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var))
+    sol = pyswip.Query(planner(actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
 
-    sol.nextSolution()
+    succ = sol.nextSolution()
+
+    if succ == 0:
+        raise ValueError("Failed to execute prolog")
     
     print("Executed prolog")
 
     # Convert the following code into a dictionary 
     data_dict = {
-        "actions":       extract_actions(actions_var.get_value()),
-        "tt_actions":    extract_tt_actions(tt_actions_var.get_value(), res_x_actions_var.get_value()),
-        "adj_matrix":    adj_matrix_var.get_value(),
-        "resources":     extract_resources(resources_var.get_value())
+        "actions":          extract_actions(actions_var.get_value()),
+        "tt_actions":       extract_tt_actions(tt_actions_var.get_value(), res_x_actions_var.get_value()),
+        "adj_matrix":       adj_matrix_var.get_value(),
+        "resources":        extract_resources(resources_var.get_value()),
+        "resources_list":   extract_resources_list(resources_list.get_value()),
+        "ll_actions_list":  extract_ll_actions_list(ll_actions_list_var.get_value())
     }
 
     data_dict["actions"].insert(0, data_dict["tt_actions"]["0"]["s"])
     data_dict["actions"].append(data_dict["tt_actions"]["0"]["e"])
 
-    for key, value in data_dict.items():
-        print(key, value)
-        print()
+    # for key, value in data_dict.items():
+    #     print(key, value)
+    #     print()
 
     return data_dict
-
 
 
