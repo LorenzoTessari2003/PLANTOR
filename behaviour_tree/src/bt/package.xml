@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>bt</name>
+  <version>0.0.1</version>
+  <description>
+  This package provides the behavior tree.
+  </description>
+  <maintainer email="enrico.saccon@unitn.it">Enrico Saccon</maintainer>
+  <license>GPL3.0</license>
+  <author>Enrico Saccon</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>behaviortree_cpp</depend>
+
+  <!-- ROS2 dependencies -->
+  <depend>rclcpp</depend>
+  <depend>std_srvs</depend>
+  <depend>behaviortree_ros2</depend>
+  <depend>bt_interfaces</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <export>
+      <build_type>ament_cmake</build_type>
+  </export>
+
+</package>
