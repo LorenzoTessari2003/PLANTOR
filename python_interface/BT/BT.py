@@ -2,7 +2,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from dict2xml import dict2xml
 import pathlib
-
+import re
+import json
 
 try:
     from python_interface.STN.STN import SimpTempNet
@@ -10,6 +11,9 @@ try:
 except:
     from STN.STN import SimpTempNet
     from .BTNode import *
+
+
+RE_ACTION = r".*\d+\_(?P<action_name>[a-zA-Z\_]+)\_start\((?P<args>[^\)]*)\).*"
 
 
 XML_STANDARD = """
@@ -149,6 +153,11 @@ class BehaviourTree(nx.DiGraph):
     def toXML(self, filepath = "") -> str:
         if not self.root_name_:
             return ""
+
+        # Read the JSON file
+        actions_dict = {}
+        with open(os.path.join("data", "actions.json"), "r") as f:
+            actions_dict = json.load(f)
         
         func_d = {}
 
@@ -169,7 +178,36 @@ class BehaviourTree(nx.DiGraph):
                     dictionary["Parallel"].append(tmp_dict)
             
             elif bt.nodes[node]["type"] == "ES":
-                dictionary["Action"] = node
+                match = re.match(RE_ACTION, str(node))
+                if match is not None:
+                    # Create action name and check if it is already in the actions dictionary
+                    action_name = "Action_"+str(node)
+                    if action_name in actions_dict:
+                        raise Exception(f"Action {action_name} already in the dictionary")
+                                       
+                    # Add entry for action in the XML dictionary
+                    dictionary[action_name] = {}
+
+                    # Get the corresponding ROS2 node and service name
+                    ros2_node_dict = actions_dict[match.group("action_name")]
+                    ros2_node_name = ros2_node_dict["ros2_node"]
+                    ros2_serv_name = ros2_node_dict["service_name"]
+                    ros2_args_name = ros2_node_dict["args"]
+        
+                    args_name = [x.strip() for x in match.group("args").split(",")]
+
+                    if len(args_name) != len(ros2_args_name):
+                        raise Exception(f"Number of arguments does not match for action {action_name} {len(args_name)} != {len(ros2_args_name)}")
+
+                    args = " ".join([f"{ros2_args_name[i]}=\"{args_name[i]}\"" for i in range(len(args_name))])
+
+                    final_replecement = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args}"
+                    print(f"{action_name} -> {final_replecement}")
+
+                    actions_dict[action_name] = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args}"
+
+                else:
+                    raise Exception(f"Action {node} does not match the regex {RE_ACTION}")
                 
             else:
                 if bt.nodes[node]["type"].lower() not in ["ee"]:
