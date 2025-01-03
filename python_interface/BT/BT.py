@@ -1,25 +1,40 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from dict2xml import dict2xml
+import pathlib
 
-from . import BTNode
 
 try:
     from python_interface.STN.STN import SimpTempNet
     from python_interface.BT.BTNode import *
 except:
     from STN.STN import SimpTempNet
-    # from .BTNode import *
+    from .BTNode import *
+
+
+XML_STANDARD = """
+<root BTCPP_format="4" >
+    <BehaviorTree ID="MainTree">
+        {}
+    </BehaviorTree>
+</root>
+"""
 
 
 class BehaviourTree(nx.DiGraph):
-    def __init__(self, stn : SimpTempNet):
+    def __init__(self, stn : SimpTempNet, root_name):
         super(BehaviourTree, self).__init__()
-        toBTfromSTN(self, stn)
+        assert root_name in stn.nodes, "Root {} not in STN".format(root_name)
+        self.root_name_ = ""
+        toBTfromSTN(self, stn, root_name)
 
-    def add_bt_node(self, node : BTNode):
+    def add_bt_node(self, node : BT_NODE):
         if node:
             assert node not in self.nodes, "Node {} already in BT".format(node)
             self.add_node(node)
+            self.nodes[node]["type"] = node.type
+            if self.root_name_ == "":
+                self.root_name_ = node
             if node.get_parent() is not None:
                 self.add_edge(node.get_parent(), node)
                 node.get_parent().add_child(node)
@@ -34,7 +49,7 @@ class BehaviourTree(nx.DiGraph):
         self.drawBokeh()
 
     def drawBokeh(self) -> None:
-        return
+        # return
         from bokeh.plotting import figure, show, output_file
         from bokeh.models import ColumnDataSource, HTMLLabelSet
 
@@ -116,6 +131,7 @@ class BehaviourTree(nx.DiGraph):
         output_file(filename="BT.html")
         show(plot)
 
+
     def drawMatplotlib(self,):
         plt.close()
         plt.figure(1, figsize=(25, 20), dpi=400)
@@ -128,6 +144,50 @@ class BehaviourTree(nx.DiGraph):
         nx.draw_networkx_labels(self, pos, labels={n: self.nodes[n]['label'] for n in self.nodes})
 
         plt.savefig("BT.png")
+
+
+    def toXML(self, filepath = "") -> str:
+        if not self.root_name_:
+            return ""
+        
+        func_d = {}
+
+        def toXMLRec(bt, node, dictionary) -> None:
+            print(f"toXMLRec: {node} {dictionary}")
+            if bt.nodes[node]["type"] == "INIT" or bt.nodes[node]["type"] == "SEQ":
+                dictionary["Sequence"] = []
+                for _, child in bt.out_edges(node):
+                    tmp_dict = {}
+                    toXMLRec(bt, child, tmp_dict)
+                    dictionary["Sequence"].append(tmp_dict)
+            
+            elif bt.nodes[node]["type"] == "PAR":
+                dictionary["Parallel"] = []
+                for _, child in bt.out_edges(node):
+                    tmp_dict = {}
+                    toXMLRec(bt, child, tmp_dict)
+                    dictionary["Parallel"].append(tmp_dict)
+            
+            elif bt.nodes[node]["type"] == "ES":
+                dictionary["Action"] = node
+                
+            else:
+                if bt.nodes[node]["type"].lower() not in ["ee"]:
+                    raise Exception("Unknown node type: {}".format(bt.nodes[node]["type"]))
+                
+
+        toXMLRec(self, self.root_name_, func_d)
+
+        xml = dict2xml(func_d)
+        xml = XML_STANDARD.format(xml)
+        if filepath:
+            if pathlib.Path(filepath).parent.exists():
+                with open(filepath, "w") as f:
+                    f.write(xml)
+            else:
+                print("Filepath {} does not exist".format(filepath))
+        return xml
+        
 
 
 def toBTfromSTNRec(bt : BehaviourTree, stn : SimpTempNet, action_id, used, level, parent) -> None:
@@ -164,8 +224,6 @@ def toBTfromSTNRec(bt : BehaviourTree, stn : SimpTempNet, action_id, used, level
         bt.add_bt_node(BT_EXEC_START(action, level+1, new_parent))
     elif action['type'] == "end":
         bt.add_bt_node(BT_EXEC_END(action, level+1, new_parent))
-        if "a1" in action['label'] and "grip" in action["label"]:
-            bt.add_bt_node(BT_WAIT_ACTION(stn.nodes(data=True)[7], level + 1, new_parent))
 
     # Check if the children nodes should be run in parallel
     recursive_level = 0
@@ -183,7 +241,7 @@ def toBTfromSTNRec(bt : BehaviourTree, stn : SimpTempNet, action_id, used, level
         if not end_node_id or (end_node_id and end_node_id != new_node_id[1]):
             bt.add_bt_node(toBTfromSTNRec(bt, stn, new_node_id[1], used, level+recursive_level+1, new_parent))
 
-def toBTfromSTN(bt : BehaviourTree, stn : SimpTempNet):
+def toBTfromSTN(bt : BehaviourTree, stn : SimpTempNet, root_name):
     # Remove negative edges
     edges_to_remove = []
     for edge in stn.edges(data=True):
@@ -192,4 +250,8 @@ def toBTfromSTN(bt : BehaviourTree, stn : SimpTempNet):
     for edge in edges_to_remove:
         stn.remove_edge(edge[0], edge[1])
 
-    return toBTfromSTNRec(bt, stn, 0, [], 1, None)
+    return toBTfromSTNRec(bt, stn, root_name, [], 1, None)
+
+
+def extract_dict(bt, node, dic):
+      new_dic = {}

@@ -9,9 +9,25 @@ class Graph(nx.DiGraph):
         self.add_nodes_from(nodes)
         self.add_edges_from(edges)
 
-    def __init__(self, edges=[]):
+    def __init__(self, edges=[], weights = [], nodesD = {}):
         super().__init__()
-        self.add_edges_from(edges)
+        if len(weights) == 0:
+            self.add_edges_from(edges)
+        else:
+            weighted_edges = [(edges[i][0], edges[i][1], weights[i]) for i in range(len(edges))]
+            self.add_weighted_edges_from(weighted_edges)
+        
+        print('nodesD', nodesD)
+
+        for node in self.nodes:
+            print(node)
+
+        if len(nodesD) > 0:
+            nx.set_node_attributes(self, nodesD)
+
+        attributes = nx.get_node_attributes(self, 'type')
+        print('attributes', attributes)
+
 
     def __remove_redundant_edges(self):
         """

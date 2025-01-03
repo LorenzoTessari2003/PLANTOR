@@ -1,6 +1,9 @@
 fake_backend/
 *.html
 *.xml
+bt.CPP/
+bt.ROS2/
+data/
 *_old
 .venv
 __pycache__

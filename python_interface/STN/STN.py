@@ -32,11 +32,12 @@ class SimpTempNet(Graph):
             if not super(SimpTempNet, self).has_edge(t, it + 1):
                 super(SimpTempNet, self).add_edge(t, it + 1, weight=0, label="from {} to {}".format(t, it + 1))
 
-    def __init__(self, stn_root):
-        
+    def __init__(self, edges=[], weights = [], nodesD = {}):
+        super(SimpTempNet, self).__init__(edges, weights, nodesD)
+        assert self.checkConsistency()
 
     def getEnd(self, node_id):
-        return self.nodes[node_id]['related'][0]
+        return self.nodes[node_id]['related']
 
     def checkConsistency(self):
         def w(u, v, d):
@@ -51,7 +52,7 @@ class SimpTempNet(Graph):
                 for e in res:
                     print(e)
                 break
-            except Exception:
+            except Exception as e:
                 pass
 
         return not found

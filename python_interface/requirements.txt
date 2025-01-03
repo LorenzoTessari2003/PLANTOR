@@ -6,3 +6,4 @@ networkx
 pillow>=7.1.0
 ortools
 pyvis
+dicttoxml

@@ -1,12 +1,15 @@
 import collections
 from ortools.sat.python import cp_model
+import os
 
 try:
     from python_interface.utility.Graph.Graph import Graph
     from python_interface.BT.BT import BehaviourTree
+    from python_interface.STN.STN import SimpTempNet
 except:
     from utility.Graph.Graph import Graph
     from BT.BT import BehaviourTree
+    from STN.STN import SimpTempNet
 
 hl_t = 0
 ll_t = 0
@@ -305,16 +308,17 @@ class MILPSolver(cp_model.CpSolver):
             def __init__(self, name):
                 self.name = name
                 self.children = []
-                self.start_time, self.end_time = 0, 0
+                self.time = 0
                 self.resources = []
-                self.type = "ActionNode"
+                self.action_type = ""
+                self.related = ""
 
             def add_child(self, child):
                 if isinstance(child, Node) and child not in self.children:
                     self.children.append(child)
 
             def __str__(self):
-                return f"{self.name} [{self.start_time}, {self.end_time}] -> {[x.name for x in self.children]}"
+                return f"{self.name} at {self.time} -> {[x.name for x in self.children]}"
 
         # First create a dictionary where the key is the name of the action and the value is a tuple with start and end times
         times_for_ttas = {}
@@ -328,9 +332,11 @@ class MILPSolver(cp_model.CpSolver):
         print("\n\n", times_for_ttas)
         print("\n\n", times_for_sas)
 
-        root_stn = Node(self.tta_actions['0']['s'])
-        root_stn.start_time = self.Value(self.all_tta['0'].start)
-        root_stn.end_time = self.Value(self.all_tta['0'].end)
+        root_name = self.tta_actions['0']['s']
+        root_stn = Node(root_name)
+        root_stn.time = self.Value(self.all_tta['0'].start)
+        root_stn.action_type = "init"
+        # root_stn.end_time = self.Value(self.all_tta['0'].end)
 
 
         import networkx as nx
@@ -372,7 +378,8 @@ class MILPSolver(cp_model.CpSolver):
                             if times_for_ttas[child_action][0] <= ll_t:
                                 print(f"{tab}Node {child_action} starts before {ll_t} >= {times_for_ttas[child_action][0]}") if debug else None
                                 child_node = Node(child_action)
-                                child_node.start_time = times_for_ttas[child_action][0]
+                                child_node.time = times_for_ttas[child_action][0]
+                                child_node.action_type = "start"
                                 tree_nodes[child_action] = child_node
                                 node.add_child(child_node)
                                 ll_t = times_for_ttas[child_action][0]
@@ -391,11 +398,14 @@ class MILPSolver(cp_model.CpSolver):
 
                             if start_action in tree_nodes:
                                 print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
-                                tree_nodes[start_action].end_time = times_for_sas[child_action]
+                                # tree_nodes[start_action].time = times_for_sas[child_action]
                                 ll_t = times_for_ttas[start_action][1] 
                                 
                                 child_node = Node(child_action)
-                                child_node.end_time = times_for_ttas[start_action][1]
+                                child_node.time = times_for_ttas[start_action][1]
+                                child_node.action_type = "end"
+                                child_node.related = start_action
+                                tree_nodes[start_action].related = child_node.name                                
                                 node.add_child(child_node)
                                 
                                 print(f"{tab}Node {child_action} is a LL action, new time {ll_t}") if debug else None
@@ -407,7 +417,8 @@ class MILPSolver(cp_model.CpSolver):
                             if times_for_ttas[child_action][0] <= hl_t:
                                 print(f"{tab}Node {child_action} starts before {hl_t} >= {times_for_ttas[child_action][0]}") if debug else None
                                 child_node = Node(child_action)
-                                child_node.start_time = times_for_ttas[child_action][0]
+                                child_node.time = times_for_ttas[child_action][0]
+                                child_node.action_type = "end"
                                 tree_nodes[child_action] = child_node
                                 node.add_child(child_node)
                                 hl_t = times_for_ttas[child_action][0]
@@ -426,11 +437,14 @@ class MILPSolver(cp_model.CpSolver):
 
                             if start_action in tree_nodes:
                                 print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
-                                tree_nodes[start_action].end_time = times_for_sas[child_action]
+                                # tree_nodes[start_action].time = times_for_sas[child_action]
                                 hl_t = times_for_ttas[start_action][1] 
                                 
                                 child_node = Node(child_action)
-                                child_node.end_time = times_for_ttas[start_action][1]
+                                child_node.time = times_for_ttas[start_action][1]
+                                child_node.action_type = "end"
+                                child_node.related = start_action
+                                tree_nodes[start_action].related = child_node.name
                                 node.add_child(child_node)
 
                                 print(f"{tab}Node {child_action} is a LL action, new time {hl_t}") if debug else None
@@ -470,22 +484,38 @@ class MILPSolver(cp_model.CpSolver):
         prune_bt(root_stn)
         print('\n\n%%%%%%%%%%%%%%%%%%%%%%%%')
 
-        
-
         # resources_x_action = self.extract_resources_x_action()
         # print("resources_x_action:", resources_x_action)
         # self.__assign_values(root, resources_x_action)
 
-        def get_edges(node, edges = []):
+        def get_edges_weights_nodesD(node, edges = [], weights = [], nodesD = {}):
+            if node.name not in nodesD:
+                nodesD[node.name] = {'type' : node.action_type, 'time' : node.time, 'label' : node.name, 'related' : node.related}
             for child in node.children:
                 edges.append((node.name, child.name))
-                get_edges(child, edges)
+                weights.append(child.time - node.time)
+                get_edges_weights_nodesD(child, edges, weights, nodesD)
 
         edges = []
-        get_edges(root, edges)
-        new_graph = Graph(edges)
+        weights = []
+        nodesD = {}
+        get_edges_weights_nodesD(root_stn, edges, weights, nodesD)
+        for i in range(len(edges)):
+            print(f"Edge {edges[i]} has weight {weights[i]}")
+        
+        stn = SimpTempNet(edges, weights, nodesD)
         print("Displaying graph")
-        new_graph.draw(title="BehaviourTree.html", open_browser=True)
+        stn.draw(title="BehaviourTree.html", open_browser=True)
+
+        # new_graph = Graph(edges)
+        # print("Displaying graph")
+        # new_graph.draw(title="BehaviourTree.html", open_browser=True)
+
+        real_bt = BehaviourTree(stn, root_name)
+        real_bt.draw()
+
+        real_bt.toXML(os.path.join("output", "BT.xml"))
+
 
 
     def extract_resources_x_action(self):

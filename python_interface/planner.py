@@ -10,10 +10,6 @@ except:
     from MILP.MILP import MILPSolver
     from Prolog import prolog as PrologLib
 
-# from STN import SimpTempNet
-# from BT.BT import BehaviourTree
-
-
 def main():
     data_dict = PrologLib.execTest()#kb_path="/home/enrico/Projects/prolog_planner/output/kb.pl")
 
