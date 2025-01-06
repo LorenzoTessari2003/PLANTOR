@@ -155,41 +155,48 @@ class BehaviourTree(nx.DiGraph):
             return ""
 
         # Read the JSON file
-        actions_dict = {}
+        ros2_dict = {}
         with open(os.path.join("data", "actions.json"), "r") as f:
-            actions_dict = json.load(f)
+            ros2_dict = json.load(f)
         
         func_d = {}
+        actions_dict = {}
 
         def toXMLRec(bt, node, dictionary) -> None:
+            def get_key_name(action_name):
+                return action_name.replace(" ", "_").replace("(", "_").replace(")", "_").replace("[", "_").replace("]", "_").replace(",", "_")
+
             print(f"toXMLRec: {node} {dictionary}")
             if bt.nodes[node]["type"] == "INIT" or bt.nodes[node]["type"] == "SEQ":
                 dictionary["Sequence"] = []
                 for _, child in bt.out_edges(node):
                     tmp_dict = {}
                     toXMLRec(bt, child, tmp_dict)
-                    dictionary["Sequence"].append(tmp_dict)
+                    if tmp_dict:
+                        dictionary["Sequence"].append(tmp_dict)
             
             elif bt.nodes[node]["type"] == "PAR":
                 dictionary["Parallel"] = []
                 for _, child in bt.out_edges(node):
                     tmp_dict = {}
                     toXMLRec(bt, child, tmp_dict)
-                    dictionary["Parallel"].append(tmp_dict)
+                    if tmp_dict:
+                        dictionary["Parallel"].append(tmp_dict)
             
             elif bt.nodes[node]["type"] == "ES":
                 match = re.match(RE_ACTION, str(node))
+                print(node, type(node), node.get_STN_node()["label"])
                 if match is not None:
                     # Create action name and check if it is already in the actions dictionary
                     action_name = "Action_"+str(node)
-                    if action_name in actions_dict:
+                    if action_name in ros2_dict:
                         raise Exception(f"Action {action_name} already in the dictionary")
                                        
                     # Add entry for action in the XML dictionary
                     dictionary[action_name] = {}
 
                     # Get the corresponding ROS2 node and service name
-                    ros2_node_dict = actions_dict[match.group("action_name")]
+                    ros2_node_dict = ros2_dict[match.group("action_name")]
                     ros2_node_name = ros2_node_dict["ros2_node"]
                     ros2_serv_name = ros2_node_dict["service_name"]
                     ros2_args_name = ros2_node_dict["args"]
@@ -204,11 +211,22 @@ class BehaviourTree(nx.DiGraph):
                     final_replecement = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args}"
                     print(f"{action_name} -> {final_replecement}")
 
-                    actions_dict[action_name] = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args}"
+                    key_val = get_key_name(action_name)
+                    actions_dict[key_val] = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args} _onsuccess=\"{key_val}=DONE\""
 
                 else:
                     raise Exception(f"Action {node} does not match the regex {RE_ACTION}")
-                
+
+            elif bt.nodes[node]["type"] == "WA":
+                dictionary["Sequence"] = [{
+                    "Wait": {get_key_name(str(node))}
+                }]
+                for _, child in bt.out_edges(node):
+                    tmp_dict = {}
+                    toXMLRec(bt, child, tmp_dict)
+                    if tmp_dict:
+                        dictionary["Sequence"].append(tmp_dict)
+
             else:
                 if bt.nodes[node]["type"].lower() not in ["ee"]:
                     raise Exception("Unknown node type: {}".format(bt.nodes[node]["type"]))
@@ -217,6 +235,10 @@ class BehaviourTree(nx.DiGraph):
         toXMLRec(self, self.root_name_, func_d)
 
         xml = dict2xml(func_d)
+        # Replace the empty tags with the correct format
+        for key, val in actions_dict.items():
+            xml = xml.replace(f"<{key}></{key}>", f"<{val} />")
+            
         xml = XML_STANDARD.format(xml)
         if filepath:
             if pathlib.Path(filepath).parent.exists():
