@@ -235,10 +235,21 @@ class BehaviourTree(nx.DiGraph):
         toXMLRec(self, self.root_name_, func_d)
 
         xml = dict2xml(func_d)
-        # Replace the empty tags with the correct format
+        # Replace the empty action tags with the correct format
         for key, val in actions_dict.items():
             xml = xml.replace(f"<{key}></{key}>", f"<{val} />")
-            
+
+        # Replace the delay tags with the correct format
+        re_m = "<Delay>(?P<an>[^<]*)</Delay>"
+        def delay_change(matchobj):
+            if matchobj:
+                print('test', matchobj.group('an'))
+                return f"<SleepNode name=\"sleep for {matchobj.group('an')}\" msec=\"1\" _while=\"{matchobj.group('an')}!='DONE'\"/>"
+            else:
+                raise Exception("Error in delay_change, patter could not be matched")
+        xml = re.sub(re_m, delay_change, xml)
+        
+        # Add the necessary initial and final tags and save to file.
         xml = XML_STANDARD.format(xml)
         if filepath:
             if pathlib.Path(filepath).parent.exists():

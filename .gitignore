@@ -367,3 +367,5 @@ fabric.properties
 output/
 tmp*txt
 package-lock.json
+
+re_test.py
