@@ -1,26 +1,52 @@
-## Available Scripts
+# PLOP UI
 
-In the project directory, you can run:
+The UI is provided via browser. The front-end is written in React, while the backend relies on 
+Python3 with Flask in order to server the APIs. 
 
-### `npm start`
+## Docker installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+A Docker compose is provided in order to simplify the execution of the code. After installing 
+Docker, one just has to run from within this directory:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```shell
+cd llm_ui
+docker-compose up --build
+```
 
-### `npm test`
+## Local installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Install the due dependencies
 
-### `npm run build`
+First enter `backend` and run `pip install`, possibly creating or sourcing a virtual environment 
+before.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```shell
+# Consider using virtualenv
+# virtualenv plop_venv
+# source plop_venv/bin/activate
+cd llm_ui/backend 
+python3 -m pip install -r requirements.txt
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Then enter the `frontend` directory and install the modules for NodeJS.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```shell
+cd llm_ui/frontend
+npm install
+```
+
+### Run the server
+
+On one shell, run the following command from within the `backend` directory:
+
+```shell
+python3 run.py
+```
+
+### Start the UI
+
+On another shell, run the following command from within the `frontend` directory:
+
+```shell
+npm start
+```

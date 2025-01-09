@@ -145,12 +145,13 @@ def execTest(query = "plan", kb_path = "") -> dict:
     print(f"Executing {query} from Prolog")
     
     prolog = pyswip.Prolog()
-    # planner_path = os.path.join(os.getcwd(), "..", "prolog_planner")
-    print(f"Looking for planner at {PLANNER_PATH}")
     if kb_path != "":
+        print(f"Consulting {kb_path}")
         prolog.consult(kb_path)
+    
+    print(f"Consulting planner at {PLANNER_PATH}")
     prolog.consult(PLANNER_PATH)
-
+        
     planner = pyswip.Functor(query, 7)
     actions_var = pyswip.Variable()
     tt_actions_var = pyswip.Variable()
@@ -167,8 +168,6 @@ def execTest(query = "plan", kb_path = "") -> dict:
     if succ == 0:
         raise ValueError("Failed to execute prolog")
     
-    print("Executed prolog")
-
     # Convert the following code into a dictionary 
     data_dict = {
         "actions":          extract_actions(actions_var.get_value()),
@@ -181,10 +180,6 @@ def execTest(query = "plan", kb_path = "") -> dict:
 
     data_dict["actions"].insert(0, data_dict["tt_actions"]["0"]["s"])
     data_dict["actions"].append(data_dict["tt_actions"]["0"]["e"])
-
-    # for key, value in data_dict.items():
-    #     print(key, value)
-    #     print()
 
     return data_dict
 

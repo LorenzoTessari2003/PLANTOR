@@ -296,7 +296,7 @@ class MILPSolver(cp_model.CpSolver):
                     if start_tta2 >= end_tta1:
                         self.graph.add_edge(self.tta_actions[tta1]['e'], self.tta_actions[tta2]['s'])
 
-        self.draw_graph_from_matrix(os.path.join("output", "MILP.html"), open_browser=True)
+        self.draw_graph_from_matrix(os.path.join("output", "MILP.html"), open_browser=False)
 
 
 
@@ -505,16 +505,15 @@ class MILPSolver(cp_model.CpSolver):
         
         stn = SimpTempNet(edges, weights, nodesD)
         print("Displaying graph")
-        stn.draw(title="BehaviourTree.html", open_browser=True)
+        stn.draw(title="BehaviourTree.html", open_browser=False)
 
         # new_graph = Graph(edges)
         # print("Displaying graph")
-        # new_graph.draw(title="BehaviourTree.html", open_browser=True)
+        # new_graph.draw(title="BehaviourTree.html", open_browser=False)
 
         real_bt = BehaviourTree(stn, root_name)
-        real_bt.draw()
-
-        real_bt.toXML(os.path.join("output", "BT.xml"))
+        
+        return real_bt
 
 
 

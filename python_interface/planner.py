@@ -1,5 +1,5 @@
 import os
-import sys
+import sys, getopt
 
 try:
     from python_interface.BT.BT import BehaviourTree
@@ -11,7 +11,32 @@ except:
     from Prolog import prolog as PrologLib
 
 def main():
-    data_dict = PrologLib.execTest()#kb_path="/home/enrico/Projects/prolog_planner/output/kb.pl")
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "x:H:i:h", ["xml=", "html=", "input="])
+    except getopt.GetoptError:
+        print("main.py -x <xml_file> -H <html_file> -i <input_file>")
+        sys.exit(2)
+    
+    xml_file = ""
+    html_file = ""
+    input_kb_file = ""
+
+    for opt, arg in opts:
+        if opt in ("-x", "--xml"):
+            xml_file = arg
+        elif opt in ("-H", "--html"):
+            html_file = arg
+        elif opt in ("-i", "--input"):
+            input_kb_file = arg
+        elif opt == "-h":
+            print("main.py -x <xml_file> -H <html_file> -i <input_file>")
+            sys.exit()
+
+    if input_kb_file != "":
+        assert os.path.exists(input_kb_file), "KB file not found"
+
+    data_dict = PrologLib.execTest(kb_path=input_kb_file)
 
     milp_solver = MILPSolver(
         data_dict["tt_actions"],
@@ -26,11 +51,10 @@ def main():
     
     # milp_solver.draw_graph_from_matrix(os.path.join("output", "MILP.html"), open_browser=True)
 
-    milp_solver.extract_BT()
+    bt = milp_solver.extract_BT()
 
-    # bt = BehaviourTree(stn)
-    # bt.draw()
-    # bt.tick()
+    bt.draw(html_file)
+    bt.toXML(xml_file)
 
 
 if __name__ == "__main__":

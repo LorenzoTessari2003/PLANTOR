@@ -49,10 +49,10 @@ class BehaviourTree(nx.DiGraph):
     def __str__(self):
         pass
 
-    def draw(self):
-        self.drawBokeh()
+    def draw(self, output_filename="BT.html"):
+        self.drawBokeh(output_filename=output_filename)
 
-    def drawBokeh(self) -> None:
+    def drawBokeh(self, output_filename="BT.html") -> None:
         # return
         from bokeh.plotting import figure, show, output_file
         from bokeh.models import ColumnDataSource, HTMLLabelSet
@@ -132,8 +132,8 @@ class BehaviourTree(nx.DiGraph):
         plot.renderers.extend([nodes, labels, edges])
 
         # Show the plot
-        output_file(filename="BT.html")
-        show(plot)
+        output_file(filename=output_filename)
+        # show(plot)
 
 
     def drawMatplotlib(self,):
@@ -156,7 +156,7 @@ class BehaviourTree(nx.DiGraph):
 
         # Read the JSON file
         ros2_dict = {}
-        with open(os.path.join("data", "actions.json"), "r") as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "actions.json"), "r") as f:
             ros2_dict = json.load(f)
         
         func_d = {}
@@ -249,7 +249,7 @@ class BehaviourTree(nx.DiGraph):
                 raise Exception("Error in delay_change, patter could not be matched")
         xml = re.sub(re_m, delay_change, xml)
         
-        # Add the necessary initial and final tags and save to file.
+        # Add the necessary initial and final tags and save to file
         xml = XML_STANDARD.format(xml)
         if filepath:
             if pathlib.Path(filepath).parent.exists():

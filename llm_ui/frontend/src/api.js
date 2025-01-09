@@ -30,12 +30,11 @@ export const validateDescriptions = async (highLevel, lowLevel) => {
  * @param {string} highLevel - High-level description text.
  * @returns {Promise<Object>} API response.
  */
-export const generateHighLevelKB = async (highLevel) => {
-    console.log(highLevel);
+export const generateHighLevelKB = async (highLevelDesc) => {
     const response = await fetch(`${API_BASE_URL}/generate_hl_kb`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: highLevel }),
+        body: JSON.stringify({ description: highLevelDesc }),
     });
 
     if (!response.ok) {
@@ -51,11 +50,18 @@ export const generateHighLevelKB = async (highLevel) => {
  * @param {string} lowLevel - Low-level description text.
  * @returns {Promise<Object>} API response.
  */
-export const generateLowLevelKB = async (lowLevelDesc, highLevelKB) => {
+export const generateLowLevelKB = async (lowLevelDesc, hlkbContent, hlInitContent, hlGoalContent, hlActionsContent) => {
     const response = await fetch(`${API_BASE_URL}/generate_ll_kb`, {
         method: 'POST',
+        // mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lowLevelDesc: lowLevelDesc, highLevelKB: highLevelKB }),
+        body: JSON.stringify({ 
+            lowLevelDesc: lowLevelDesc,
+            hlkbContent: hlkbContent,
+            hlInitContent: hlInitContent,
+            hlGoalContent: hlGoalContent,
+            hlActionsContent: hlActionsContent
+        }),
     });
 
     if (!response.ok) {
@@ -65,6 +71,10 @@ export const generateLowLevelKB = async (lowLevelDesc, highLevelKB) => {
 
     return response.json();
 };
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * Generate the behavior tree in XML format.
@@ -72,17 +82,22 @@ export const generateLowLevelKB = async (lowLevelDesc, highLevelKB) => {
  * @param {string} lowLevelKB - Low-level knowledge base.
  * @returns {Promise<Object>} API response.
  */
-export const generateBehaviorTree = async (highLevelKB, lowLevelKB) => {
+export const generateBehaviorTree = async (lowLevelKB) => {
     const response = await fetch(`${API_BASE_URL}/generate_bt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ high_level_kb: highLevelKB, low_level_kb: lowLevelKB }),
+        body: JSON.stringify({ low_level_kb: lowLevelKB }),
     });
 
     if (!response.ok) {
         const error = await response.json();
+        console.log("Something went wrong in generateBehaviorTree");
+        sleep(5000);
         throw new Error(error.error);
     }
 
+    sleep(5000);
+
     return response.json();
 };
+
