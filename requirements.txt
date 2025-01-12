@@ -2,7 +2,7 @@
 -r llm_ll_gen/requirements.txt
 -r LLM/requirements.txt
 -r python_interface/requirements.txt
--r server/requirements.txt
+-r llm_ui/backend/requirements.txt
 
 art
 networkx
