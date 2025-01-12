@@ -28,7 +28,7 @@ const Home = () => {
     const [hlActionsContent, setHLActionsContent] = useState('');
 
     // State for the generated low-level KB content
-    const [llkbContent, setLLKBContent] = useState('');
+    const [llKBContent, setLLKBContent] = useState('');
     const [llInitContent, setLLInitContent] = useState('');
     const [llGoalContent, setLLGoalContent] = useState('');
     const [llActionsContent, setLLActionsContent] = useState('');
@@ -77,13 +77,12 @@ const Home = () => {
         try {
             setIsLoading(true);
             const result = await generateLowLevelKB(lowLevelDesc, hlkbContent, hlInitContent, hlGoalContent, hlActionsContent);
-            console.log(result);
             setLLKBContent(result.kb);
             setLLInitContent(result.init);
             setLLGoalContent(result.goal);
             setLLActionsContent(result.actions);
             setLLMappingsContent(result.mappings);
-            console.log(llkbContent, llInitContent, llGoalContent, llActionsContent, llMappingsContent);
+            console.log(llKBContent, llInitContent, llGoalContent, llActionsContent, llMappingsContent);
         } catch (error) {
             console.error(error);
         }
@@ -95,7 +94,7 @@ const Home = () => {
     const handleGenerateBt = async () => {
         try {
             setIsLoading(true);
-            const result = await generateBehaviorTree(hlkbContent, llkbContent);
+            const result = await generateBehaviorTree(llKBContent, llInitContent, llGoalContent, llActionsContent, llMappingsContent);
             console.log("Got BT: ", result);
             if (result.bt_error) {
                 setPlanningError(result.bt_error);
@@ -167,7 +166,7 @@ const Home = () => {
             {!showGenerateHLKB && (
                     <div className="text-center mt-3">
                         <div className="spinner-button-container">
-                            {isLoading && (
+                            {isLoading && !(validationError || showGenerateHLKB) && (
                                 <div className="spinner-with-text">
                                     <div className="spinner"></div>
                                     <div className="loading-text">This may take a few seconds...</div>
@@ -181,14 +180,14 @@ const Home = () => {
             )}
 
             {/* Display Validation Error if Validation Fails */}
-            {validationError && (
+            {validationError && !showGenerateHLKB && (
                 <div className="alert alert-danger text-center mt-2" role="alert">
                     {validationError}
                 </div>
             )}
 
             {/* Generate HL KB Button and Text Area */}
-            {showGenerateHLKB && (
+            {showGenerateHLKB && !validationError && (
                 <div className="text-center mt-3 mb-4">
                     <div className="spinner-button-container">
                         {isLoading && (
@@ -286,7 +285,7 @@ const Home = () => {
                     </div> */}
                     <div className="text-center mt-3 mb-4">
                         <div className="spinner-button-container">
-                            {isLoading && (
+                            {isLoading && !(llKBContent && llInitContent && llGoalContent && llActionsContent && llMappingsContent) && (
                                 <div className="spinner-with-text">
                                     <div className="spinner"></div>
                                     <div className="loading-text">This may take a few seconds...</div>
@@ -303,7 +302,7 @@ const Home = () => {
             )}
 
 
-            {llkbContent && llInitContent && llGoalContent && llActionsContent && llMappingsContent && (
+            {llKBContent && llInitContent && llGoalContent && llActionsContent && llMappingsContent && (
                 <div className="row">
                     <div className="col-md-4">
                         <div className="card shadow p-2 mb-4">
@@ -348,7 +347,7 @@ const Home = () => {
                                 <textarea
                                     className="form-control"
                                     rows="6"
-                                    value={llkbContent}
+                                    value={llKBContent}
                                     onChange={(e) => setLLKBContent(e.target.value)}
                                     placeholder="This is the LL KB"
                                 ></textarea>
@@ -397,7 +396,7 @@ const Home = () => {
 
                     <div className="text-center mt-3 mb-4">
                         <div className="spinner-button-container">
-                            {isLoading && (
+                            {isLoading && !(planningError || btXML) && (
                                 <div className="spinner-with-text">
                                     <div className="spinner"></div>
                                     <div className="loading-text">This may take a few seconds...</div>

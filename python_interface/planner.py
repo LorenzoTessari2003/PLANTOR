@@ -55,6 +55,7 @@ def main():
 
     bt.draw(html_file)
     bt.toXML(xml_file)
+    print(f"Done extracting BT to files {xml_file} and {html_file}")
 
 
 if __name__ == "__main__":

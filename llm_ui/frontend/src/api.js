@@ -72,32 +72,35 @@ export const generateLowLevelKB = async (lowLevelDesc, hlkbContent, hlInitConten
     return response.json();
 };
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 /**
  * Generate the behavior tree in XML format.
- * @param {string} highLevelKB - High-level knowledge base.
  * @param {string} lowLevelKB - Low-level knowledge base.
  * @returns {Promise<Object>} API response.
  */
-export const generateBehaviorTree = async (lowLevelKB) => {
+export const generateBehaviorTree = async (lowLevelKB, lowLevelInit, lowLevelGoal, lowLevelActions, lowLevelMappings) => {
     const response = await fetch(`${API_BASE_URL}/generate_bt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ low_level_kb: lowLevelKB }),
+        body: JSON.stringify({ 
+            low_level_kb: lowLevelKB,
+            low_level_init: lowLevelInit,
+            low_level_goal: lowLevelGoal,
+            low_level_actions: lowLevelActions,
+            low_level_mappings: lowLevelMappings
+        }),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        console.log("Something went wrong in generateBehaviorTree");
-        sleep(5000);
-        throw new Error(error.error);
-    }
+    // if (!response.ok) {
+    //     const error = await response.json();
+    //     console.log("Something went wrong in generateBehaviorTree");
+    //     throw new Error(error.error);
+    // }
 
-    sleep(5000);
+    const data = response.json();
 
-    return response.json();
+    console.log("data: ", data);
+
+    return data;
 };
 

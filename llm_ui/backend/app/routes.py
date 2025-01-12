@@ -12,26 +12,37 @@ def validate_descriptions(high_level, low_level):
     """Validate compatibility of high-level and low-level descriptions."""
     return {"valid": llm_scenario_comprehension(high_level, low_level)}
 
+
 def generate_high_level_kb(high_level):
     """Generate the high-level knowledge base."""
     hl_d = hl_llm_multi_step(high_level)
     current_app.logger.info(f"[generate_high_level_kb] constructed\n{hl_d}")
+
     return hl_d
+
 
 def generate_low_level_kb(low_level_desc, hl_kb):
     """Generate the low-level knowledge base."""
     ll_d = ll_llm_multi_step(low_level_desc, hl_kb)
     current_app.logger.info(f"[generate_low_level_kb] constructed\n{ll_d}")
 
-    # write_to_file(ll_d, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
-
     return ll_d
 
-def generate_behavior_tree(low_level_kb):
+
+def generate_behavior_tree(kb):
     """Generate the behavior tree (BT) in XML format."""
 
+    # write_to_file(kb, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
+
     planner_path = os.path.join(PLOP_PATH, "python_interface", "planner.py")
-    subprocess.run(["python3", planner_path, "-x", os.path.join(PUBLIC_PATH, "bt.xml"), "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")])
+    subprocess.Popen(
+        ["python3", planner_path, "-x", os.path.join(PUBLIC_PATH, "bt.xml"), "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
+        shell=False, 
+        stdout=subprocess.DEVNULL, 
+        stderr=subprocess.DEVNULL
+    )
+
+    print("Is this blocking or non-blocking?")
 
     xml = ""
 
@@ -39,11 +50,8 @@ def generate_behavior_tree(low_level_kb):
         with open(os.path.join(PUBLIC_PATH, "bt.xml"), "r") as f:
             xml = f.read()
 
-    assert type(xml) == str, f"Expected str, got {type(xml)}"
-
     return xml
 
-    
 
 app_routes = Blueprint('app_routes', __name__)
 
@@ -53,7 +61,7 @@ def validate():
         return jsonify({"isValid": True})
 
     """Validate compatibility of high-level and low-level descriptions."""
-    current_app.logger.info(f"[validate] received {request}")
+    # current_app.logger.info(f"[validate] received {request}")
     data = request.json
     high_level = data.get('highLevel').strip()
     low_level = data.get('lowLevel').strip()
@@ -79,7 +87,7 @@ def generate_hl_kb():
         })
 
     """Generate the high-level knowledge base."""
-    current_app.logger.info(f"[generate_hl_kb] received {request.json}")
+    # current_app.logger.info(f"[generate_hl_kb] received {request.json}")
     data = request.json
     high_level = data.get('description').strip()
 
@@ -89,16 +97,22 @@ def generate_hl_kb():
     hl_kb = generate_high_level_kb(high_level)
     assert type(hl_kb) == dict, f"Expected dict, got {type(hl_kb)}"
 
-    current_app.logger.info(f"[generate_hl_kb] constructed\n{hl_kb}")
+    # current_app.logger.info(f"[generate_hl_kb] constructed\n{hl_kb}")
     return jsonify(hl_kb)
 
 @app_routes.route('/api/generate_ll_kb', methods=['POST'])
 def generate_ll_kb():
     if MOCK:
-        return jsonify({"kb": "This is a high-level knowledge base"})
+        return jsonify({
+            'kb': "ll_kb_content",
+            'init': "ll_init_content",
+            'goal': "ll_goal_content",
+            'actions': "ll_actions_content",
+            'mappings': "ll_mappings_content",
+        })
 
     """Generate the low-level knowledge base."""
-    current_app.logger.info(f"[generate_ll_kb] received {request.json}")
+    # current_app.logger.info(f"[generate_ll_kb] received {request.json}")
     data = request.json
     low_level_desc = data.get('lowLevelDesc').strip()
     hl_kb_content = data.get('hlkbContent').strip()
@@ -117,7 +131,7 @@ def generate_ll_kb():
     }
 
     ll_kb = generate_low_level_kb(low_level_desc, hl_d)
-    current_app.logger.info(f"[generate_ll_kb] constructed\n{ll_kb}")
+    # current_app.logger.info(f"[generate_ll_kb] constructed\n{ll_kb}")
     assert type(ll_kb) == dict, f"Expected dict, got {type(ll_kb)}"
     return jsonify(ll_kb)
 
@@ -130,10 +144,28 @@ def generate_bt():
     current_app.logger.info(f"[generate_bt] received {request.json}")
     data = request.json
     low_level_kb = data.get('low_level_kb')
+    low_level_init = data.get('low_level_init')
+    low_level_goal = data.get('low_level_goal')
+    low_level_actions = data.get('low_level_actions')
+    low_level_mappings = data.get('low_level_mappings')
 
-    if not low_level_kb:
-        return jsonify({"error": "Field low-level is required."}), 400
+    if not low_level_kb or not low_level_init or not low_level_goal or not low_level_actions or not low_level_mappings:
+        return jsonify({"error": "All fields `low-level_{kb,init,goal,actions,mappings}` are required."}), 400
 
-    bt_xml = generate_behavior_tree(low_level_kb)
-    # return jsonify({"bt_error": "Could not plan because"}) # Request was successful but there was an error generating the BT
-    return jsonify({"behavior_tree": bt_xml})
+    kb = {
+        'kb': low_level_kb,
+        'init': low_level_init,
+        'goal': low_level_goal,
+        'actions': low_level_actions,
+        'mappings': low_level_mappings
+    }
+
+    bt_xml = generate_behavior_tree(kb)
+
+    assert type(bt_xml) == str, f"Expected str, got {type(bt_xml)}"
+    if bt_xml != "":
+        return jsonify({"bt_error": "Could not plan because"}) # Request was successful but there was an error generating the BT
+
+    else:
+        # current_app.logger.info(f"[generate_bt] constructed\n{bt_xml}")
+        return jsonify({"behavior_tree": bt_xml})
