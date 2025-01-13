@@ -32,25 +32,31 @@ def generate_low_level_kb(low_level_desc, hl_kb):
 def generate_behavior_tree(kb):
     """Generate the behavior tree (BT) in XML format."""
 
-    # write_to_file(kb, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
+    bt_xml_path = os.path.join(PUBLIC_PATH, "bt.xml")
+    current_app.logger.info(f"[generate_behavior_tree] generating BT XML file at {bt_xml_path}")
+
+    write_to_file(kb, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
+
+    if os.path.exists(bt_xml_path):
+        os.remove(bt_xml_path)
 
     planner_path = os.path.join(PLOP_PATH, "python_interface", "planner.py")
     subprocess.Popen(
-        ["python3", planner_path, "-x", os.path.join(PUBLIC_PATH, "bt.xml"), "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
-        shell=False, 
+        ["python3", planner_path, "-x", bt_xml_path, "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
         stdout=subprocess.DEVNULL, 
         stderr=subprocess.DEVNULL
-    )
+    ).wait()
 
-    print("Is this blocking or non-blocking?")
+    xml = "init"
 
-    xml = ""
-
-    if os.path.exists(os.path.join(PUBLIC_PATH, "bt.xml")):
-        with open(os.path.join(PUBLIC_PATH, "bt.xml"), "r") as f:
+    if os.path.exists(bt_xml_path):
+        with open(bt_xml_path, "r") as f:
             xml = f.read()
 
-    return xml
+    if xml in ["init", ""]:
+        return {"bt_error": "Error generating the behavior tree because file was not found."}
+
+    return {"behavior_tree": xml}
 
 
 app_routes = Blueprint('app_routes', __name__)
@@ -162,10 +168,10 @@ def generate_bt():
 
     bt_xml = generate_behavior_tree(kb)
 
-    assert type(bt_xml) == str, f"Expected str, got {type(bt_xml)}"
+    assert type(bt_xml) == dict, f"Expected dict, got {type(bt_xml)}"
     if bt_xml != "":
-        return jsonify({"bt_error": "Could not plan because"}) # Request was successful but there was an error generating the BT
+        return jsonify(bt_xml) # Request was successful but there was an error generating the BT
 
     else:
-        # current_app.logger.info(f"[generate_bt] constructed\n{bt_xml}")
-        return jsonify({"behavior_tree": bt_xml})
+        current_app.logger.info(f"[generate_bt] constructed\n{bt_xml}")
+        return jsonify(bt_xml)

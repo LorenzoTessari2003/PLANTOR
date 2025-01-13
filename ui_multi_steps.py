@@ -293,9 +293,9 @@ def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False)
 ########################################################################################################################
 
 
-def execute_plan(plan):
+def execute_plan(plan_file):
     # Execute plan
-    INFO("Execute plan")
+    INFO("Executing plan")
 
 
 ########################################################################################################################
@@ -312,8 +312,8 @@ def write_to_file(kb, output_file = OUTPUT_KB_FILE):
                 file.write("\n")
             file.write(f"%%%%%%%%%%%%%%%%%%%%%%%\n% {key}\n%%%%%%%%%%%%%%%%%%%%%%%\n{value}\n")
             first_line = False
-        actions_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'actions.pl')
-        mappings_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'mappings.pl')
+#         actions_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'actions.pl')
+#         mappings_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'mappings.pl')
 #         file.write(f"""
 # % :- ensure_loaded('{actions_path}').
 # % :- ensure_loaded('{mappings_path}').

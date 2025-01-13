@@ -118,8 +118,15 @@ const Home = () => {
         setVisBT(true);
     };
 
-    const handleExecute = () => {
-        const path = 'BT2.html';
+    const handleDownloadXML = () => {
+        // Lets the user download the XML file, bt.xml, stored in the %PUBLIC_URL% directory
+        const element = document.createElement('a');
+        const file = new Blob([btXML], { type: 'text/xml' });
+        element.href = URL.createObjectURL(file);
+        element.download = 'bt.xml';
+        document.body.appendChild(element);
+        element.click();
+        
     };
 
     return (
@@ -396,7 +403,7 @@ const Home = () => {
 
                     <div className="text-center mt-3 mb-4">
                         <div className="spinner-button-container">
-                            {isLoading && !(planningError || btXML) && (
+                            {isLoading && (
                                 <div className="spinner-with-text">
                                     <div className="spinner"></div>
                                     <div className="loading-text">This may take a few seconds...</div>
@@ -432,30 +439,19 @@ const Home = () => {
                     {!visBT && (
                         <div className="text-center mt-3">
                             <button className="btn btn-success" onClick={handleCheckBT}>
-                                Check BT
+                                Visualize BT
                             </button>
                         </div>
                     )}
                     {visBT && (
                         <div className="text-center mt-3">
-                            <button className="btn btn-danger" onClick={handleExecute}>
-                                Execute
+                            <button className="btn btn-success" onClick={handleDownloadXML}>
+                                Download XML file
                             </button>
                         </div>
                     )}
                 </div>
             )}
-            {/* {btXML && (
-                <div className="card-body">
-                    <iframe
-                        src="BT.html"
-                        title="Behavior Tree"
-                        width="100%"
-                        height="500px"
-                        style={{ border: '1px solid lightgray' }}
-                    ></iframe>
-                </div>
-            )} */}
 
             <div><br/></div>
         </div>
