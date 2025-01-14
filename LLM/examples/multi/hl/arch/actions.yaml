@@ -88,8 +88,8 @@ entries:
             [pillar(Pos, Block1)],
             [block(Block1), agent(A), pos(Pos,_,_,_)],
             [
-            del(av(A)), del(free(Block1)),
-            add(pillaring(A, Pos, Block1))
+              del(av(A)), del(free(Block1)),
+              add(pillaring(A, Pos, Block1))
             ]
           ).
           action(build_pillar_end(A, Pos, Block1),
