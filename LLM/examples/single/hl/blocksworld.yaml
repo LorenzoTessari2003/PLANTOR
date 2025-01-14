@@ -175,8 +175,7 @@ entries:
           Sure, here is the Prolog code:
           ```actions
           % The robot starts to grip the block
-          action(
-          grip_ontable_start(Agent, Block), 
+          action(grip_ontable_start(Agent, Block), 
             [ontable(Block), at(Block, X, Y) available(Agent), clear(Block)],
             [gripped(_, Block), gripping(_, Block)],
             [ontable(Block), at(Block, X, Y)],
@@ -236,8 +235,7 @@ entries:
           Sure, here is the Prolog code for asked actions
           ```actions
           % Move Block1 from (X1,Y1) on the table to the top of block Block2 in (X2,Y2). Notice that we are not removing the predicates for Block2 yet as the action is not concluded yet.
-          action(
-            move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+          action(  move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
             [available(Agent), ontable(Block1), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
             [on(_, Block1), on(Block1, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
             [],
@@ -247,8 +245,7 @@ entries:
               add(moving_table_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2))
             ]
           ).
-          action(
-            move_table_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+          action(  move_table_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
             [moving_table_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
             [],
             [],
@@ -259,8 +256,7 @@ entries:
             ]
           ).
           % Move a block from a position (X1,Y1) to another position (X2,Y2) on the table. 
-          action(
-            move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+          action(  move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
             [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
             [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
             [],
@@ -270,8 +266,7 @@ entries:
               add(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2))
             ]
           ).
-          action(
-            move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+          action(  move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
             [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
             [at(X2, Y2)],
             [],
@@ -282,8 +277,7 @@ entries:
             ]
           ).
           % Move Block1 from (X1,Y1) on top of another block to the table in (X2,Y2).
-          action(
-            move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
+          action(  move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
             [available(Agent), on(Block1, Block2), at(Block1, X1, Y1), at(Block2, X1, Y1), clear(Block1)],
             [moving_onblock_to_table(_, Block1, _, _, _, _), on(_, Block1), ontable(Block1), at(_, X2, Y2)],
             [],
@@ -293,8 +287,7 @@ entries:
               add(moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)), add(clear(Block2))
             ]
           ).
-          action(
-            move_onblock_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
+          action(  move_onblock_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
             [moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)],
             [at(_, X2, Y2)],
             [],
@@ -305,8 +298,7 @@ entries:
             ]
           ).
           % Move Block1 from (X1,Y1) on top of another block to the top of block Block2 in (X2,Y2). Notice that we are not removing the predicates for Block2 yet as the action is not concluded yet.
-          action(
-            move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+          action(  move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
             [available(Agent), on(Block1, Block3), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
             [moving_onblock_to_block(_, Block1, _, _, _, _), on(_, Block1), ontable(Block1)],
             [],
@@ -316,8 +308,7 @@ entries:
               add(moving_onblock_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2)), add(clear(Block3))
             ]
           ).
-          action(
-            move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+          action(  move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
             [moving_onblock_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
             [],
             [],
@@ -438,8 +429,7 @@ entries:
     #     content: |
     #       Sure, here is the Prolog code:
     #       ```actions
-    #       action(
-    #         grip_on_start(Agent, Block), 
+    #       action(grip_on_start(Agent, Block), 
     #         [on(Block, Block1, X, Y), available(A), clear(Block)],
     #         [gripped(_, Block), gripping(_, Block)],
     #         [on(B, B1, X, Y)],
@@ -559,8 +549,7 @@ entries:
     #       Finally, the list of actions. We are working with temporal planning, so each action is being divided in start and end. The 4 temporal actions, which will give a total of 8 snap actions, have been previously described and are the following:
     #       ```actions
     #       % Move a block from a position (X1,Y1) to another position (X2,Y2) on the table. 
-    #       action(
-    #         move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+    #       action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
     #         [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
     #         [moving(_, Block), at(_, X2, Y2)],
     #         [ontable(Block), at(Block, X1, Y1)],
@@ -570,8 +559,7 @@ entries:
     #           add(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2))
     #         ]
     #       ).
-    #       action(
-    #         move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+    #       action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
     #         [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
     #         [at(X2, Y2)],
     #         [],
@@ -582,8 +570,7 @@ entries:
     #         ]
     #       ).
     #       % Move Block1 from (X1,Y1) to the top of block Block2 in (X2,Y2), which is on the table. Notice that we are not removing the predicates for Block2 yet as the action is not concluded yet.
-    #       action(
-    #         move_table_to_block_ontable_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+    #       action(move_table_to_block_ontable_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
     #         [available(Agent), ontable(Block1, X1, Y1), ontable(Block2, X2, Y2), clear(Block2), clear(Block1)],
     #         [moving(_, Block1), on(_, Block1, X2, Y2)],
     #         [ontable(Block1, X1, Y1)],
@@ -593,8 +580,7 @@ entries:
     #           add(moving_table_to_block_ontable(Agent, Block1, Block2, X1, Y1, X2, Y2))
     #         ]
     #       ).
-    #       action(
-    #         move_table_to_block_ontable_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+    #       action(move_table_to_block_ontable_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
     #         [moving_table_to_block_ontable(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
     #         [],
     #         [],
@@ -606,8 +592,7 @@ entries:
     #       ).
 
     #       % Move Block1 from (X1,Y1) to the top of block Block2 in (X2,Y2), which is on another block. Notice that we are not removing the predicates for Block2 yet as the action is not concluded yet.
-    #       action(
-    #         move_table_to_block_onblock_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+    #       action(move_table_to_block_onblock_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
     #         [available(Agent), ontable(Block1, X1, Y1), on(Block2, _, X2, Y2), clear(Block1)],
     #         [moving(_, Block1), on(_, Block1, X2, Y2)],
     #         [ontable(Block1, X1, Y1)],
@@ -617,8 +602,7 @@ entries:
     #           add(moving_table_to_block_onblock(Agent, Block1, Block2, X1, Y1, X2, Y2))
     #         ]
     #       ).
-    #       action(
-    #         move_table_to_block_onblock_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+    #       action(move_table_to_block_onblock_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
     #         [moving_table_to_block_onblock(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
     #         [],
     #         [],
