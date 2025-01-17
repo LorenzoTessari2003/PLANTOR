@@ -30,6 +30,10 @@ OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
 OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
 
+OUTPUT_FILE_CC = os.path.join(OUTPUT_PATH, "output_cc.txt")
+OUTPUT_FILE_HL = os.path.join(OUTPUT_PATH, "output_hl.txt")
+OUTPUT_FILE_LL = os.path.join(OUTPUT_PATH, "output_ll.txt")
+
 
 ## FUNCTIONS ###########################################################################################################
 
@@ -75,6 +79,9 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     :param query_hl: The high-level scenario
     :param query_ll: The low-level scenario
     """
+    
+    file = open(OUTPUT_FILE_CC, "w+")
+
     # print("test\n\n\n\n\n\n\n\ntest")
     # raise NotImplementedError("This function is not implemented yet")
     INFO("\r[CC] Checking LLM comprehension of scenario for high-level", imp=True)
@@ -89,8 +96,10 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     succ, response = llm_scenario.query(scenario_query_hl)
     if succ and "OK" in response:
         MSG(f"\rLLM has correctly understood the scenario\n{response}") 
+        file.write(f"HL: {response}\n")
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
+        file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
         return False
     else: 
         FAIL(f"Problem with the LLM\n{response}")
@@ -109,12 +118,16 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     succ, response = llm_scenario.query(scenario_query)
     if succ and "OK" in response:
         MSG(f"\rLLM has correctly understood the scenario\n{response}") 
+        file.write(f"LLM has correctly understood the scenario\n{response}\n")
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
+        file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
         return False
     else: 
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
+
+    file.close()
 
     return True
 
@@ -128,6 +141,8 @@ def hl_llm_multi_step(query) -> dict:
     :param query: The query that will be used to extract the knowledge base, initial and final states. 
     :return: A tuple containing the knowledge base and the response from the LLM
     """
+    file = open(OUTPUT_FILE_HL, "w+")
+
     # Extract HL knowledge base
     INFO("\r[HL] Extracting HL knowledge base", imp=True)
     llm = LLM(
@@ -145,6 +160,7 @@ def hl_llm_multi_step(query) -> dict:
     succ, tmp_response = llm.query(kb_query)
     assert succ == True, "Failed to generate static knowledge base"
     print(succ, tmp_response+'\n')
+    file.write(f"KB: {tmp_response}\n")
     scan_and_extract(kb, tmp_response)
 
     # Generate initial and final states
@@ -155,6 +171,7 @@ def hl_llm_multi_step(query) -> dict:
     succ, tmp_response = llm.query(states_query)
     assert succ == True, "Failed to generate initial and final states"
     print(succ, tmp_response+'\n')
+    file.write(f"INIT: {tmp_response}\n")
     scan_and_extract(kb, tmp_response)
 
     # Generate action set
@@ -168,7 +185,10 @@ def hl_llm_multi_step(query) -> dict:
     assert succ == True, "Failed to generate final state"
     print(succ, response)
     print()
+    file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
+
+    file.close()
 
     return kb
 
@@ -203,6 +223,8 @@ def ll_llm_multi_step(query, kb) -> dict:
     # ```
     # """.format(kb["kb"], kb["init"], kb["goal"])
 
+    file = open(OUTPUT_FILE_LL, "w+")
+
     # Extract LL knowledge base
     INFO("\r[LL] Extract LL knowledge base", imp=True)
     llm = LLM(
@@ -218,6 +240,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(kb_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"KB: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate initial and final states
@@ -230,6 +253,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(states_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"INIT: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate actions set
@@ -241,6 +265,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(ll_actions_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate mappings
@@ -255,7 +280,10 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(mappings_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"MAPPINGS: {response}\n")
     scan_and_extract(kb, response)
+
+    file.close()
 
     return kb 
     

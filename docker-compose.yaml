@@ -7,7 +7,6 @@ services:
       context: .
     ports:
       - "3000:3000"
-      - "5000:5000"
     restart: always
     networks:
       - app-network
@@ -18,7 +17,6 @@ services:
       dockerfile: Dockerfile.backend
       context: .
     ports:
-      - "3000:3000"
       - "5000:5000"
     restart: always
     networks:

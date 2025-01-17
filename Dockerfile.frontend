@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy all project files
 COPY llm_ui/frontend .
 
+EXPOSE 3000
+
 RUN npm install
 
 CMD ["npm", "start"]
