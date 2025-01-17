@@ -2,14 +2,14 @@ import os, subprocess
 from flask import Flask, request, jsonify, Blueprint, current_app
 
 from . import PUBLIC_PATH, PLOP_PATH
-from .mock_help import HL_KB_MOCK, LL_DESCR_MOCK
-from ui_multi_steps import llm_scenario_comprehension, hl_llm_multi_step, ll_llm_multi_step, write_to_file
+from ui_multi_steps import llm_scenario_comprehension, hl_llm_multi_step, ll_llm_multi_step, write_to_file, find_plan
 
 MOCK = False
 
 
 def validate_descriptions(high_level, low_level):
     """Validate compatibility of high-level and low-level descriptions."""
+    current_app.logger.info("Calling validate_descriptions")
     return {"valid": llm_scenario_comprehension(high_level, low_level)}
 
 
@@ -41,17 +41,22 @@ def generate_behavior_tree(kb):
         os.remove(bt_xml_path)
 
     planner_path = os.path.join(PLOP_PATH, "python_interface", "planner.py")
+
+    subprocess.run(["mkdir", "-p", "/app/test/test2"])
+
     subprocess.Popen(
         ["python3", planner_path, "-x", bt_xml_path, "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
-        stdout=subprocess.DEVNULL, 
-        stderr=subprocess.DEVNULL
+        # stdout=subprocess.PIPE, 
+        # stderr=subprocess.PIPE
     ).wait()
 
-    xml = "init"
+    # xml = "init"
 
     if os.path.exists(bt_xml_path):
         with open(bt_xml_path, "r") as f:
             xml = f.read()
+    else:
+        current_app.logger.error(f"[generate_behavior_tree] Error generating the behavior tree because file was not found at {bt_xml_path}.")
 
     if xml in ["init", ""]:
         return {"bt_error": "Error generating the behavior tree because file was not found."}
@@ -63,6 +68,7 @@ app_routes = Blueprint('app_routes', __name__)
 
 @app_routes.route('/api/validate', methods=['POST'])
 def validate():
+    current_app.logger.info(f"[validate] received {request}")
     if MOCK:
         return jsonify({"isValid": True})
 
@@ -71,6 +77,8 @@ def validate():
     data = request.json
     high_level = data.get('highLevel').strip()
     low_level = data.get('lowLevel').strip()
+
+    current_app.logger.info(f"[validate] received\n{high_level}\n{low_level}")
 
     if not high_level or not low_level:
         return jsonify({"error": "Both fields 'highLevel' and 'lowLevel' are required."}), 400

@@ -75,6 +75,9 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     :param query_hl: The high-level scenario
     :param query_ll: The low-level scenario
     """
+    # print("test\n\n\n\n\n\n\n\ntest")
+    # raise NotImplementedError("This function is not implemented yet")
+    INFO("\r[CC] Checking LLM comprehension of scenario for high-level", imp=True)
     llm_scenario = LLM(
         llm_connection_config_file=LLM_CONF_PATH,
         examples_yaml_file = [CC_EXAMPLES_HL_PATH]
@@ -260,9 +263,13 @@ def ll_llm_multi_step(query, kb) -> dict:
 ########################################################################################################################
 
 
-def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False) -> planner.BehaviourTree:
+def find_plan(kb_file = OUTPUT_KB_FILE, xml_file = OUTPUT_BT_FILE, stn_file = "", html_file = "") -> planner.BehaviourTree:
     # Find plan
     INFO(f"Finding plan for kb in {kb_file}")
+
+    if not os.path.exists(kb_file):
+        raise FileNotFoundError(f"Knowledge base file not found at {kb_file}")
+    
     data_dict = planner.PrologLib.execTest(kb_path=kb_file)
 
     INFO("Optimizing")
@@ -271,21 +278,24 @@ def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False)
         data_dict["actions"],
         data_dict["adj_matrix"],
         data_dict["resources"],
+        data_dict["resources_list"],
+        data_dict["ll_actions_list"]
     )
 
     milp_solver.solve()
 
-    if draw:
-        os.makedirs(output_path, exist_ok=True)
-        milp_solver.draw_graph_from_matrix(os.path.join(output_path, "MILP.html"), open_browser=False)
+    if stn_file != "":
+        milp_solver.draw_graph_from_matrix(stn_file, open_browser=False)
+
 
     INFO("Extracing BT")
-
     bt = milp_solver.extract_BT()
     
-    if draw:
-        bt.draw()
-        bt.toXML(os.path.join(output_path, "BT.xml"))
+    if html_file!="":
+        bt.draw(html_file)
+
+    bt.toXML(xml_file)
+    INFO(f"Done extracting BT to {xml_file}")
 
     return bt
     

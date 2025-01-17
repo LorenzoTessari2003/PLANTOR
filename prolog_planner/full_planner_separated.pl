@@ -245,12 +245,15 @@ apply_action_map(_, _, _, _, _, _, _, _, _) :-
 % This function generates a plan
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 generate_plan(Init, Goal, Plan, LastAchievers) :-
+  generate_plan(Init, Goal, Plan, LastAchievers, 4).
+
+generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
   % enable_debug,
   debug_format('Checking if the initial state is the goal state ~w~w\n', [Init, Goal]),
   \+goal_reached(Init, Goal),
   debug_format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
   (
-    generate_plan_hl(Init, Goal, [], [], [], 4, HL_Plan, HL_Achievers)
+    generate_plan_hl(Init, Goal, [], [], [], MaxDepth, HL_Plan, HL_Achievers)
     ->(
       % Print information on the high-level part
       debug_format('High-level plan generated\n~w\n', [HL_Plan]),

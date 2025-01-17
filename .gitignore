@@ -16,6 +16,10 @@ node_modules
 
 public_generated/
 
+.env
+*.env
+LLM/.env
+
 file.txt
 tmp.txt
 !requirements.txt

@@ -13,6 +13,7 @@ export const validateDescriptions = async (highLevel, lowLevel) => {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": "*"
         },
         body: JSON.stringify({ highLevel: highLevel, lowLevel: lowLevel }),
     });

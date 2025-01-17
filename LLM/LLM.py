@@ -1,5 +1,6 @@
 import yaml
 import os
+from dotenv import load_dotenv
 
 from openai import AzureOpenAI
 from retry import retry
@@ -22,6 +23,8 @@ class LLM:
     }
 
     def __init__(self, llm_connection_config_file = os.path.join(os.path.dirname(__file__), "conf/gpt40-32k.yaml"), examples_yaml_file = [""], llm_config = None):
+        load_dotenv()
+
         self.messages = []
         self.system_msg = ""
 
@@ -112,6 +115,8 @@ class LLM:
             azure_endpoint = self.ENDPOINT,
             api_version    = self.API_VERSION,
         )
+
+        assert client, "Failed to connect to the LLM"
 
         response = client.chat.completions.create(
             model             = self.engine,
