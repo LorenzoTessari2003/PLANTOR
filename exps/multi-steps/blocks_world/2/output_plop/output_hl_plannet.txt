@@ -1,0 +1,7 @@
+Goal reached
+[0] [0-move_onblock_to_table_start(a1,b4,1,1,10,10)]
+[1] [1-move_onblock_to_table_end(a1,b4,1,1,10,10)]
+[2] [2-move_onblock_to_block_start(a1,b5,b4,2,2,10,10)]
+[3] [3-move_onblock_to_block_end(a1,b5,b4,2,2,10,10)]
+% 7,062,769 inferences, 0.431 CPU in 0.432 seconds (100% CPU, 16380559 Lips)
+% halt

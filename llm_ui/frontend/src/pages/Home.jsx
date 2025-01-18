@@ -49,6 +49,9 @@ const Home = () => {
             if (result.isValid) {
                 setShowGenerateHLKB(true);
             }
+            else {
+                setValidationError(result.error);
+            }
         } catch (error) {
             setValidationError(error.message);
         }
