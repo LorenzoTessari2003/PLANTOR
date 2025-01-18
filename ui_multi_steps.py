@@ -27,7 +27,8 @@ HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yam
 WAIT = True
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
-OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb.pl')
+OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
+OUTPUT_HL_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_hl.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
 
 OUTPUT_FILE_CC = os.path.join(OUTPUT_PATH, "output_cc.txt")
@@ -100,7 +101,7 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
         file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
-        return False
+        return False, response
     else: 
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
@@ -122,14 +123,14 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
         file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
-        return False
+        return False, response
     else: 
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
 
     file.close()
 
-    return True
+    return True, ""
 
 
 ########################################################################################################################
@@ -187,6 +188,8 @@ def hl_llm_multi_step(query) -> dict:
     print()
     file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
+
+    write_to_file(kb, output_file=OUTPUT_HL_KB_FILE)
 
     file.close()
 
@@ -284,6 +287,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     scan_and_extract(kb, response)
 
     file.close()
+    write_to_file(kb, output_file=OUTPUT_KB_FILE)
 
     return kb 
     
@@ -491,8 +495,9 @@ def main():
 
     # query_ll = "Nothing to do here"
 
-    # if not llm_scenario_comprehension(query_hl, query_ll):
-    #     FAIL("There was a problem with the comprehension of the scenario")
+    # compr, resp = llm_scenario_comprehension(query_hl, query_ll)
+    # if not compr:
+    #     FAIL(f"There was a problem with the comprehension of the scenario {resp}")
     #     return
     
     # if WAIT:

@@ -10,7 +10,11 @@ MOCK = False
 def validate_descriptions(high_level, low_level):
     """Validate compatibility of high-level and low-level descriptions."""
     current_app.logger.info("Calling validate_descriptions")
-    return {"valid": llm_scenario_comprehension(high_level, low_level)}
+    comp, resp = llm_scenario_comprehension(high_level, low_level)
+    if comp:
+        return {"isValid": True}
+    else:
+        return {"isValid": False, "error": resp}
 
 
 def generate_high_level_kb(high_level):
@@ -85,10 +89,12 @@ def validate():
 
     validation_result = validate_descriptions(high_level, low_level)
 
-    if validation_result['valid']:
-        return jsonify({"isValid": True})
-    else:
-        return jsonify({"isValid": False, "error": validation_result['error']}), 400
+    return jsonify(validation_result)
+
+    # if validation_result['valid']:
+    #     return jsonify({"isValid": True})
+    # else:
+    #     return jsonify({"isValid": False, "error": validation_result['error']}), 400
 
 @app_routes.route('/api/generate_hl_kb', methods=['POST'])
 def generate_hl_kb():

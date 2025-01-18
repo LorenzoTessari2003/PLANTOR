@@ -1,0 +1,4 @@
+Goal reached
+[0] [0-move_table_to_block_start(a1,b3,b1,3,3,1,1)]
+[1] [1-move_table_to_block_end(a1,b3,b1,3,3,1,1)]
+% 229,224 inferences, 0.008 CPU in 0.008 seconds (100% CPU, 27612126 Lips)
