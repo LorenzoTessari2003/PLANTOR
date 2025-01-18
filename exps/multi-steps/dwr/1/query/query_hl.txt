@@ -1,0 +1,11 @@
+There are two different locations: location1 and location2. In each location there is a crane capable of moving the containers in the location.
+There is a robot that can move a container from a location to another location. The crane can load or unload the robot.
+There are 4 container c1, c2, c3 and c4, c1 is located in location 1, c2 is located in location 1 and is on top of c1. c3 is located in location 2 and c4 is located in location2
+and is on top of c3.
+The robot r1 is in location1.
+
+At the end we want c2 on top of c3 and c4 on top of c1, c1 and c3 remains in the same location as before.
+
+The crane is capable to move a container on top of a container, a container on top of the robot or a container from the robot to the location
+
+The robot can move through location with only a container on it.
