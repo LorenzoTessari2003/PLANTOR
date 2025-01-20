@@ -1,18 +1,12 @@
 Let the container, crane and robot and their positions be described in the high-level part.
 There are available only one robot that can:
-- move_start(robot, locationFrom, locationTo)
-- move_end(robot, locationFrom, locationTo)
+- move_start(robot, locationFrom, locationTo), which makes the robot starting to move from position (x1,y1) to position (x2,y2).
+- move_end(robot, locationFrom, locationTo), which completes the movement of the robot from position (x1,y1) to position (x2,y2).
 There are one crane for location that can:
-
-
-    There are 2 available agents that can carry out the task. They are available at the beginning and will be 
-    available at the end. The agents are actually robotic arms that can pick up blocks and move them around. At the 
-    beginning, the arms are in positions (0,0) and (3,3), respectively, while 
-    we do not care were they are at the end. The low_level actions that they can perform are:
-    - move_arm_start(arm, x1, y1, x2, y2), which makes the robotic arm starting to move from position (x1,y1) to position (x2,y2).
-    - move_arm_end(arm, x1, y1, x2, y2), which completes the movement of the robotic arm from position (x1,y1) to position (x2,y2).
-    - close_start(arm), which makes the gripper starting to close.
-    - close_end(arm), which indicates the gripper has closed.
-    - open_start(arm), which makes the gripper starting to open.
-    - open_end(arm), which indicates the gripper has opened.
-    Remember to use the appropriate tags for the code you produce and not to use prolog tags.
+- go_to_c_start(crane, container), which makes the crane move on the top of the container.
+- go_to_c_end(crane, container), which completes the movement of the crane to go on the top of the container.
+- close_start(crane), which makes the gripper starting to close.
+- close_end(crane), which indicates the gripper has closed.
+- open_start(crane), which makes the gripper starting to open.
+- open_end(crane), which indicates the gripper has opened.
+Remember to use the appropriate tags for the code you produce and not to use prolog tags.

@@ -1,11 +1,33 @@
-There are two different locations: location1 and location2. In each location there is a crane capable of moving the containers in the location.
-There is a robot that can move a container from a location to another location. The crane can load or unload the robot.
-There are 4 container c1, c2, c3 and c4, c1 is located in location 1, c2 is located in location 1 and is on top of c1. c3 is located in location 2 and c4 is located in location2
-and is on top of c3.
-The robot r1 is in location1.
+The scenario involves two distinct locations, referred to as Location1 and Location2. These two locations are directly connected, allowing for movement between them.
+Containers:
 
-At the end we want c2 on top of c3 and c4 on top of c1, c1 and c3 remains in the same location as before.
+    There are two containers in the system:
+        Container c1 is initially located in Location1, placed on the ground.
+        Container c2 is also in Location1, positioned on top of c1.
 
-The crane is capable to move a container on top of a container, a container on top of the robot or a container from the robot to the location
+Robot:
 
-The robot can move through location with only a container on it.
+    A robot, designated as Robot r1, is initially situated in Location1.
+    The robot is capable of transporting a container from one location to another. However, to do so:
+        The container must be placed on top of the robot.
+        The robot can only move while carrying one container at a time.
+        The robot cannot move if the container it is carrying is obstructed by another container.
+
+Cranes:
+
+    Each location is equipped with a crane:
+        The crane in Location1 operates only within that location.
+        The crane in Location2 operates exclusively within Location2.
+    Cranes are versatile and capable of performing the following operations:
+        Moving a container from the ground to the top of another container within the same location.
+        Loading a container onto the robot or unloading a container from the robot. Container could be everywhere but has to be clear
+        Placing a container on the ground in the same location.
+    A crane can only manipulate a container if the container is clear, meaning there is nothing on top of it.
+
+Goal:
+
+    By the end of the operation:
+        Container c2 must be relocated to Location2.
+        Container c1 must remain in its original position in Location1.
+
+This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve the desired arrangement of containers.
