@@ -211,16 +211,16 @@ apply_action_map(_, _, _, _, _, _, _, _, _) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function generates a plan
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-generate_plan(Init, Goal, Plan, LastAchievers) :-
-  generate_plan(Init, Goal, Plan, LastAchievers, 4).
+generate_plan(Init, Goal, Plan, Enablers) :-
+  generate_plan(Init, Goal, Plan, Enablers, 4).
 
-generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
+generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
   format('Checking if the initial state is the goal state ~w ~w\n', [Init, Goal]),
   goal_reached(Init, Goal),
   format('Goal reached\n').
 
-generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
+generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
   format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
   (
@@ -228,10 +228,6 @@ generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
     ->(
       % Print information on the high-level part
       format('High-level plan generated\n~w\n', [HL_Plan]),
-      format('Finding high-level achievers\n'),
-      extract_hl_achievers(HL_Plan, HL_Achievers),
-      format('High-level achievers found ~w\n', [HL_Achievers]),
-      print_list(HL_Achievers),
       
       format('Applying the mappings to obtain the low-level temporal plan\n'),
       reverse(HL_Plan, HL_PlanReversed),
@@ -242,9 +238,11 @@ generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
           (
             % reverse(Plan, PlanReversed),
             enable_debug,!,
-            extract_achievers(Plan, LastAchievers)
+            extract_achievers(Plan, EnablersD)
             ->(
-              format('Achievers found ~w\n', [LastAchievers]),
+              format('Achievers found ~w\n', [EnablersD]),
+              clean_achievers(EnablersD, Plan, Enablers),
+              format('Cleaned achievers ~w\n', [Enablers]),
               true
             );(
               format('Could not extract achievers\n'), fail
@@ -260,36 +258,6 @@ generate_plan(Init, Goal, Plan, LastAchievers, MaxDepth) :-
     )
   ),
   true.
-
-  %     extract_adj_matrix_actions(HL_Achievers, AdjMatrix, Actions),
-  %     debug_format('Adjacency matrix:\n'),
-  %     print_list(AdjMatrix),
-  %     print_list(Actions),
-  %     % Find the low-level plan
-  %     debug_format('Applying the mappings to obtain the low-level temporal plan from ~w to ~w\n', [Init, Goal]),
-  %     findall(Mapping, mapping(Mapping, _), Mappings),
-  %     debug_format('Mappings available: ~w\n', [Mappings]),
-  %     reverse(HL_Plan, HL_PlanReversed),
-  %     reverse(HL_Achievers, HL_AchieversReversed),
-  %     (
-  %       % leash(-all),trace,
-  %       apply_mappings(Init, Goal, HL_PlanReversed, HL_AchieversReversed, Plan, LL_Achievers)
-  %       ->(
-  %         debug_format('Plan generated~w\n', [Plan]),
-  %         debug_format('LL achievers:\n'),
-  %         print_list(LL_Achievers),
-  %         clean_achievers(LL_Achievers, LastAchievers)
-  %       );(
-  %         format('Could not apply mappings\n'), fail
-  %       ),
-  %       % notrace,
-  %       true
-  %     ),
-  %     true
-  %   );(
-  %     format('Could not generate a HL plan\n'), fail
-  %   )
-  % ).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -507,16 +475,26 @@ generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function takes a list of achievers, removes the duplicates and reverses the list
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clean_achievers(LastAchievers, RetLastAchievers) :-
-  clean_achievers(LastAchievers, [], TmpLastAchievers),
-  reverse(TmpLastAchievers, [], RetLastAchievers).
+find_action_name_from_plan([ID-Action|_], ID, Action).
+find_action_name_from_plan([_ID-_Action|T], ID, RetAction) :-
+  find_action_name_from_plan(T, ID, RetAction).
+find_action_name_from_plan([], _, _) :-
+  format('Could not find action name, SOMETHING IS VERY WRONG\n'),
+  fail.
 
-clean_achievers([], LastAchievers, LastAchievers).
-clean_achievers([ID-Action-Achievers|TActions], TempLastAchievers, RetLastAchievers) :-
-  move_to_set(Achievers, NewAchievers),
-  debug_format('Cleaned achievers for ~w ~w ~w from ~w\n', [ID, Action, NewAchievers, Achievers]),
-  append([ID-Action-NewAchievers], TempLastAchievers, NewLastAchievers),
-  clean_achievers(TActions, NewLastAchievers, RetLastAchievers).
+clean_achievers(EnablersD, Plan, RetEnablers) :-
+  clean_achievers(EnablersD, Plan, [], RetEnablers, 0),
+
+clean_achievers(EnablersD, Plan, RetEnablers, RetEnablers, Counter) :-
+  length(Plan, Counter).
+clean_achievers(EnablersD, Plan, Enablers, RetEnablers, Counter):-
+  ActionEnablers = EnablersD.get(Counter),
+  find_action_name_from_plan(Plan, Counter, ActionName),
+  debug_format('Action ~w has enablers ~w\n', [ActionName, ActionEnablers]),
+  append([Counter-ActionName-ActionEnablers], Enablers, NewEnablers),
+  NewCounter is Counter + 1,
+  clean_achievers(EnablersD, Plan, NewEnablers, RetEnablers, NewCounter).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
