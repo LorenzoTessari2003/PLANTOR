@@ -13,8 +13,8 @@ plan_hl(MaxDepth):-
   init_state(Init),
   goal_state(Goal),
   format('Planning from: ~w to: ~w~n', [Init, Goal]),
-  % generate_plan_hl(Init, Goal, [], [], MaxDepth, Actions),
-  generate_plan(Init, Goal, Actions, _, MaxDepth),
+  generate_plan_hl(Init, Goal, [], [], MaxDepth, Actions),
+  % generate_plan(Init, Goal, Actions, _, MaxDepth),
   format('Plan: ~n'),
   reverse(Actions, ActionsReversed),
   print_list(ActionsReversed).

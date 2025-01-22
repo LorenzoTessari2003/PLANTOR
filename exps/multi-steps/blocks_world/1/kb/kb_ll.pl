@@ -49,7 +49,7 @@ init_state([
 goal_state([
   ontable(b1), ontable(b2),
   on(b3, b1),
-  at(b1,1,1), at(b2,2,2), at(b3,1,1),
+  at(b1,1,1), at(b2,4,4), at(b3,1,1),
   clear(b2), clear(b3),
   available(a1), available(a2),
   ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
@@ -220,8 +220,8 @@ ll_action(open_gripper_end(Agent),
 %%%%%%%%%%%%%%%%%%%%%%%
 mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
     close_gripper_start(Agent),
     close_gripper_end(Agent),
     move_arm_start(Agent, X1, Y1, X2, Y2),
@@ -233,8 +233,8 @@ mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
 
 mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
     close_gripper_start(Agent),
     close_gripper_end(Agent),
     move_arm_start(Agent, X1, Y1, X2, Y2),
@@ -246,8 +246,8 @@ mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
 
 mapping(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
     close_gripper_start(Agent),
     close_gripper_end(Agent),
     move_arm_start(Agent, X1, Y1, X2, Y2),
@@ -259,8 +259,8 @@ mapping(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
 
 mapping(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
     close_gripper_start(Agent),
     close_gripper_end(Agent),
     move_arm_start(Agent, X1, Y1, X2, Y2),

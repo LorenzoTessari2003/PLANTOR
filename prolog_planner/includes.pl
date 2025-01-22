@@ -1,5 +1,5 @@
 % :- ensure_loaded('/home/enrico/Projects/prolog_planner/output/kb.pl').
-:- ensure_loaded('/home/enrico/Projects/prolog_planner/exps/multi-steps/1/kb/kb_ll.pl').
+:- ensure_loaded('/home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/1/kb/kb_ll.pl').
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                  ACTIONS                                   %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
