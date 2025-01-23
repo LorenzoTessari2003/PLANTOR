@@ -22,11 +22,10 @@ block(b6).
 agent(a1).
 agent(a2).
 
-% Arms
+% Low-level predicates for arms and grippers
 ll_arm(a1).
 ll_arm(a2).
 
-% Grippers
 ll_gripper(a1).
 ll_gripper(a2).
 
@@ -77,7 +76,7 @@ action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
 ).
 action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
   [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
-  [at(X2, Y2)],
+  [at(_, X2, Y2)],
   [],
   [agent(Agent)],
   [
@@ -155,68 +154,68 @@ action(move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
 %%%%%%%%%%%%%%%%%%%%%%%
 % ll_actions
 %%%%%%%%%%%%%%%%%%%%%%%
+% Move the arm from one position to another
 ll_action(move_arm_start(Agent, X1, Y1, X2, Y2),
   [ll_arm_at(Agent, X1, Y1)],
-  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent)],
+  [moving_arm(Agent, _, _, _, _), gripping(Agent, _), releasing(Agent)],
   [],
   [ll_arm(Agent), pos(X1, Y1), pos(X2, Y2)],
   [
-    add(ll_moving_arm(Agent, X1, Y1, X2, Y2)),
+    add(moving_arm(Agent, X1, Y1, X2, Y2)),
     del(ll_arm_at(Agent, X1, Y1))
   ]
 ).
-
 ll_action(move_arm_end(Agent, X1, Y1, X2, Y2),
-  [ll_moving_arm(Agent, X1, Y1, X2, Y2)],
+  [moving_arm(Agent, X1, Y1, X2, Y2)],
   [],
   [],
-  [ll_arm(Agent)],
+  [],
   [
-    del(ll_moving_arm(Agent, X1, Y1, X2, Y2)),
+    del(moving_arm(Agent, X1, Y1, X2, Y2)),
     add(ll_arm_at(Agent, X2, Y2))
   ]
 ).
 
-ll_action(close_gripper_start(Agent),
-  [ll_gripper(Agent, open)],
-  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent)],
+% Close the gripper to grip a block
+ll_action(close_gripper_start(Agent, Block),
+  [ll_gripper(Agent, open), ll_arm_at(Agent, X, Y)],
+  [moving_arm(Agent, _, _, _, _), gripping(Agent, _), releasing(Agent)],
   [],
-  [ll_gripper(Agent)],
+  [ll_gripper(Agent), ll_arm(Agent), block(Block)],
   [
-    del(ll_gripper(Agent, open)),
-    add(ll_gripping(Agent, close))
+    add(gripping(Agent, Block)),
+    del(ll_gripper(Agent, open))
   ]
 ).
-
-ll_action(close_gripper_end(Agent),
-  [ll_gripping(Agent, close)],
+ll_action(close_gripper_end(Agent, Block),
+  [gripping(Agent, Block)],
   [],
   [],
-  [ll_gripper(Agent)],
+  [],
   [
-    del(ll_gripping(Agent, close)),
+    del(gripping(Agent, Block)),
     add(ll_gripper(Agent, close))
   ]
 ).
 
+% Open the gripper to release a block
 ll_action(open_gripper_start(Agent),
   [ll_gripper(Agent, close)],
-  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent)],
+  [moving_arm(Agent, _, _, _, _), gripping(Agent, _), releasing(Agent)],
   [],
-  [ll_gripper(Agent)],
+  [ll_gripper(Agent), ll_arm(Agent)],
   [
-    del(ll_gripper(Agent, close)),
-    add(ll_releasing(Agent, open))
+    add(releasing(Agent)),
+    del(ll_gripper(Agent, close))
   ]
 ).
-
 ll_action(open_gripper_end(Agent),
-  [ll_releasing(Agent, open)],
+  [releasing(Agent)],
   [],
   [],
-  [ll_gripper(Agent)],
+  [],
   [
-    del(ll_releasing(Agent, open)),
+    del(releasing(Agent)),
     add(ll_gripper(Agent, open))
   ]
 ).
@@ -224,12 +223,13 @@ ll_action(open_gripper_end(Agent),
 %%%%%%%%%%%%%%%%%%%%%%%
 % mappings
 %%%%%%%%%%%%%%%%%%%%%%%
+% Mapping for moving a block from one position on the table to another position on the table
 mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
-    close_gripper_start(Agent),
-    close_gripper_end(Agent),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
+    close_gripper_start(Agent, Block),
+    close_gripper_end(Agent, Block),
     move_arm_start(Agent, X1, Y1, X2, Y2),
     move_arm_end(Agent, X1, Y1, X2, Y2),
     open_gripper_start(Agent),
@@ -237,12 +237,13 @@ mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
   ]
 ).
 
+% Mapping for moving a block from a position on the table to the top of another block
 mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
-    close_gripper_start(Agent),
-    close_gripper_end(Agent),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
+    close_gripper_start(Agent, Block1),
+    close_gripper_end(Agent, Block1),
     move_arm_start(Agent, X1, Y1, X2, Y2),
     move_arm_end(Agent, X1, Y1, X2, Y2),
     open_gripper_start(Agent),
@@ -250,12 +251,13 @@ mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   ]
 ).
 
+% Mapping for moving a block from the top of another block to a position on the table
 mapping(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
-    close_gripper_start(Agent),
-    close_gripper_end(Agent),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
+    close_gripper_start(Agent, Block1),
+    close_gripper_end(Agent, Block1),
     move_arm_start(Agent, X1, Y1, X2, Y2),
     move_arm_end(Agent, X1, Y1, X2, Y2),
     open_gripper_start(Agent),
@@ -263,12 +265,13 @@ mapping(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
   ]
 ).
 
+% Mapping for moving a block from the top of another block to the top of another block
 mapping(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [
-    move_arm_start(Agent, 4, 4, X1, Y1),
-    move_arm_end(Agent, 4, 4, X1, Y1),
-    close_gripper_start(Agent),
-    close_gripper_end(Agent),
+    move_arm_start(Agent, _, _, X1, Y1),
+    move_arm_end(Agent, _, _, X1, Y1),
+    close_gripper_start(Agent, Block1),
+    close_gripper_end(Agent, Block1),
     move_arm_start(Agent, X1, Y1, X2, Y2),
     move_arm_end(Agent, X1, Y1, X2, Y2),
     open_gripper_start(Agent),

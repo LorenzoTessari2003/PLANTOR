@@ -26,8 +26,10 @@ plan_ll(MaxDepth):-
   debug_format('Planning from: ~w to: ~w~n', [Init, Goal]),
   generate_plan(Init, Goal, Actions, LastAchievers, MaxDepth),
   reverse(Actions, ActionsReversed),
+  format('Plan: ~n'),
   print_list(ActionsReversed),
   reverse(LastAchievers, LastAchieversReversed),
+  format('\nAchievers: ~n'),
   print_list(LastAchieversReversed).
 
 
