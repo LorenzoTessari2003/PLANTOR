@@ -5,6 +5,8 @@
 % Positions
 pos(1,1).
 pos(2,1).
+pos(0,0).
+pos(3,3).
 
 % Blocks
 block(a).
@@ -23,35 +25,22 @@ resources(agent(_)).
 % init
 %%%%%%%%%%%%%%%%%%%%%%%
 init_state([
-  ontable(a),
-  on(b, a),
-  on(c, b),
-  on(d, c),
-  at(a, 1, 1),
-  at(b, 1, 1),
-  at(c, 1, 1),
-  at(d, 1, 1),
+  ontable(a), on(b, a), on(c, b), on(d, c),
+  at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
-  available(a1),
-  available(a2)
+  available(a1), available(a2),
+  at(a1, 0, 0), at(a2, 3, 3)
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % goal
 %%%%%%%%%%%%%%%%%%%%%%%
 goal_state([
-  ontable(a),
-  ontable(b),
-  on(c, b),
-  on(d, a),
-  at(a, 1, 1),
-  at(b, 2, 1),
-  at(c, 2, 1),
-  at(d, 1, 1),
-  clear(c),
-  clear(d),
-  available(a1),
-  available(a2)
+  ontable(a), ontable(b), on(c, b), on(d, a),
+  at(a, 1, 1), at(b, 2, 1), at(c, 2, 1), at(d, 1, 1),
+  clear(d), clear(c),
+  available(a1), available(a2),
+  at(a1, 0, 0), at(a2, 3, 3)
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%

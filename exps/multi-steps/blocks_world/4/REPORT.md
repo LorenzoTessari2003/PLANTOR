@@ -21,4 +21,8 @@ there seems to not be any error as it finds the correct solution in 8ms. Is wort
 
 ## Low-Level Generation
 
-Could not apply mappings (16 depth)
+Find HL plan but could not apply mappings since there was an error in every mapping
+move_arm_*(Agent, X1, Y1, X1, Y1), has to be move_arm_*(Agent, _, _, X1, Y1),
+Changing this solves the problem
+
+When changed solves in 72 sec
