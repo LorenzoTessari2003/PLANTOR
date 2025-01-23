@@ -17,12 +17,8 @@ The goal state correctly describe the movement of the block from the table to th
 block.
 
 The LLM generated all the actions dividing them in start and final actions. By running the HL planner
-there seems to not be any error as it finds the correct solution in 8ms. Is worth to mention that the plan is not optimal, 
-in order to place D on top of A the planner move at first the block in a position and then move it on top of A. This 
-because the move_onblock_to_block_start action require the two blocks to be clear.  
-After testing with the planner, we were able to extract a plan in 9ms. 
+there seems to not be any error as it finds the correct solution in 8ms. Is worth to mention that the plan is not optimal.  
 
 ## Low-Level Generation
 
-Find HL plan but could not apply mappings (8 depth).
-
+Could not apply mappings (16 depth)

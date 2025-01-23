@@ -11,14 +11,14 @@ block(c).
 block(d).
 
 % Agents
-agent(agent1).
-agent(agent2).
+agent(a1).
+agent(a2).
 
 % Resources
 resources(agent(_)).
 ```
 
-In this knowledge base, we have defined the positions on the table, the blocks, and the agents. The `resources` predicate indicates that any agent can be used as a resource to carry out tasks.
+In this knowledge base, we have defined the positions on the table, the blocks, and the agents. The `resources` predicate indicates that the agents are the resources that can carry out tasks.
 INIT: Sure, here is the description of the initial and final states:
 
 ```init
@@ -27,7 +27,7 @@ init_state([
   on(b, a), on(c, b), on(d, c),
   at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
-  available(agent1), available(agent2)
+  available(a1), available(a2)
 ]).
 ```
 
@@ -39,13 +39,13 @@ goal_state([
   on(d, a),
   at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
   clear(b), clear(c), clear(d),
-  available(agent1), available(agent2)
+  available(a1), available(a2)
 ]).
 ```
 
-In the goal state, block A is still on the table in position (1,1), block B is on the table in position (2,1), block C is on the table in position (3,1), and block D is on top of block A. Blocks B, C, and D are clear since they are not stacked on top of each other. Both agents are available.
+In the goal state, block A is still in position (1,1) on the table, block B is on the table in position (2,1), block C is on the table in position (3,1), and block D is on top of block A. Blocks B, C, and D are clear since they are not stacked on top of any other blocks. Both agents are available.
 ACTIONS: ```actions
-% Move a block from a position on the table to another position on the table
+% Move a block from a position to another position on the table
 action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
   [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
   [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
