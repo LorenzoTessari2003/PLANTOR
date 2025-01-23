@@ -1,9 +1,12 @@
 The scenario involves two distinct locations, referred to as Location1 and Location2. These two locations are directly connected, allowing for movement between them.
 Containers:
 
-    There are two containers in the system:
+    There are four containers in the system:
         Container c1 is initially located in Location1, placed on the ground.
         Container c2 is also in Location1, positioned on top of c1.
+        Container c3 is initially located in Location2, placed on the ground.
+        Container c4 is also in Location2, positioned on top of c3.
+      If a container has a container on top, could not be clear.
 
 Robot:
 
@@ -24,12 +27,16 @@ Cranes:
         Placing a container on the ground in the same location, so cannot place a container in a different location (e.g crane 1 is located
         in location1 so can only operate in location1 not in other).
     A crane can only manipulate a container if the container is clear, meaning there is nothing on top of it.
+    A crane is not a resource.
     When executing an action the crane is busy so it could not execute any other action till the finish of the action.
+
 
 Goal:
 
     By the end of the operation:
-        Container c2 must be relocated to Location2.
+        Container c2 must be relocated to the top of c3.
+        Container c4 must be relocated to the top of c1.
         Container c1 must remain in its original position in Location1.
+        Container c3 must remain in its original position in Location2.
 
 This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve the desired arrangement of containers.

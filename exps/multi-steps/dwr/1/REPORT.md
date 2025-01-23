@@ -17,8 +17,8 @@ The goal state correctly describe state wanted
 The LLM generated all the actions dividing them in start and final actions. By running the HL planner
 there seems to not be any error as it finds the correct solution in 0.627 s. 
 
-The only complain is that the container has to be putted at first onto the ground in order to be loaded in the robot.
+The only complain is that the container has to be putted at first onto the ground in order to be loaded in the robot and that the crane is considered as a resource next time put in the description that is not a resource.
 
 ## Low-Level Generation
 
-TBD but seems correct.
+Could not generate HL plan
