@@ -6,6 +6,8 @@
 pos(1,1).
 pos(2,1).
 pos(3,1).
+pos(0,0).
+pos(3,3).
 
 % Blocks
 block(a).
@@ -17,25 +19,19 @@ block(d).
 agent(a1).
 agent(a2).
 
-% Arms
+% Low-level predicates for arms and grippers
 ll_arm(a1).
 ll_arm(a2).
-
-% Grippers
-ll_gripper(a1).
-ll_gripper(a2).
 
 % Resources
 resources(agent(_)).
 resources(ll_arm(_)).
-resources(ll_gripper(_)).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % init
 %%%%%%%%%%%%%%%%%%%%%%%
 init_state([
-  ontable(a),
-  on(b, a), on(c, b), on(d, c),
+  ontable(a), on(b, a), on(c, b), on(d, c),
   at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
   available(a1), available(a2),
@@ -47,10 +43,9 @@ init_state([
 % goal
 %%%%%%%%%%%%%%%%%%%%%%%
 goal_state([
-  ontable(a), ontable(b), ontable(c),
-  on(d, a),
+  ontable(a), ontable(b), ontable(c), on(d, a),
   at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
-  clear(b), clear(c), clear(d),
+  clear(d), clear(b), clear(c),
   available(a1), available(a2),
   ll_arm_at(a1, _, _), ll_arm_at(a2, _, _),
   ll_gripper(a1, _), ll_gripper(a2, _)
@@ -72,7 +67,7 @@ action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
 ).
 action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
   [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
-  [at(X2, Y2)],
+  [at(_, X2, Y2)],
   [],
   [agent(Agent)],
   [
@@ -176,7 +171,7 @@ ll_action(close_start(Arm),
   [ll_gripper(Arm, open)],
   [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
   [],
-  [ll_gripper(Arm)],
+  [ll_arm(Arm)],
   [
     del(ll_gripper(Arm, open)),
     add(ll_closing(Arm))
@@ -187,7 +182,7 @@ ll_action(close_end(Arm),
   [ll_closing(Arm)],
   [],
   [],
-  [ll_gripper(Arm)],
+  [ll_arm(Arm)],
   [
     del(ll_closing(Arm)),
     add(ll_gripper(Arm, closed))
@@ -198,7 +193,7 @@ ll_action(open_start(Arm),
   [ll_gripper(Arm, closed)],
   [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
   [],
-  [ll_gripper(Arm)],
+  [ll_arm(Arm)],
   [
     del(ll_gripper(Arm, closed)),
     add(ll_opening(Arm))
@@ -209,7 +204,7 @@ ll_action(open_end(Arm),
   [ll_opening(Arm)],
   [],
   [],
-  [ll_gripper(Arm)],
+  [ll_arm(Arm)],
   [
     del(ll_opening(Arm)),
     add(ll_gripper(Arm, open))

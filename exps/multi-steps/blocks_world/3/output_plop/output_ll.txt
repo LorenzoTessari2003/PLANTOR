@@ -1,10 +1,10 @@
-KB: Sure. Here is the updated general knowledge base to include the new low-level predicates and resources:
-
-```kb
+KB: ```KB
 % Positions
 pos(1,1).
 pos(2,1).
 pos(3,1).
+pos(0,0).
+pos(3,3).
 
 % Blocks
 block(a).
@@ -24,14 +24,11 @@ ll_arm(a2).
 resources(agent(_)).
 resources(ll_arm(_)).
 ```
-
-This updated knowledge base now includes the low-level predicates `ll_arm/1` to represent the robotic arms and includes them as resources.
 INIT: Sure. Here is the updated initial and final states reflecting the changes in the description for the low-level part:
 
 ```init
 init_state([
-  ontable(a),
-  on(b, a), on(c, b), on(d, c),
+  ontable(a), on(b, a), on(c, b), on(d, c),
   at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
   available(a1), available(a2),
@@ -42,17 +39,16 @@ init_state([
 
 ```goal
 goal_state([
-  ontable(a), ontable(b), ontable(c),
-  on(d, a),
+  ontable(a), ontable(b), ontable(c), on(d, a),
   at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
-  clear(b), clear(c), clear(d),
+  clear(d), clear(b), clear(c),
   available(a1), available(a2),
   ll_arm_at(a1, _, _), ll_arm_at(a2, _, _),
   ll_gripper(a1, _), ll_gripper(a2, _)
 ]).
 ```
 
-In the initial state, we have added the positions of the robotic arms (`ll_arm_at/3`) and the state of the grippers (`ll_gripper/2`). In the goal state, we have used wildcards (`_`) to indicate that we do not care about the final positions of the arms and the state of the grippers.
+In the initial state, we added the positions of the robotic arms (`ll_arm_at/3`) and the state of the grippers (`ll_gripper/2`). In the goal state, we used wildcards (`_`) to indicate that we do not care about the final positions of the arms and the state of the grippers.
 ACTIONS: Sure, here is the low-level actions set based on the provided description:
 
 ```ll_actions
@@ -71,7 +67,7 @@ ll_action(move_arm_end(Arm, X1, Y1, X2, Y2),
   [ll_moving_arm(Arm, X1, Y1, X2, Y2)],
   [],
   [],
-  [],
+  [ll_arm(Arm)],
   [
     del(ll_moving_arm(Arm, X1, Y1, X2, Y2)),
     add(ll_arm_at(Arm, X2, Y2))
@@ -85,17 +81,17 @@ ll_action(close_start(Arm),
   [ll_arm(Arm)],
   [
     del(ll_gripper(Arm, open)),
-    add(ll_gripping(Arm, closing))
+    add(ll_closing(Arm))
   ]
 ).
 
 ll_action(close_end(Arm),
-  [ll_gripping(Arm, closing)],
+  [ll_closing(Arm)],
   [],
   [],
   [ll_arm(Arm)],
   [
-    del(ll_gripping(Arm, closing)),
+    del(ll_closing(Arm)),
     add(ll_gripper(Arm, closed))
   ]
 ).
@@ -107,23 +103,23 @@ ll_action(open_start(Arm),
   [ll_arm(Arm)],
   [
     del(ll_gripper(Arm, closed)),
-    add(ll_gripping(Arm, opening))
+    add(ll_opening(Arm))
   ]
 ).
 
 ll_action(open_end(Arm),
-  [ll_gripping(Arm, opening)],
+  [ll_opening(Arm)],
   [],
   [],
   [ll_arm(Arm)],
   [
-    del(ll_gripping(Arm, opening)),
+    del(ll_opening(Arm)),
     add(ll_gripper(Arm, open))
   ]
 ).
 ```
 
-This set of low-level actions includes the necessary actions for moving the robotic arm, and opening and closing the gripper. Each action is divided into a start and end action to reflect the durative nature of the actions. The predicates are prefixed with `ll_` to avoid conflicts with the high-level predicates.
+This set of low-level actions includes the actions for moving the arm, closing the gripper, and opening the gripper, as described in the query. Each action has a start and end phase, and the preconditions and effects are specified accordingly.
 MAPPINGS: Sure. Here are the mappings from high-level actions to low-level actions:
 
 ```mappings
@@ -180,4 +176,4 @@ mapping(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
 ).
 ```
 
-These mappings reflect the sequence of low-level actions required to perform the high-level actions. Each high-level action is mapped to a series of low-level actions that involve moving the arm to the block's position, closing the gripper to pick up the block, moving the arm to the target position, and opening the gripper to release the block.
+These mappings ensure that the high-level actions are translated into the appropriate sequence of low-level actions. Each high-level action is mapped to a series of low-level actions that involve moving the arm to the block's position, closing the gripper to pick up the block, moving the arm to the target position, and opening the gripper to release the block.

@@ -6,6 +6,8 @@
 pos(1,1).
 pos(2,1).
 pos(3,1).
+pos(0,0).
+pos(3,3).
 
 % Blocks
 block(a).
@@ -24,10 +26,10 @@ resources(agent(_)).
 % init
 %%%%%%%%%%%%%%%%%%%%%%%
 init_state([
-  ontable(a),
-  on(b, a), on(c, b), on(d, c),
+  ontable(a), on(b, a), on(c, b), on(d, c),
   at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
+  at(a1, 0, 0), at(a2, 3, 3),
   available(a1), available(a2)
 ]).
 
@@ -35,17 +37,17 @@ init_state([
 % goal
 %%%%%%%%%%%%%%%%%%%%%%%
 goal_state([
-  ontable(a), ontable(b), ontable(c),
-  on(d, a),
+  ontable(a), ontable(b), ontable(c), on(d, a),
   at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
-  clear(b), clear(c), clear(d),
+  clear(d), clear(b), clear(c),
+  at(a1, 0, 0), at(a2, 3, 3),
   available(a1), available(a2)
 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % actions
 %%%%%%%%%%%%%%%%%%%%%%%
-% Move a block from a position to another position on the table
+% Move a block from a position on the table to another position on the table
 action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
   [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
   [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
@@ -58,7 +60,7 @@ action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
 ).
 action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
   [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
-  [at(X2, Y2)],
+  [at(_, X2, Y2)],
   [],
   [agent(Agent)],
   [

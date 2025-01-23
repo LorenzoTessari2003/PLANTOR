@@ -3,6 +3,8 @@ KB: ```kb
 pos(1,1).
 pos(2,1).
 pos(3,1).
+pos(0,0).
+pos(3,3).
 
 % Blocks
 block(a).
@@ -17,35 +19,31 @@ agent(a2).
 % Resources
 resources(agent(_)).
 ```
-
-In this knowledge base, we have defined the positions on the table, the blocks, and the agents. The `resources` predicate indicates that the agents are the resources that can carry out tasks.
-INIT: Sure, here is the description of the initial and final states:
+INIT: Sure, here are the initial and final states wrapped in the appropriate tags:
 
 ```init
 init_state([
-  ontable(a),
-  on(b, a), on(c, b), on(d, c),
+  ontable(a), on(b, a), on(c, b), on(d, c),
   at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
   clear(d),
+  at(a1, 0, 0), at(a2, 3, 3),
   available(a1), available(a2)
 ]).
 ```
-
-In the initial state, block A is on the table, and blocks B, C, and D are stacked on top of each other. The positions of all blocks are (1,1). Block D is clear since it is on top of the stack. Both agents are available.
 
 ```goal
 goal_state([
-  ontable(a), ontable(b), ontable(c),
-  on(d, a),
+  ontable(a), ontable(b), ontable(c), on(d, a),
   at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
-  clear(b), clear(c), clear(d),
+  clear(d), clear(b), clear(c),
+  at(a1, 0, 0), at(a2, 3, 3),
   available(a1), available(a2)
 ]).
 ```
 
-In the goal state, block A is still in position (1,1) on the table, block B is on the table in position (2,1), block C is on the table in position (3,1), and block D is on top of block A. Blocks B, C, and D are clear since they are not stacked on top of any other blocks. Both agents are available.
+In the initial state, we have the blocks stacked on top of each other, with block A on the table and the other blocks on top of it. The agents are in their initial positions and are available. In the goal state, the blocks have been rearranged according to the description, with block A in the same position, block B and C on the table in new positions, and block D on top of block A. The agents are still in their initial positions and are available.
 ACTIONS: ```actions
-% Move a block from a position to another position on the table
+% Move a block from a position on the table to another position on the table
 action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
   [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
   [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
@@ -58,7 +56,7 @@ action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
 ).
 action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
   [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
-  [at(X2, Y2)],
+  [at(_, X2, Y2)],
   [],
   [agent(Agent)],
   [

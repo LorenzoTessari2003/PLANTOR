@@ -24,5 +24,6 @@ After testing with the planner, we were able to extract a plan in 9ms.
 
 ## Low-Level Generation
 
-Find HL plan but could not apply mappings (8 depth).
-
+Find HL plan but could not apply mappings since there was an error in every mapping
+move_arm_*(Agent, X1, Y1, X1, Y1), has to be move_arm_*(Agent, _, _, X1, Y1),
+Changing this solves the problem
