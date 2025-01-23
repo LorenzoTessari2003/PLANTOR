@@ -41,7 +41,7 @@ goal_state([
   ontable(b1), ontable(b2), ontable(b3), ontable(b4),
   on(b5, b4), on(b6, b3),
   at(b1,1,1), at(b2,2,2), at(b3,3,3), at(b4,10,10), at(b5,10,10), at(b6,3,3),
-  clear(b1), clear(b2), clear(b6), clear(b5),
+  clear(b1), clear(b2), clear(b5), clear(b6),
   available(a1), available(a2)
 ]).
 
@@ -49,6 +49,27 @@ goal_state([
 % actions
 %%%%%%%%%%%%%%%%%%%%%%%
 % Move a block from a position on the table to another position on the table
+action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+  [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
+  [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block)],
+  [
+    del(available(Agent)), del(clear(Block)), del(ontable(Block)), del(at(Block, X1, Y1)),
+    add(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2))
+  ]
+).
+action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+  [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
+  [at(_, X2, Y2)],
+  [],
+  [agent(Agent)],
+  [
+    del(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)),
+    add(ontable(Block)), add(at(Block, X2, Y2)), add(clear(Block)), add(available(Agent))
+  ]
+).
+
 % Move a block from a position on the table to the top of another block
 action(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [available(Agent), ontable(Block1), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
@@ -114,24 +135,3 @@ action(move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
     add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
   ]
 ).
-action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
-  [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
-  [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
-  [],
-  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block)],
-  [
-    del(available(Agent)), del(clear(Block)), del(ontable(Block)), del(at(Block, X1, Y1)),
-    add(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2))
-  ]
-).
-action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
-  [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
-  [at(X2, Y2)],
-  [],
-  [agent(Agent)],
-  [
-    del(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)),
-    add(ontable(Block)), add(at(Block, X2, Y2)), add(clear(Block)), add(available(Agent))
-  ]
-).
-

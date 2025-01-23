@@ -1,69 +1,44 @@
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:40:
-Warning:    Singleton variables: [Length]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:61:
-Warning:    Singleton variables: [After]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:69:
-Warning:    Singleton variables: [After]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:86:
-Warning:    Singleton variables: [ID,ActionName,Args]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:86:
-Warning:    Singleton variable in \+: ActionName
-Warning:    Singleton variable in \+: Args
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/actions.pl:94:
-Warning:    Singleton variables: [T]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:30:
-Warning:    Singleton variables: [T]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:55:
-Warning:    Singleton variables: [T]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:82:
-Warning:    Singleton variables: [FinalConditionsF,Goal]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:131:
-Warning:    Singleton variables: [FinalConditionsF,Goal]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:172:
-Warning:    Singleton variables: [HVer,TVers,Res]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:177:
-Warning:    Singleton variable in branch: NewHVer
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:209:
-Warning:    Singleton variables: [HVer]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/resources.pl:14:
-Warning:    Singleton variables: [H]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/resources.pl:36:
-Warning:    Singleton variables: [StartAction,EndAction]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/resources.pl:75:
-Warning:    Singleton variables: [Resource]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/utility/resources.pl:76:
-Warning:    Singleton variables: [T]
-Warning: /home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/2/kb/kb_ll.pl:158:
-Warning:    Redefined static procedure ll_action/6
-Warning:    Previously defined at /home/enrico/Projects/prolog_planner/prolog_planner/utility/conditions.pl:10
-Warning: /home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/2/kb/kb_ll.pl:227:
-Warning:    Singleton variables: [Block]
-Warning: /home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/2/kb/kb_ll.pl:240:
-Warning:    Singleton variables: [Block1,Block2]
-Warning: /home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/2/kb/kb_ll.pl:253:
-Warning:    Singleton variables: [Block1]
-Warning: /home/enrico/Projects/prolog_planner/exps/multi-steps/blocks_world/2/kb/kb_ll.pl:266:
-Warning:    Singleton variables: [Block1,Block2]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/full_planner_separated.pl:19:
-Warning:    Singleton variables: [Pre]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/full_planner_separated.pl:92:
-Warning:    Singleton variables: [Init,Goal]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/full_planner_separated.pl:97:
-Warning:    Singleton variable in branch: TempActionLastAchievers
-Warning:    Singleton variable in branch: TempLastAchievers
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/full_planner_separated.pl:342:
-Warning:    Singleton variables: [Been_list,LastAchievers,FinalPlan,FinalLastAchievers]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/full_planner_separated.pl:350:
-Warning:    Singleton variables: [State,Goal,Been_list,Plan,LastAchievers,MaxDepth,FinalPlan,FinalLastAchievers]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/planner.pl:85:
-Warning:    Singleton variables: [TOActions,LastAchievers]
-Warning: /home/enrico/Projects/prolog_planner/prolog_planner/planner.pl:85:
-Warning:    Singleton variable in \+: TOActions
-Warning:    Singleton variable in \+: LastAchievers
-Welcome to SWI-Prolog (threaded, 64 bits, version 8.4.2)
-SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
-Please run ?- license. for legal details.
+Plan: 
+[0] 0-move_onblock_to_table_start(a1,b4,1,1,10,10)
+[1] 1-move_arm_start(a1,4,4,1,1)
+[2] 2-move_arm_end(a1,4,4,1,1)
+[3] 3-close_gripper_start(a1,b4)
+[4] 4-close_gripper_end(a1,b4)
+[5] 5-move_arm_start(a1,1,1,10,10)
+[6] 6-move_arm_end(a1,1,1,10,10)
+[7] 7-open_gripper_start(a1)
+[8] 8-open_gripper_end(a1)
+[9] 9-move_onblock_to_table_end(a1,b4,1,1,10,10)
+[10] 10-move_onblock_to_block_start(a1,b5,b4,2,2,10,10)
+[11] 11-move_arm_start(a1,10,10,2,2)
+[12] 12-move_arm_end(a1,10,10,2,2)
+[13] 13-close_gripper_start(a1,b5)
+[14] 14-close_gripper_end(a1,b5)
+[15] 15-move_arm_start(a1,2,2,10,10)
+[16] 16-move_arm_end(a1,2,2,10,10)
+[17] 17-open_gripper_start(a1)
+[18] 18-open_gripper_end(a1)
+[19] 19-move_onblock_to_block_end(a1,b5,b4,2,2,10,10)
 
-For online help and background, visit https://www.swi-prolog.org
-For built-in help, use ?- help(Topic). or ?- apropos(Word).
-
+Achievers: 
+[0] 0-move_onblock_to_table_start(a1,b4,1,1,10,10)-[]
+[1] 1-move_arm_start(a1,4,4,1,1)-[0]
+[2] 2-move_arm_end(a1,4,4,1,1)-[0,1]
+[3] 3-close_gripper_start(a1,b4)-[0,2,1]
+[4] 4-close_gripper_end(a1,b4)-[0,3,2,1]
+[5] 5-move_arm_start(a1,1,1,10,10)-[0,4,3,2,1]
+[6] 6-move_arm_end(a1,1,1,10,10)-[0,5,4,3,2,1]
+[7] 7-open_gripper_start(a1)-[0,6,5,4,3,2,1]
+[8] 8-open_gripper_end(a1)-[0,7,6,5,4,3,2,1]
+[9] 9-move_onblock_to_table_end(a1,b4,1,1,10,10)-[0,1,2,3,4,5,6,7,8]
+[10] 10-move_onblock_to_block_start(a1,b5,b4,2,2,10,10)-[9,0]
+[11] 11-move_arm_start(a1,10,10,2,2)-[10]
+[12] 12-move_arm_end(a1,10,10,2,2)-[10,11]
+[13] 13-close_gripper_start(a1,b5)-[10,12,11]
+[14] 14-close_gripper_end(a1,b5)-[10,13,12,11]
+[15] 15-move_arm_start(a1,2,2,10,10)-[10,14,13,12,11]
+[16] 16-move_arm_end(a1,2,2,10,10)-[10,15,14,13,12,11]
+[17] 17-open_gripper_start(a1)-[10,16,15,14,13,12,11]
+[18] 18-open_gripper_end(a1)-[10,17,16,15,14,13,12,11]
+[19] 19-move_onblock_to_block_end(a1,b5,b4,2,2,10,10)-[10,9,0,11,12,13,14,15,16,17,18]
+% 142,122,942 inferences, 5.010 CPU in 5.012 seconds (100% CPU, 28369640 Lips)

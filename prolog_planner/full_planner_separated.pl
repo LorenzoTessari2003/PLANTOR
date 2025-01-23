@@ -140,34 +140,32 @@ generate_plan(Init, Goal, Plan, Enablers) :-
 
 generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
-  format('Checking if the initial state is the goal state ~w ~w\n', [Init, Goal]),
+  debug_format('Checking if the initial state is the goal state ~w ~w\n', [Init, Goal]),
   goal_reached(Init, Goal),
-  format('Goal reached\n').
+  debug_format('Goal reached\n').
 
 generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
-  format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
+  debug_format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
   (
     generate_plan_hl(Init, Goal, [], [], MaxDepth, HL_Plan)
     ->(
       % Print information on the high-level part
-      format('High-level plan generated\n~w\n', [HL_Plan]),
+      debug_format('High-level plan generated\n~w\n', [HL_Plan]),
       
-      format('Applying the mappings to obtain the low-level temporal plan\n'),
+      debug_format('Applying the mappings to obtain the low-level temporal plan\n'),
       reverse(HL_Plan, HL_PlanReversed),
       (
         apply_mappings(Init, HL_PlanReversed, Plan)
         ->(
-          format('Plan generated~w\n', [Plan]),
+          debug_format('Plan generated~w\n', [Plan]),
           (
             % reverse(Plan, PlanReversed),
-            enable_debug,!,
             extract_achievers(Plan, EnablersD)
             ->(
-              format('Achievers found ~w\n', [EnablersD]),
+              debug_format('Achievers found ~w\n', [EnablersD]),
               clean_achievers(EnablersD, Plan, Enablers),
-              format('Cleaned achievers\n'),
-              print_list(Enablers),
+              debug_format('Cleaned achievers\n'),
               true
             );(
               format('Could not extract achievers\n'), fail
@@ -228,7 +226,6 @@ add_hl_to_ll_enablers(_HL_ID, [_ID-HAction|_TActions], _Used, AchieversD, Achiev
 
 extract_achievers(Plan, AchieversD):-
   debug_format('Extracting all achievers for plan~n'),
-  print_list(Plan),
   extract_achievers(Plan, [], achieversD{}, AchieversD),
   debug_format('Achievers found ~w~n', [AchieversD]).
 
