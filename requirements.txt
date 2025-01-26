@@ -6,3 +6,4 @@
 
 art
 networkx
+pygraphviz

@@ -1,0 +1,16 @@
+# Frontend Dockerfile
+FROM node:18 AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy all project files
+COPY llm_ui/frontend .
+
+EXPOSE 3000
+
+RUN npm install
+
+CMD ["npm", "start"]
+# CMD ["ping", "172.20.0.2"]
+

@@ -1,9 +1,9 @@
-pygraphviz
-matplotlib==3.5.1
+graphviz
+matplotlib
 bokeh
 pyswip
 networkx
 pillow>=7.1.0
 ortools
 pyvis
-dicttoxml
+dict2xml

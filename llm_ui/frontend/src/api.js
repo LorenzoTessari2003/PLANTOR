@@ -13,6 +13,7 @@ export const validateDescriptions = async (highLevel, lowLevel) => {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin": "*"
         },
         body: JSON.stringify({ highLevel: highLevel, lowLevel: lowLevel }),
     });
@@ -91,11 +92,11 @@ export const generateBehaviorTree = async (lowLevelKB, lowLevelInit, lowLevelGoa
         }),
     });
 
-    // if (!response.ok) {
-    //     const error = await response.json();
-    //     console.log("Something went wrong in generateBehaviorTree");
-    //     throw new Error(error.error);
-    // }
+    if (!response.ok) {
+        const error = await response.json();
+        console.log("Something went wrong in generateBehaviorTree");
+        throw new Error(error.error);
+    }
 
     const data = response.json();
 

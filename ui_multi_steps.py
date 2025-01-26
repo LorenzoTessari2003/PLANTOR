@@ -26,8 +26,13 @@ HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yam
 WAIT = True
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
-OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb.pl')
+OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
+OUTPUT_HL_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_hl.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
+
+OUTPUT_FILE_CC = os.path.join(OUTPUT_PATH, "output_cc.txt")
+OUTPUT_FILE_HL = os.path.join(OUTPUT_PATH, "output_hl.txt")
+OUTPUT_FILE_LL = os.path.join(OUTPUT_PATH, "output_ll.txt")
 
 
 ## FUNCTIONS ###########################################################################################################
@@ -74,6 +79,12 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     :param query_hl: The high-level scenario
     :param query_ll: The low-level scenario
     """
+    
+    file = open(OUTPUT_FILE_CC, "w+")
+
+    # print("test\n\n\n\n\n\n\n\ntest")
+    # raise NotImplementedError("This function is not implemented yet")
+    INFO("\r[CC] Checking LLM comprehension of scenario for high-level", imp=True)
     llm_scenario = LLM(
         llm_connection_config_file=LLM_CONF_PATH,
         examples_yaml_file = [CC_EXAMPLES_HL_PATH]
@@ -85,9 +96,11 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     succ, response = llm_scenario.query(scenario_query_hl)
     if succ and "OK" in response:
         MSG(f"\rLLM has correctly understood the scenario\n{response}") 
+        file.write(f"HL: {response}\n")
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
-        return False
+        file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
+        return False, response
     else: 
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
@@ -105,14 +118,18 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
     succ, response = llm_scenario.query(scenario_query)
     if succ and "OK" in response:
         MSG(f"\rLLM has correctly understood the scenario\n{response}") 
+        file.write(f"LLM has correctly understood the scenario\n{response}\n")
     elif succ and "PROBLEM" in response:
         FAIL(f"\rLLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
-        return False
+        file.write(f"LLM has not correctly understood the scenario or there is a problem in the scenario\n{response}")
+        return False, response
     else: 
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
 
-    return True
+    file.close()
+
+    return True, ""
 
 
 ########################################################################################################################
@@ -124,6 +141,8 @@ def hl_llm_multi_step(query) -> dict:
     :param query: The query that will be used to extract the knowledge base, initial and final states. 
     :return: A tuple containing the knowledge base and the response from the LLM
     """
+    file = open(OUTPUT_FILE_HL, "w+")
+
     # Extract HL knowledge base
     INFO("\r[HL] Extracting HL knowledge base", imp=True)
     llm = LLM(
@@ -141,6 +160,7 @@ def hl_llm_multi_step(query) -> dict:
     succ, tmp_response = llm.query(kb_query)
     assert succ == True, "Failed to generate static knowledge base"
     print(succ, tmp_response+'\n')
+    file.write(f"KB: {tmp_response}\n")
     scan_and_extract(kb, tmp_response)
 
     # Generate initial and final states
@@ -151,6 +171,7 @@ def hl_llm_multi_step(query) -> dict:
     succ, tmp_response = llm.query(states_query)
     assert succ == True, "Failed to generate initial and final states"
     print(succ, tmp_response+'\n')
+    file.write(f"INIT: {tmp_response}\n")
     scan_and_extract(kb, tmp_response)
 
     # Generate action set
@@ -164,7 +185,12 @@ def hl_llm_multi_step(query) -> dict:
     assert succ == True, "Failed to generate final state"
     print(succ, response)
     print()
+    file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
+
+    write_to_file(kb, output_file=OUTPUT_HL_KB_FILE)
+
+    file.close()
 
     return kb
 
@@ -199,6 +225,8 @@ def ll_llm_multi_step(query, kb) -> dict:
     # ```
     # """.format(kb["kb"], kb["init"], kb["goal"])
 
+    file = open(OUTPUT_FILE_LL, "w+")
+
     # Extract LL knowledge base
     INFO("\r[LL] Extract LL knowledge base", imp=True)
     llm = LLM(
@@ -214,6 +242,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(kb_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"KB: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate initial and final states
@@ -226,6 +255,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(states_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"INIT: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate actions set
@@ -237,6 +267,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(ll_actions_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
 
     # Generate mappings
@@ -251,7 +282,11 @@ def ll_llm_multi_step(query, kb) -> dict:
     succ, response = llm.query(mappings_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
+    file.write(f"MAPPINGS: {response}\n")
     scan_and_extract(kb, response)
+
+    file.close()
+    write_to_file(kb, output_file=OUTPUT_KB_FILE)
 
     return kb 
     
@@ -259,9 +294,13 @@ def ll_llm_multi_step(query, kb) -> dict:
 ########################################################################################################################
 
 
-def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False) -> planner.BehaviourTree:
+def find_plan(kb_file = OUTPUT_KB_FILE, xml_file = OUTPUT_BT_FILE, stn_file = "", html_file = "") -> planner.BehaviourTree:
     # Find plan
     INFO(f"Finding plan for kb in {kb_file}")
+
+    if not os.path.exists(kb_file):
+        raise FileNotFoundError(f"Knowledge base file not found at {kb_file}")
+    
     data_dict = planner.PrologLib.execTest(kb_path=kb_file)
 
     INFO("Optimizing")
@@ -270,21 +309,24 @@ def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False)
         data_dict["actions"],
         data_dict["adj_matrix"],
         data_dict["resources"],
+        data_dict["resources_list"],
+        data_dict["ll_actions_list"]
     )
 
     milp_solver.solve()
 
-    if draw:
-        os.makedirs(output_path, exist_ok=True)
-        milp_solver.draw_graph_from_matrix(os.path.join(output_path, "MILP.html"), open_browser=False)
+    if stn_file != "":
+        milp_solver.draw_graph_from_matrix(stn_file, open_browser=False)
+
 
     INFO("Extracing BT")
-
     bt = milp_solver.extract_BT()
     
-    if draw:
-        bt.draw()
-        bt.toXML(os.path.join(output_path, "BT.xml"))
+    if html_file!="":
+        bt.draw(html_file)
+
+    bt.toXML(xml_file)
+    INFO(f"Done extracting BT to {xml_file}")
 
     return bt
     
@@ -292,9 +334,9 @@ def find_plan(kb_file = OUTPUT_KB_FILE, output_path = OUTPUT_PATH, draw = False)
 ########################################################################################################################
 
 
-def execute_plan(plan):
+def execute_plan(plan_file):
     # Execute plan
-    INFO("Execute plan")
+    INFO("Executing plan")
 
 
 ########################################################################################################################
@@ -311,8 +353,8 @@ def write_to_file(kb, output_file = OUTPUT_KB_FILE):
                 file.write("\n")
             file.write(f"%%%%%%%%%%%%%%%%%%%%%%%\n% {key}\n%%%%%%%%%%%%%%%%%%%%%%%\n{value}\n")
             first_line = False
-        actions_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'actions.pl')
-        mappings_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'mappings.pl')
+#         actions_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'actions.pl')
+#         mappings_path = os.path.join(os.path.dirname(__file__), 'prolog_planner', 'examples', 'blocks_world', 'mappings.pl')
 #         file.write(f"""
 # % :- ensure_loaded('{actions_path}').
 # % :- ensure_loaded('{mappings_path}').
@@ -452,8 +494,9 @@ def main():
 
     # query_ll = "Nothing to do here"
 
-    # if not llm_scenario_comprehension(query_hl, query_ll):
-    #     FAIL("There was a problem with the comprehension of the scenario")
+    # compr, resp = llm_scenario_comprehension(query_hl, query_ll)
+    # if not compr:
+    #     FAIL(f"There was a problem with the comprehension of the scenario {resp}")
     #     return
     
     # if WAIT:

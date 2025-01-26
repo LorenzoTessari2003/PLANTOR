@@ -1,5 +1,38 @@
 :- ensure_loaded('full_planner.pl').
 
+time_plan_hl(MaxDepth) :-
+  time(plan_hl(MaxDepth)).
+  % format('Time: ~w~n', [D]).
+
+time_plan_ll(MaxDepth) :-
+  time(plan_ll(MaxDepth)).
+  % format('Time: ~w~n', [D]).
+
+plan_hl(MaxDepth):-
+  disable_debug,
+  init_state(Init),
+  goal_state(Goal),
+  format('Planning from: ~w to: ~w~n', [Init, Goal]),
+  generate_plan_hl(Init, Goal, [], [], MaxDepth, Actions),
+  % generate_plan(Init, Goal, Actions, _, MaxDepth),
+  format('Plan: ~n'),
+  reverse(Actions, ActionsReversed),
+  print_list(ActionsReversed).
+
+plan_ll(MaxDepth):-
+  disable_debug,
+  init_state(Init),
+  goal_state(Goal),
+  debug_format('Planning from: ~w to: ~w~n', [Init, Goal]),
+  generate_plan(Init, Goal, Actions, LastAchievers, MaxDepth),
+  reverse(Actions, ActionsReversed),
+  format('Plan: ~n'),
+  print_list(ActionsReversed),
+  reverse(LastAchievers, LastAchieversReversed),
+  format('\nAchievers: ~n'),
+  print_list(LastAchieversReversed).
+
+
 plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources, ResourcesList, LLActions) :-
   disable_debug,
   init_state(Init),

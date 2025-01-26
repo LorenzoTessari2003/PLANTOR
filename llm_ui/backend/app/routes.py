@@ -2,15 +2,19 @@ import os, subprocess
 from flask import Flask, request, jsonify, Blueprint, current_app
 
 from . import PUBLIC_PATH, PLOP_PATH
-from .mock_help import HL_KB_MOCK, LL_DESCR_MOCK
-from ui_multi_steps import llm_scenario_comprehension, hl_llm_multi_step, ll_llm_multi_step, write_to_file
+from ui_multi_steps import llm_scenario_comprehension, hl_llm_multi_step, ll_llm_multi_step, write_to_file, find_plan
 
 MOCK = False
 
 
 def validate_descriptions(high_level, low_level):
     """Validate compatibility of high-level and low-level descriptions."""
-    return {"valid": llm_scenario_comprehension(high_level, low_level)}
+    current_app.logger.info("Calling validate_descriptions")
+    comp, resp = llm_scenario_comprehension(high_level, low_level)
+    if comp:
+        return {"isValid": True}
+    else:
+        return {"isValid": False, "error": resp}
 
 
 def generate_high_level_kb(high_level):
@@ -32,31 +36,43 @@ def generate_low_level_kb(low_level_desc, hl_kb):
 def generate_behavior_tree(kb):
     """Generate the behavior tree (BT) in XML format."""
 
-    # write_to_file(kb, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
+    bt_xml_path = os.path.join(PUBLIC_PATH, "bt.xml")
+    current_app.logger.info(f"[generate_behavior_tree] generating BT XML file at {bt_xml_path}")
+
+    write_to_file(kb, os.path.join(PUBLIC_PATH, "ll_kb.pl"))
+
+    if os.path.exists(bt_xml_path):
+        os.remove(bt_xml_path)
 
     planner_path = os.path.join(PLOP_PATH, "python_interface", "planner.py")
+
+    subprocess.run(["mkdir", "-p", "/app/test/test2"])
+
     subprocess.Popen(
-        ["python3", planner_path, "-x", os.path.join(PUBLIC_PATH, "bt.xml"), "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
-        shell=False, 
-        stdout=subprocess.DEVNULL, 
-        stderr=subprocess.DEVNULL
-    )
+        ["python3", planner_path, "-x", bt_xml_path, "-H", os.path.join(PUBLIC_PATH, "bt.html"), "-i", os.path.join(PUBLIC_PATH, "ll_kb.pl")],
+        # stdout=subprocess.PIPE, 
+        # stderr=subprocess.PIPE
+    ).wait()
 
-    print("Is this blocking or non-blocking?")
+    # xml = "init"
 
-    xml = ""
-
-    if os.path.exists(os.path.join(PUBLIC_PATH, "bt.xml")):
-        with open(os.path.join(PUBLIC_PATH, "bt.xml"), "r") as f:
+    if os.path.exists(bt_xml_path):
+        with open(bt_xml_path, "r") as f:
             xml = f.read()
+    else:
+        current_app.logger.error(f"[generate_behavior_tree] Error generating the behavior tree because file was not found at {bt_xml_path}.")
 
-    return xml
+    if xml in ["init", ""]:
+        return {"bt_error": "Error generating the behavior tree because file was not found."}
+
+    return {"behavior_tree": xml}
 
 
 app_routes = Blueprint('app_routes', __name__)
 
 @app_routes.route('/api/validate', methods=['POST'])
 def validate():
+    current_app.logger.info(f"[validate] received {request}")
     if MOCK:
         return jsonify({"isValid": True})
 
@@ -66,15 +82,19 @@ def validate():
     high_level = data.get('highLevel').strip()
     low_level = data.get('lowLevel').strip()
 
+    current_app.logger.info(f"[validate] received\n{high_level}\n{low_level}")
+
     if not high_level or not low_level:
         return jsonify({"error": "Both fields 'highLevel' and 'lowLevel' are required."}), 400
 
     validation_result = validate_descriptions(high_level, low_level)
 
-    if validation_result['valid']:
-        return jsonify({"isValid": True})
-    else:
-        return jsonify({"isValid": False, "error": validation_result['error']}), 400
+    return jsonify(validation_result)
+
+    # if validation_result['valid']:
+    #     return jsonify({"isValid": True})
+    # else:
+    #     return jsonify({"isValid": False, "error": validation_result['error']}), 400
 
 @app_routes.route('/api/generate_hl_kb', methods=['POST'])
 def generate_hl_kb():
@@ -162,10 +182,10 @@ def generate_bt():
 
     bt_xml = generate_behavior_tree(kb)
 
-    assert type(bt_xml) == str, f"Expected str, got {type(bt_xml)}"
+    assert type(bt_xml) == dict, f"Expected dict, got {type(bt_xml)}"
     if bt_xml != "":
-        return jsonify({"bt_error": "Could not plan because"}) # Request was successful but there was an error generating the BT
+        return jsonify(bt_xml) # Request was successful but there was an error generating the BT
 
     else:
-        # current_app.logger.info(f"[generate_bt] constructed\n{bt_xml}")
-        return jsonify({"behavior_tree": bt_xml})
+        current_app.logger.info(f"[generate_bt] constructed\n{bt_xml}")
+        return jsonify(bt_xml)

@@ -26,8 +26,8 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "proxy": "http://localhost:5000",
-  "author": "Your Name",
+  "proxy": "http://localhost:5000/",
+  "author": "Enrico Saccon",
   "license": "MIT",
   "browserslist": {
     "production": [

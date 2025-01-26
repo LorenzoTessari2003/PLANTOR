@@ -42,8 +42,7 @@ entries:
           Our knowledge base is composed of predicates to describe the states and Prolog rules that 
           describe the actions leveraging the following structure:
           ```prolog
-          action(
-            Name(Argument1, Argument2, ...), 
+          action(Name(Argument1, Argument2, ...), 
             ValidConditions, 
             InvalidConditions, 
             InvalidConditionsAtEnd, 

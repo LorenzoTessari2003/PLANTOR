@@ -5,7 +5,7 @@ Python3 with Flask in order to server the APIs.
 
 ## Docker installation
 
-A Docker compose is provided in order to simplify the execution of the code. After installing 
+A docker-compose is provided in order to simplify the execution of the code. After installing 
 Docker, one just has to run from within this directory:
 
 ```shell
