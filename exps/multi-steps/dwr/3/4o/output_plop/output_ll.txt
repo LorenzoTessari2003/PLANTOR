@@ -1,0 +1,244 @@
+KB: Sure. Here is the updated general knowledge base to include the new low-level predicates and resources:
+
+```kb
+% Locations
+location(location1).
+location(location2).
+
+% Containers
+container(c1).
+container(c2).
+container(c3).
+container(c4).
+
+% Robot
+robot(r1).
+
+% Cranes
+crane(crane1, location1).
+crane(crane2, location2).
+
+% Initial positions of containers
+at(c1, location1, ground).
+on(c2, c1).
+at(c3, location2, ground).
+on(c4, c3).
+
+% Initial position of the robot
+at(r1, location1).
+
+% Resources
+resources(robot(_)).
+resources(ll_crane(_)).
+resources(ll_gripper(_)).
+
+% Connections between locations
+connected(location1, location2).
+connected(location2, location1).
+
+% Low-level predicates
+ll_crane(crane1).
+ll_crane(crane2).
+
+ll_gripper(crane1).
+ll_gripper(crane2).
+```
+
+In this updated knowledge base, we have added the low-level predicates `ll_crane/1` and `ll_gripper/1` to represent the cranes and their grippers. We have also added these as resources using the `resources/1` predicate. This ensures that the low-level actions can be properly mapped and utilized in the task.
+INIT: Sure. Here is the updated initial and final states reflecting the changes in the description for the low-level part:
+
+```init
+init_state([
+  at(c1, location1, ground), on(c2, c1), at(c3, location2, ground), on(c4, c3),
+  at(r1, location1),
+  clear(c2), clear(c4),
+  ll_crane_at(crane1, location1), ll_crane_at(crane2, location2),
+  ll_gripper(crane1, open), ll_gripper(crane2, open)
+]).
+```
+```goal
+goal_state([
+  at(c1, location1, ground), on(c2, c3), at(c3, location2, ground), on(c4, c1),
+  at(r1, location1),
+  clear(c2), clear(c4),
+  ll_crane_at(crane1, location1), ll_crane_at(crane2, location2),
+  ll_gripper(crane1, _), ll_gripper(crane2, _)
+]).
+```
+
+In the initial state, we have added the positions of the cranes and the state of the grippers. The cranes are initially at their respective locations, and the grippers are open. In the goal state, we do not care about the state of the grippers, so we use the wildcard `_` to represent any value for the state of the grippers. The positions of the cranes remain the same in the goal state.
+ACTIONS: Sure, here is the low-level actions set based on the provided high-level actions and the refactored low-level knowledge base:
+
+```ll_actions
+% Move the robot from one location to another
+ll_action(move_start(Robot, LocationFrom, LocationTo),
+  [at(Robot, LocationFrom)],
+  [moving_robot(_, _, _)],
+  [],
+  [robot(Robot), location(LocationFrom), location(LocationTo), connected(LocationFrom, LocationTo)],
+  [
+    del(at(Robot, LocationFrom)),
+    add(moving_robot(Robot, LocationFrom, LocationTo))
+  ]
+).
+ll_action(move_end(Robot, LocationFrom, LocationTo),
+  [moving_robot(Robot, LocationFrom, LocationTo)],
+  [],
+  [],
+  [robot(Robot)],
+  [
+    del(moving_robot(Robot, LocationFrom, LocationTo)),
+    add(at(Robot, LocationTo))
+  ]
+).
+
+% Move the crane to the top of the container
+ll_action(go_to_c_start(Crane, Container),
+  [ll_crane(Crane), at(Container, Location, _), crane(Crane, Location)],
+  [moving_crane(_, _, _)],
+  [],
+  [crane(Crane, Location), container(Container), location(Location)],
+  [
+    add(moving_crane(Crane, Container, Location))
+  ]
+).
+ll_action(go_to_c_end(Crane, Container),
+  [moving_crane(Crane, Container, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(moving_crane(Crane, Container, Location)),
+    add(at(Crane, Container))
+  ]
+).
+
+% Close the gripper
+ll_action(close_start(Crane),
+  [ll_gripper(Crane, open)],
+  [closing_gripper(_, _)],
+  [],
+  [ll_gripper(Crane)],
+  [
+    del(ll_gripper(Crane, open)),
+    add(closing_gripper(Crane))
+  ]
+).
+ll_action(close_end(Crane),
+  [closing_gripper(Crane)],
+  [],
+  [],
+  [ll_gripper(Crane)],
+  [
+    del(closing_gripper(Crane)),
+    add(ll_gripper(Crane, closed))
+  ]
+).
+
+% Open the gripper
+ll_action(open_start(Crane),
+  [ll_gripper(Crane, closed)],
+  [opening_gripper(_, _)],
+  [],
+  [ll_gripper(Crane)],
+  [
+    del(ll_gripper(Crane, closed)),
+    add(opening_gripper(Crane))
+  ]
+).
+ll_action(open_end(Crane),
+  [opening_gripper(Crane)],
+  [],
+  [],
+  [ll_gripper(Crane)],
+  [
+    del(opening_gripper(Crane)),
+    add(ll_gripper(Crane, open))
+  ]
+).
+```
+
+This set of low-level actions corresponds to the high-level actions described in the provided knowledge base. The low-level actions include moving the robot, moving the crane to the top of a container, and opening and closing the gripper of the crane. Each action is divided into start and end actions to reflect the durative nature of the actions.
+MAPPINGS: Sure. Here are the mappings from high-level actions to low-level actions:
+
+```mappings
+% Move a container from the ground to the top of another container within the same location
+mapping(move_ground_to_top_start(Crane, Container1, Container2, Location),
+  [
+    go_to_c_start(Crane, Container1),
+    go_to_c_end(Crane, Container1),
+    close_start(Crane),
+    close_end(Crane),
+    go_to_c_start(Crane, Container2),
+    go_to_c_end(Crane, Container2),
+    open_start(Crane),
+    open_end(Crane)
+  ]
+).
+
+% Load a container onto the robot
+mapping(load_container_start(Crane, Container, Robot, Location),
+  [
+    go_to_c_start(Crane, Container),
+    go_to_c_end(Crane, Container),
+    close_start(Crane),
+    close_end(Crane),
+    go_to_c_start(Crane, Robot),
+    go_to_c_end(Crane, Robot),
+    open_start(Crane),
+    open_end(Crane)
+  ]
+).
+
+% Unload a container from the robot
+mapping(unload_container_start(Crane, Container, Robot, Location),
+  [
+    go_to_c_start(Crane, Robot),
+    go_to_c_end(Crane, Robot),
+    close_start(Crane),
+    close_end(Crane),
+    go_to_c_start(Crane, Container),
+    go_to_c_end(Crane, Container),
+    open_start(Crane),
+    open_end(Crane)
+  ]
+).
+
+% Move a container from the top of another container to the ground within the same location
+mapping(move_top_to_ground_start(Crane, Container1, Container2, Location),
+  [
+    go_to_c_start(Crane, Container1),
+    go_to_c_end(Crane, Container1),
+    close_start(Crane),
+    close_end(Crane),
+    go_to_c_start(Crane, Container2),
+    go_to_c_end(Crane, Container2),
+    open_start(Crane),
+    open_end(Crane)
+  ]
+).
+
+% Move a container from the top of another container to the top of another container within the same location
+mapping(move_top_to_top_start(Crane, Container1, Container2, Container3, Location),
+  [
+    go_to_c_start(Crane, Container1),
+    go_to_c_end(Crane, Container1),
+    close_start(Crane),
+    close_end(Crane),
+    go_to_c_start(Crane, Container3),
+    go_to_c_end(Crane, Container3),
+    open_start(Crane),
+    open_end(Crane)
+  ]
+).
+
+% Move the robot from one location to another
+mapping(move_robot_start(Robot, Location1, Location2),
+  [
+    move_start(Robot, Location1, Location2),
+    move_end(Robot, Location1, Location2)
+  ]
+).
+```
+
+These mappings ensure that each high-level action is broken down into the appropriate sequence of low-level actions.

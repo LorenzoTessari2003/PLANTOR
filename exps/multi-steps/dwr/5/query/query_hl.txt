@@ -1,0 +1,23 @@
+The scenario consists of three locations: LocationA, LocationB, and LocationC, which are directly
+connected, allowing movement between them. There are seven containers initially distributed across
+these locations. In LocationA, container c1 is on the ground with c2 placed on top of it, followed
+by c3 on top of c2. In LocationB, container c4 is positioned on the ground with c5 stacked on top.
+In LocationC, container c6 is on the ground with c7 placed on top of it. A container is not clear if
+another container is stacked on top of it.   
+
+A robot, r1, starts in LocationA and can transport containers between locations under specific
+conditions. It must carry a container on top of itself, can only transport one at a time, and cannot
+move if the container it is carrying is obstructed by another.   
+
+Each location has a dedicated crane that operates exclusively within its respective area. These
+cranes can stack a clear container on another within the same location, load or unload a clear
+container from the robot, and place a clear container on the ground. However, they cannot transfer
+containers between locations. Cranes are independent and not considered as resources, meaning each
+can only execute one operation at a time and remains occupied until the action is complete.   
+
+The objective is to rearrange the containers so that c3 is placed on top of c7 in LocationC, c5 is
+moved to LocationA and placed on the ground, and c6 is transferred to LocationB and placed on top of
+c4, while c1, c2, and c7 remain in their original locations. 
+
+Achieving this configuration requires a well-coordinated sequence of actions involving both the
+robot and the cranes. 

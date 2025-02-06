@@ -1,4 +1,5 @@
-The scenario involves two distinct locations, referred to as Location1 and Location2. These two locations are directly connected, allowing for movement between them.
+The scenario involves two distinct locations, referred to as Location1 and Location2. These two
+locations are directly connected, allowing for movement between them. 
 Containers:
 
     There are two containers in the system:
@@ -32,4 +33,5 @@ Goal:
         Container c2 must be relocated to Location2.
         Container c1 must remain in its original position in Location1.
 
-This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve the desired arrangement of containers.
+This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve
+the desired arrangement of containers. 

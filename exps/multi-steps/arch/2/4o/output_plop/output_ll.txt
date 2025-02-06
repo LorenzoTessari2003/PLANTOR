@@ -1,0 +1,198 @@
+KB: Sure. Here is the updated general knowledge base to include the new low-level predicates and resources:
+
+```kb
+% Positions
+pos(1,1).
+pos(2,2).
+pos(3,3).
+pos(6,6).
+pos(9,6).
+
+% Blocks
+block(b1).
+block(b2).
+architrave(b3).
+
+% Agents
+agent(a1).
+agent(a2).
+
+% Low-level predicates for arms and grippers
+ll_arm(a1).
+ll_arm(a2).
+
+ll_gripper(a1).
+ll_gripper(a2).
+
+% Resources
+resources(agent(_)).
+resources(ll_arm(_)).
+resources(ll_gripper(_)).
+```
+
+This updated knowledge base now includes the low-level predicates `ll_arm/1` and `ll_gripper/1` to represent the robotic arms and grippers of the agents. These are also marked as resources that can be used in the task.
+INIT: Sure. Here is the updated initial and final states reflecting the changes in the description for the low-level:
+
+```init
+init_state([
+  ontable(b1), ontable(b2), ontable(b3),
+  at(b1,1,1), at(b2,2,2), at(b3,3,3),
+  clear(b1), clear(b2), clear(b3),
+  available(a1), available(a2),
+  ll_arm_at(a1,4,4), ll_arm_at(a2,5,5),
+  ll_gripper(a1,open), ll_gripper(a2,open)
+]).
+```
+
+```goal
+goal_state([
+  ontable(b1), ontable(b2),
+  on(b3, b1), on(b3, b2),
+  at(b1,6,6), at(b2,9,6), at(b3,6,6),
+  clear(b3),
+  available(a1), available(a2),
+  ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+  ll_gripper(a1,_), ll_gripper(a2,_)
+]).
+```
+
+In the initial state, we have added the positions of the robotic arms and the state of the grippers. In the goal state, we have included the positions of the blocks and the state of the grippers and arms, using wildcards `_` to indicate that we do not care about their specific values at the end.
+ACTIONS: Sure. Here is the low-level actions set:
+```ll_actions
+% Move the arm from one position to another
+ll_action(ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+  [ll_arm_at(Agent, X1, Y1)],
+  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent)],
+  [],
+  [ll_arm(Agent), pos(X1, Y1), pos(X2, Y2)],
+  [
+    add(ll_moving_arm(Agent, X1, Y1, X2, Y2)),
+    del(ll_arm_at(Agent, X1, Y1))
+  ]
+).
+ll_action(ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+  [ll_moving_arm(Agent, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [],
+  [
+    del(ll_moving_arm(Agent, X1, Y1, X2, Y2)),
+    add(ll_arm_at(Agent, X2, Y2))
+  ]
+).
+
+% Close the gripper
+ll_action(ll_close_gripper_start(Agent),
+  [ll_gripper(Agent, open)],
+  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent), ll_gripped(Agent)],
+  [],
+  [ll_gripper(Agent)],
+  [
+    del(ll_gripper(Agent, open)),
+    add(ll_gripping(Agent, _))
+  ]
+).
+ll_action(ll_close_gripper_end(Agent),
+  [ll_gripping(Agent, _)],
+  [],
+  [],
+  [ll_gripper(Agent)],
+  [
+    del(ll_gripping(Agent, _)),
+    add(ll_gripped(Agent)), add(ll_gripper(Agent, close))
+  ]
+).
+
+% Open the gripper
+ll_action(ll_open_gripper_start(Agent),
+  [ll_gripper(Agent, close)],
+  [ll_moving_arm(Agent, _, _, _, _), ll_gripping(Agent, _), ll_releasing(Agent)],
+  [],
+  [ll_gripper(Agent)],
+  [
+    del(ll_gripper(Agent, close)),
+    add(ll_releasing(Agent))
+  ]
+).
+ll_action(ll_open_gripper_end(Agent),
+  [ll_releasing(Agent)],
+  [],
+  [],
+  [ll_gripper(Agent)],
+  [
+    del(ll_releasing(Agent)),
+    add(ll_gripper(Agent, open))
+  ]
+).
+```
+These low-level actions represent the basic operations that the robotic arms can perform, such as moving the arm, closing the gripper, and opening the gripper. Each action is divided into a start and end action to reflect the durative nature of the actions. The low-level predicates are prefixed with `ll_` to avoid conflicts with the high-level predicates.
+MAPPINGS: Sure. Here are the mappings from high-level actions to low-level actions:
+
+```mappings
+mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 4, 4, X1, Y1),
+    ll_move_arm_end(Agent, 4, 4, X1, Y1),
+    ll_close_gripper_start(Agent),
+    ll_close_gripper_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_open_gripper_start(Agent),
+    ll_open_gripper_end(Agent)
+  ]
+).
+
+mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 4, 4, X1, Y1),
+    ll_move_arm_end(Agent, 4, 4, X1, Y1),
+    ll_close_gripper_start(Agent),
+    ll_close_gripper_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_open_gripper_start(Agent),
+    ll_open_gripper_end(Agent)
+  ]
+).
+
+mapping(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 4, 4, X1, Y1),
+    ll_move_arm_end(Agent, 4, 4, X1, Y1),
+    ll_close_gripper_start(Agent),
+    ll_close_gripper_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_open_gripper_start(Agent),
+    ll_open_gripper_end(Agent)
+  ]
+).
+
+mapping(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 4, 4, X1, Y1),
+    ll_move_arm_end(Agent, 4, 4, X1, Y1),
+    ll_close_gripper_start(Agent),
+    ll_close_gripper_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_open_gripper_start(Agent),
+    ll_open_gripper_end(Agent)
+  ]
+).
+
+mapping(place_architrave_start(Agent, Arch, Pillar1, Pillar2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 4, 4, X1, Y1),
+    ll_move_arm_end(Agent, 4, 4, X1, Y1),
+    ll_close_gripper_start(Agent),
+    ll_close_gripper_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_open_gripper_start(Agent),
+    ll_open_gripper_end(Agent)
+  ]
+).
+```
+
+These mappings ensure that each high-level action is broken down into the appropriate sequence of low-level actions, which include moving the arm, closing the gripper, moving the arm to the new position, and opening the gripper.
