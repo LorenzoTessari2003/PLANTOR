@@ -1,0 +1,11 @@
+Planning from: [ontable(a),on(b,a),on(c,b),on(d,c),at(a,1,1),at(b,1,1),at(c,1,1),at(d,1,1),clear(d),available(a1),available(a2),ll_arm_at(a1,0,0),ll_arm_at(a2,3,3),ll_gripper(a1,open),ll_gripper(a2,open)] to: [ontable(a),ontable(b),ontable(c),on(d,a),at(a,1,1),at(b,2,1),at(c,3,1),at(d,1,1),clear(b),clear(c),clear(d),available(a1),available(a2),ll_arm_at(a1,_7454,_7456),ll_arm_at(a2,_7468,_7470),ll_gripper(a1,_7482),ll_gripper(a2,_7494)]
+Plan: 
+[0] [0-move_onblock_to_table_start(a1,d,1,1,0,0)]
+[1] [1-move_onblock_to_table_start(a2,c,1,1,3,1)]
+[2] [2-move_onblock_to_table_end(a1,d,1,1,0,0)]
+[3] [3-move_onblock_to_table_start(a1,b,1,1,2,1)]
+[4] [4-move_onblock_to_table_end(a1,b,1,1,2,1)]
+[5] [5-move_table_to_block_start(a1,d,a,0,0,1,1)]
+[6] [6-move_table_to_block_end(a1,d,a,0,0,1,1)]
+[7] [7-move_onblock_to_table_end(a2,c,1,1,3,1)]
+% 517,209,339 inferences, 27.462 CPU in 27.486 seconds (100% CPU, 18833538 Lips)

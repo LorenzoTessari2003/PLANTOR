@@ -1,0 +1,9 @@
+Planning from: [ontable(b1),ontable(b2),ontable(b3),at(b1,1,1),at(b2,2,2),at(b3,3,3),clear(b1),clear(b2),clear(b3),available(arm)] to: [ontable(b1),ontable(b2),on(b3,b1),on(b3,b2),at(b1,6,6),at(b2,9,6),at(b3,6,6),clear(b3),available(arm)]
+Plan: 
+[0] [0-move_table_to_table_start(arm,b1,1,1,6,6)]
+[1] [1-move_table_to_table_end(arm,b1,1,1,6,6)]
+[2] [2-move_table_to_table_start(arm,b2,2,2,9,6)]
+[3] [3-move_table_to_table_end(arm,b2,2,2,9,6)]
+[4] [4-place_architrave_start(arm,b3,b1,b2,3,3,6,6)]
+[5] [5-place_architrave_end(arm,b3,b1,b2,3,3,6,6,9,6)]
+% 253,631 inferences, 0.008 CPU in 0.008 seconds (100% CPU, 33152429 Lips)

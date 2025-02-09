@@ -6,7 +6,7 @@ Containers:
         Container c2 is also in Location1, positioned on top of c1.
         Container c3 is initially located in Location2, placed on the ground.
         Container c4 is also in Location2, positioned on top of c3.
-      If a container has a container on top, could not be clear.
+      If a container has a container on top, it is not clear.
 
 Robot:
 

@@ -1,0 +1,9 @@
+Planning from: [ontable(b1),ontable(b2),ontable(b3),at(b1,1,1),at(b2,2,2),at(b3,3,3),clear(b1),clear(b2),clear(b3),available(a1),available(a2),ll_arm_at(a1,4,4),ll_arm_at(a2,5,5),ll_gripper(a1,open),ll_gripper(a2,open)] to: [ontable(b1),ontable(b2),on(b3,b1),on(b3,b2),at(b1,6,6),at(b2,7,6),at(b3,6,6),clear(b3),available(a1),available(a2),ll_arm_at(a1,_7412,_7414),ll_arm_at(a2,_7426,_7428),ll_gripper(a1,_7440),ll_gripper(a2,_7452)]
+Plan: 
+[0] [0-move_table_to_table_start(a1,b1,1,1,6,6)]
+[1] [1-move_table_to_table_start(a2,b2,2,2,7,6)]
+[2] [2-move_table_to_table_end(a1,b1,1,1,6,6)]
+[3] [3-move_table_to_table_end(a2,b2,2,2,7,6)]
+[4] [4-place_architrave_start(a1,b3,b1,b2,6,6,7,6)]
+[5] [5-place_architrave_end(a1,b3,b1,b2,6,6,7,6)]
+% 24,345,563 inferences, 1.457 CPU in 1.459 seconds (100% CPU, 16707517 Lips)
