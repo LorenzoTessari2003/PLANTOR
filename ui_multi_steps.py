@@ -13,8 +13,11 @@ from python_interface.utility.utility import INFO, MSG, FAIL
 ## GLOBAL VARIABLES ####################################################################################################
 
 
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-mini-fine-tuned.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-128k.yaml')
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt35-turbo.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-32k.yaml')
 
 EXAMPLES_PATH           = os.path.join(os.path.dirname(__file__), 'LLM', 'examples')
@@ -24,7 +27,7 @@ CC_EXAMPLES_LL_PATH     = os.path.join(EXAMPLES_PATH, 'cc', 'll.yaml')
 LL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-ll.yaml')
 HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yaml')
 
-WAIT = True
+WAIT = False
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
 OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
@@ -157,7 +160,7 @@ def hl_llm_multi_step(query) -> dict:
     INFO("\r[HL] Generating knowledge base")
     kb_query = "\nGiven that the previous messages are examples, you now have to produce code for the task that follows.\n" +\
         query +\
-        "\nWrite the static knowledge base. Remember to specify all the correct predicates and identify which are the predicates that are resources and to wrap it into \"kb\" tags and NOT prolog tags."
+        "\nWrite the static knowledge base. Remember to specify all the correct predicates and identify which are the predicates that are resources and to wrap it into Markdown tags \"```kb\" and NOT with \"```Prolog\"."
     succ, tmp_response = llm.query(kb_query)
     assert succ == True, "Failed to generate static knowledge base"
     print(succ, tmp_response+'\n')
@@ -168,7 +171,7 @@ def hl_llm_multi_step(query) -> dict:
     INFO("\r[HL] Generating initial and final states")
     states_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
         "\nGiven the following static knowledge base\n```kb\n{}\n```".format(kb["kb"]) +\
-        "\nWrite the initial and final states, minding to include all the correct predicates. Remember to wrap it into \"init\" and \"goal\" tags and not prolog tags."
+        "\nWrite the initial and final states, minding to include all the correct predicates. Remember to wrap it into Markdown tags \"```init\" and \"goal\" and NOT with \"```prolog\"."
     succ, tmp_response = llm.query(states_query)
     assert succ == True, "Failed to generate initial and final states"
     print(succ, tmp_response+'\n')
@@ -181,7 +184,7 @@ def hl_llm_multi_step(query) -> dict:
         "Given the following static knowledge base\n```kb\n{}\n```".format(kb["kb"]) + \
         "\nKnowing that the initial state is the following\n```init\n{}\n```".format(kb["init"]) + \
         "\nKnowing that the goal state is the following\n```goal\n{}\n```".format(kb["goal"]) + \
-        "\nWrite the set of temporal actions divided into _start and _end actions. Remember to wrap it into \"actions\" tags and not prolog tags."
+        "\nWrite the set of temporal actions divided into _start and _end actions. Remember to wrap it into Markdown tags \"```actions\" and NOT with \"```prolog\"."
     succ, response = llm.query(final_query)
     assert succ == True, "Failed to generate final state"
     print(succ, response)
@@ -228,6 +231,8 @@ def ll_llm_multi_step(query, kb) -> dict:
 
     file = open(OUTPUT_FILE_LL, "w+")
 
+    LLM_LL_WARNING = "Remember to prepend the low-level predicates with `ll_` and also to not use the high-level predicates inside the low-level actions as they may lead to errors."
+
     # Extract LL knowledge base
     INFO("\r[LL] Extract LL knowledge base", imp=True)
     llm = LLM(
@@ -239,7 +244,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     INFO("\r[LL] Generating knowledge base")
     kb_query = "\nYou know have to produce code for the task that follows.\n" + query + \
         "Given the following high-level knowledge-base:\n{}\n".format(kb['kb']) + \
-        "\nUpdate only the generals knowledge base to contain the new low-level predicates and the resources"
+        "\nUpdate only the generals knowledge base to contain the new low-level predicates and the resources. {}".format(LLM_LL_WARNING) 
     succ, response = llm.query(kb_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
@@ -251,7 +256,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     states_query = "\nYou know have to produce code for the task that follows.\n" + query + \
         "Given the low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
         "Given the high-level initial and final states:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + \
-        "\nUpdate the initial and final states. Mind to include all the necessary predicates."
+        "\nUpdate the initial and final states. Mind to include all the necessary predicates. {}".format(LLM_LL_WARNING)
         # "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
     succ, response = llm.query(states_query)
     assert succ == True, "Failed to generate LL KB"
@@ -264,7 +269,7 @@ def ll_llm_multi_step(query, kb) -> dict:
     ll_actions_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
         "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-        "\nWrite the low-level actions set."
+        "\nWrite the low-level actions set. {}".format(LLM_LL_WARNING)
     succ, response = llm.query(ll_actions_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
@@ -279,7 +284,7 @@ def ll_llm_multi_step(query, kb) -> dict:
         "Given the initial state:\n```init\n{}\n```\n".format(kb["init"]) + \
         "Given the final state:\n```goal\n{}\n```\n".format(kb["goal"]) + \
         "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
-        "\nProvide the mappings from high-level actions to low-level actions. Remember that the mappings are only for the start actions."
+        "\nProvide the mappings from high-level actions to low-level actions. Remember that the mappings are only for the start actions. {}".format(LLM_LL_WARNING)
     succ, response = llm.query(mappings_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
@@ -406,122 +411,100 @@ def main():
     assert os.path.exists(LL_EXAMPLES_CONFIG_PATH), f"Low-level examples path not found at {LL_EXAMPLES_CONFIG_PATH}"
     assert os.path.exists(HL_EXAMPLES_CONFIG_PATH), f"High-level examples path not found at {HL_EXAMPLES_CONFIG_PATH}"
 
-    # query = input("Describe your problem: ")
-
     query_hl = """
-    There are 5 blocks on a table. Block b1 is in position (2,2), block b2 is in position (4,4), block b4 is in position
-    (8,8). Block b5 is on top of block b1 and block b3 is on top of block b2. There are 2 agents with a robotic arm. 
-    They can:
-     - move a block from on top of a block to the table;
-     - move a block from the table to another position on the table;
-     - move a block from on top of a block and place it on top of another block;
-     - move a block from the table and place it on top of another block.
-    The goal is to put block b1 on top of block b5 in position (5,5). 
+The scenario involves two distinct locations, referred to as Location1 and Location2. These two locations are directly connected, allowing for movement between them.
+Containers:
+
+    There are two containers in the system:
+        Container c1 is initially located in Location1, placed on the ground.
+        Container c2 is also in Location1, positioned on top of c1.
+
+Robot:
+
+    A robot, designated as Robot r1, is initially situated in Location1.
+    The robot is capable of transporting a container from one location to another. However, to do so:
+        The container must be placed on top of the robot.
+        The robot can only move while carrying one container at a time.
+        The robot cannot move if the container it is carrying is obstructed by another container.
+
+Cranes:
+
+    Each location is equipped with a crane:
+        The crane in Location1 operates only within that location.
+        The crane in Location2 operates exclusively within Location2.
+    Cranes are versatile and capable of performing the following operations:
+        Moving a container from the ground to the top of another container within the same location.
+        Loading a container onto the robot or unloading a container from the robot. Container could be everywhere but has to be clear
+        Placing a container on the ground in the same location, so cannot place a container in a different location (e.g crane 1 is located
+        in location1 so can only operate in location1 not in other).
+    A crane can only manipulate a container if the container is clear, meaning there is nothing on top of it.
+    When executing an action the crane is busy so it could not execute any other action till the finish of the action.
+
+Goal:
+
+    By the end of the operation:
+        Container c2 must be relocated to Location2.
+        Container c1 must remain in its original position in Location1.
+
+This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve the desired arrangement of containers.
     """
 
-    query_hl = """
-    There are 7 blocks on a table. In the initial state of the simulation, block b1 is in position (2,2), block b2 is in 
-    position (4,4), block b4 is in position (8,8). Block b5 is on top of block b1 in position (2,2) and block b3 is on 
-    top of block b2 in position (4,4). After moving the blocks around during the simulation, at the end, we have b5 on 
-    top of block b4, both in position (8,8), and the remaining blocks b1, b2 and b3 are in the same positions as in the 
-    initial state. The position of other blocks, such as b6, is irrelevant at the moment and can be considered as random
-    positions on the table. Please explicitly assign these positions when generating the knowledge base.
-    There are 2 agents with a robotic arm. 
-    The agents can:
-    - Move a block from a position on the table to another position on the table. At the beginning, the block must be
-      free, i.e., there is no other block on top of it, and the agent must be available. At the end, the final position
-      on the table must still be free, i.e., there are no blocks occupying it. After the execution of the action, the
-      agent is available again, the block is in the new position. The previous position has been freed as soon as the 
-      action starts. 
-    - Move a block B1 from a position on the table, to the top of another block B2. At the beginning, the B1 must be 
-      free and the agent must be available. To complete the action, B2 must be free. At the end, B1 is on top of B2,
-      and the agent is available again. The previous position of B1 has been freed as soon as the action starts.
-    - Move a block B1 from the top of another block B2 to the table. At the beginning, B1 must be on top of B2, B1 must 
-      be free and the agent must be available. At the end, B1 is on the table in a new position, and the agent is 
-      available again. B2 becomes free (since the block it had on top has been removed) as soon as the action starts.
-    - Move a block B1 from the top of another block B2 to the top of another block B3. At the beginning, B1 must be on
-      top of B2 with the same initial position, B1 must be free and the agent must be available. To complete the action, 
-      B3 must be free, i.e., not have any other block on top of it. At the end, B1 is on top of B3, and the agent is 
-      available again. B2 becomes free as soon as the action starts. B1 will not be in the initial position after the 
-      start of the action, but will have the same position of B3 at the end of the action.
-    """
-
-    # query_hl = """
-    # There are 3 blocks on a table. In the initial state of the simulation, block b1 is in position (1,1), block b2 is in 
-    # position (2,2), block b3 is in position (3,3). After the execution of the plan, b1 on the table in position (1,1), 
-    # b2 is on the table in position (2,2) and b3 is on top of b1 in position (1,1).
-    # There are two available agents that can carry out the task. They are available at the beginning and will be 
-    # available at the end. 
-    # """
-
-
-    # query_ll = """
-    # There are 3 blocks on a table. In the initial state of the simulation, block b1 is in position (1,1), block b2 is in 
-    # position (2,2), block b3 is in position (3,3). After the execution of the plan, b1 on the table in position (1,1), 
-    # b2 is on the table in position (2,2) and b3 is on top of b1 in position (1,1).
-    # There are two available agents that can carry out the task. They are available at the beginning and will be 
-    # available at the end. The agents are actually robotic arms that can pick up blocks and move them around. At the 
-    # beginning, the arms are in positions (0,0) and (10,10), respectively, while we do not care were they are at the end.
-    # """
 
     query_ll = """
-    Let the blocks and their positions be described in the high-level part.
-    There are 2 available agents that can carry out the task. They are available at the beginning and will be 
-    available at the end. The agents are actually robotic arms that can pick up blocks and move them around. At the 
-    beginning, the arms are in positions (0,0) and (3,3), respectively, while 
-    we do not care were they are at the end. The low_level actions that they can perform are:
-    - move_arm_start(arm, x1, y1, x2, y2), which makes the robotic arm starting to move from position (x1,y1) to position (x2,y2).
-    - move_arm_end(arm, x1, y1, x2, y2), which completes the movement of the robotic arm from position (x1,y1) to position (x2,y2).
-    - close_start(arm), which makes the gripper starting to close.
-    - close_end(arm), which indicates the gripper has closed.
-    - open_start(arm), which makes the gripper starting to open.
-    - open_end(arm), which indicates the gripper has opened.
-    Remember to use the appropriate tags for the code you produce and not to use prolog tags.
+Let the container, crane and robot and their positions be described in the high-level part.
+There is available only one robot that can:
+- move_start(robot, locationFrom, locationTo), which makes the robot starting to move from position (x1,y1) to position (x2,y2).
+- move_end(robot, locationFrom, locationTo), which completes the movement of the robot from position (x1,y1) to position (x2,y2).
+There are one crane for location that can:
+- go_to_c_start(crane, container), which makes the crane move on the top of the container.
+- go_to_c_end(crane, container), which completes the movement of the crane to go on the top of the container.
+- close_start(crane), which makes the gripper starting to close.
+- close_end(crane), which indicates the gripper has closed.
+- open_start(crane), which makes the gripper starting to open.
+- open_end(crane), which indicates the gripper has opened.
+Remember to use the appropriate tags for the code you produce and not to use prolog tags.
+Moreover, remember that the low-level actions must not contain high-level predicates. Low-level actions must only contain predicates that start with 'll_'.
     """
 
-    # query_ll = """
-    # There are 5 blocks on a table. Block b1 is in position (2,2), block b2 is in position (4,4), block b4 is in position
-    # (8,8). Block b5 is on top of block b1 and block b3 is on top of block b2. There are 2 agents with a robotic arm. The
-    # agents can move the arm from a position (x1,y1) to another position (x2,y2). They can also pick up a block from the 
-    # table or pick up a block from on top of another block. They can also put a block on the table or put a block on top
-    # of another block. Finally, they can use the gripper to grasp a block or release a block. The goal is to put block b1
-    # on top of block b5 in position (5,5).
-    # The API that we have available are:
-    # move_arm(arm, x1, y1, x2, y2), which moves a robotic arm from position (x1,y1) to position (x2,y2).
-    # close(arm), which makes the gripper close.
-    # open(arm), which makes the gripper open.
-    # """
-    # Remember to prepend the low-level predicates with 'll_'.
+    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '1', 'query')
+    assert os.path.exists(GENERAL_DIR), f"General directory not found at {GENERAL_DIR}"
+    assert os.path.exists(os.path.join(GENERAL_DIR, 'query_hl.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'query_hl.txt')}"
+    assert os.path.exists(os.path.join(GENERAL_DIR, 'query_ll.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'query_ll.txt')}"
+    
+    with open(os.path.join(GENERAL_DIR, 'query_hl.txt'), 'r') as file:
+        query_hl = file.read()
+    query_hl+="\nRemember that the tags are in the Markdown form of ```tag and not <tag>"
+    with open(os.path.join(GENERAL_DIR, 'query_ll.txt'), 'r') as file:
+        query_ll = file.read()
+    query_ll+="\nRemember that the tags are in the Markdown form of ```tag and not <tag> and that the low-level actions have the tag ll_actions and not actions"
 
-    # query_ll = "Nothing to do here"
-
-    # compr, resp = llm_scenario_comprehension(query_hl, query_ll)
+    compr, resp = llm_scenario_comprehension(query_hl, query_ll)
     # if not compr:
     #     FAIL(f"There was a problem with the comprehension of the scenario {resp}")
-    #     return
+        
     
-    # if WAIT:
-    #     input("Consistency check finished, press enter to continue...")
+    if WAIT:
+        input("Consistency check finished, press enter to continue...")
 
-    # # Use HL LLM to extract HL knowledge base
-    # # hl_kb, response = hl_llm(query_hl)
-    # hl_kb = hl_llm_multi_step(query_hl)
-    # write_to_file(hl_kb)
+    # Use HL LLM to extract HL knowledge base
+    # hl_kb, response = hl_llm(query_hl)
+    hl_kb = hl_llm_multi_step(query_hl)
+    write_to_file(hl_kb)
 
-    # if WAIT:
-    #     input("HL finished, press enter to continue...")
-    # hl_kb = read_from_file()
+    if WAIT:
+        input("HL finished, press enter to continue...")
+    hl_kb = read_from_file()
 
-    # # use LL LLM to extract LL knowledge base
-    # kb = ll_llm_multi_step(query_ll, hl_kb)
-    # write_to_file(kb)
+    # use LL LLM to extract LL knowledge base
+    kb = ll_llm_multi_step(query_ll, hl_kb)
+    write_to_file(kb)
 
-    # if WAIT:
-    #     input("LL finished, press enter to continue...")
-    kb = read_from_file()
+    if WAIT:
+        input("LL finished, press enter to continue...")
+    # kb = read_from_file()
 
     # Take the whole knowledge base and find plan
-    bt = find_plan(kb)
+    # bt = find_plan(kb)
 
     # Execute the plan
     # execute_plan(bt)

@@ -1,0 +1,11 @@
+Planning from: [ontable(a),on(b,a),on(c,b),on(d,c),at(a,1,1),at(b,1,1),at(c,1,1),at(d,1,1),clear(d),available(agent1),available(agent2),ll_arm_at(agent1,0,0),ll_arm_at(agent2,3,3),ll_gripper(agent1,open),ll_gripper(agent2,open)] to: [ontable(a),ontable(b),ontable(c),on(d,a),at(a,1,1),at(b,2,1),at(c,3,1),at(d,1,1),clear(b),clear(c),clear(d),available(agent1),available(agent2),ll_arm_at(agent1,_7454,_7456),ll_arm_at(agent2,_7468,_7470),ll_gripper(agent1,_7482),ll_gripper(agent2,_7494)]
+Plan: 
+[0] [0-move_top_block_to_table_start(agent1,d,c,1,1,0,0)]
+[1] [1-move_top_block_to_table_end(agent1,d,c,1,1,0,0)]
+[2] [2-move_top_block_to_table_start(agent1,c,b,1,1,3,1)]
+[3] [3-move_top_block_to_table_end(agent1,c,b,1,1,3,1)]
+[4] [4-move_top_block_to_table_start(agent1,b,a,1,1,2,1)]
+[5] [5-move_top_block_to_table_end(agent1,b,a,1,1,2,1)]
+[6] [6-move_block_to_top_start(agent1,d,a,0,0,1,1)]
+[7] [7-move_block_to_top_end(agent1,d,a,0,0,1,1)]
+% 16,416,872 inferences, 0.466 CPU in 0.466 seconds (100% CPU, 35258308 Lips)

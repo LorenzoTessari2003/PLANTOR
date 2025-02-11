@@ -16,9 +16,9 @@ agents are available.
 The goal state correctly describe the movement of the block from the table to the top of another 
 block.
 
-The LLM generated all the actions dividing them in start and final actions. By running the HL planner
-there seems to not be any error as it finds the correct solution in 5ms. Also when changing the 
-order of the actions, we are still obtaining the correct result. 
+The LLM generated all the actions dividing them in start and final actions. By running the HL 
+planner there seems to not be any error as it finds the correct solution in 22ms. Also when changing 
+the order of the actions, we are still obtaining the correct result. 
 
 
 ## Low-Level Generation
@@ -26,4 +26,4 @@ order of the actions, we are still obtaining the correct result.
 The LLM updated the HL KB correctly, capturing the new predicates for the arm and the gripper. It 
 was also able to correctly write the actions and the mappings. 
 
-After testing with the planner, we were able to extract a plan in 8ms. 
+After testing with the planner, we were able to extract a plan in 23ms. 

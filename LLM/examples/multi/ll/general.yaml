@@ -250,4 +250,21 @@ entries:
           ).
           ```
 
+    ############################################################################
+    ###############################     7     ##################################
+    ############################################################################
+    7:
+      Q:
+        role: 'user'
+        content: |
+          Is it possible to use high-level predicates inside low-level actions? 
+
+      A:
+        role: 'assistant'
+        content: |
+          They should be avoided as, if a low-level action were to depend on high-level predicates
+          and the corresponding high-level action of the mapping were to remove the necessary 
+          predicate, the low-level action would not be schedule and the planning would fail even 
+          though it is perfectly find. It is better to separate the high-level and low-level 
+          predicates.
 

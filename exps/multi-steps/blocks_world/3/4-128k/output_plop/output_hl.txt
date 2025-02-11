@@ -1,0 +1,147 @@
+KB: Certainly! Here is the static knowledge base for the given scenario:
+
+```kb
+% Define positions on the table
+pos(0,0).
+pos(1,1).
+pos(2,1).
+pos(3,1).
+pos(3,3).
+
+% Define blocks
+block(a).
+block(b).
+block(c).
+block(d).
+
+% Define agents
+agent(agent1).
+agent(agent2).
+
+% Define resources
+resources(agent(_)).
+
+% Define the arm positions
+arm_pos(agent1, 0, 0).
+arm_pos(agent2, 3, 3).
+```
+
+In this knowledge base:
+- The `pos(X, Y)` predicates define the possible positions on the table.
+- The `block(Block)` predicates define the blocks available in the scenario.
+- The `agent(Agent)` predicates define the agents that can perform actions.
+- The `resources(agent(_))` predicate indicates that agents are the resources in this scenario.
+- The `arm_pos(Agent, X, Y)` predicates define the initial positions of the agents' robotic arms.
+INIT: Certainly, here are the initial and final states for the given scenario:
+
+```init
+init_state([
+    ontable(a), on(b, a), on(c, b), on(d, c),
+    at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
+    clear(d),
+    available(agent1), available(agent2),
+    arm_at(agent1, 0, 0), arm_at(agent2, 3, 3)
+]).
+```
+
+In the initial state, block A is on the table at position (1,1), and blocks B, C, and D are stacked on top of each other in that order, starting with block B on top of block A. Block D is the topmost block and is clear. Both agents are available, and their arm positions are specified.
+
+```goal
+goal_state([
+    ontable(a), ontable(b), ontable(c), on(d, a),
+    at(a, 1, 1), at(b, 2, 1), at(c, 3, 1), at(d, 1, 1),
+    clear(b), clear(c), clear(d),
+    available(agent1), available(agent2)
+]).
+```
+
+In the final state, block A remains in the same position on the table, block B is moved to position (2,1), block C is moved to position (3,1), and block D is now on top of block A. Blocks B, C, and D are all clear. Both agents are available again at the end of the scenario. The arm positions are not specified in the final state as they are not relevant to the goal conditions.
+ACTIONS: ```actions
+% Move a block from a position to another position on the table
+action(move_block_start(Agent, Block, X1, Y1, X2, Y2),
+  [available(Agent), clear(Block), ontable(Block), at(Block, X1, Y1), pos(X2, Y2)],
+  [at(_, X2, Y2)],
+  [],
+  [block(Block), agent(Agent)],
+  [
+    del(available(Agent)), del(clear(Block)), del(ontable(Block)), del(at(Block, X1, Y1)),
+    add(moving(Agent, Block, X1, Y1, X2, Y2))
+  ]
+).
+action(move_block_end(Agent, Block, X1, Y1, X2, Y2),
+  [moving(Agent, Block, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [block(Block), agent(Agent)],
+  [
+    del(moving(Agent, Block, X1, Y1, X2, Y2)),
+    add(available(Agent)), add(clear(Block)), add(ontable(Block)), add(at(Block, X2, Y2))
+  ]
+).
+
+% Move a block that is on the table to the top of another one
+action(move_block_to_top_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [available(Agent), clear(Block1), clear(Block2), ontable(Block1), at(Block1, X1, Y1), at(Block2, X2, Y2)],
+  [],
+  [],
+  [block(Block1), block(Block2), agent(Agent), Block1 \= Block2],
+  [
+    del(available(Agent)), del(clear(Block1)), del(clear(Block2)), del(ontable(Block1)), del(at(Block1, X1, Y1)),
+    add(moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2))
+  ]
+).
+action(move_block_to_top_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [block(Block1), block(Block2), agent(Agent)],
+  [
+    del(moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+    add(available(Agent)), add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1))
+  ]
+).
+
+% Move a block from the top of a block to another position on the table
+action(move_top_block_to_table_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [available(Agent), clear(Block1), on(Block1, Block2), at(Block1, X1, Y1), pos(X2, Y2)],
+  [at(_, X2, Y2)],
+  [],
+  [block(Block1), block(Block2), agent(Agent), Block1 \= Block2],
+  [
+    del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
+    add(moving_top_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2))
+  ]
+).
+action(move_top_block_to_table_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [moving_top_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [block(Block1), block(Block2), agent(Agent)],
+  [
+    del(moving_top_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+    add(available(Agent)), add(ontable(Block1)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(clear(Block2))
+  ]
+).
+
+% Move a block from the top of a block to the top of another block
+action(move_top_block_to_top_start(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [available(Agent), clear(Block1), clear(Block3), on(Block1, Block2), at(Block1, X1, Y1), at(Block3, X2, Y2)],
+  [],
+  [],
+  [block(Block1), block(Block2), block(Block3), agent(Agent), Block1 \= Block2, Block1 \= Block3, Block2 \= Block3],
+  [
+    del(available(Agent)), del(clear(Block1)), del(clear(Block3)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
+    add(moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2))
+  ]
+).
+action(move_top_block_to_top_end(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [block(Block1), block(Block2), block(Block3), agent(Agent)],
+  [
+    del(moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2)),
+    add(available(Agent)), add(on(Block1, Block3)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(clear(Block2))
+  ]
+).
+```

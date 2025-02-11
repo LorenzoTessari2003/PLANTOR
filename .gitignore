@@ -16,6 +16,7 @@ node_modules
 
 public_generated/
 
+*.old
 .env
 *.env
 LLM/.env

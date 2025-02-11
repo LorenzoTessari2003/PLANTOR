@@ -7,7 +7,7 @@ entries:
       Q:
         role: 'user'
         content: |
-          Can you describe what teh actions are? 
+          Can you describe what the actions are? 
       A: 
         role : 'assistant' 
         content: | 
