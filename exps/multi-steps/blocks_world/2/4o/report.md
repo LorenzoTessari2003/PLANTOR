@@ -16,13 +16,13 @@ The initial and final states correctly captures the position of the blocks on th
 that both agents are available.
 
 The LLM generated all the actions dividing them in start and final actions. By running the HL planner
-there seems to not be any error as it finds the correct solution in 195ms. Also when changing the 
+there seems to not be any error as it finds the correct solution in 1.395s. Also when changing the 
 order of the actions, we are still obtaining the correct result. 
 
 
 ## Low-Level Generation
 
-The LLM did not update the HL KB correctly. There are two main errors:
+The LLM did not update the HL KB correctly. There main error is:
 
 - The mapping for `move_*` is not completely correct. For example, the HL action
   `move_table_to_table_start` was initially mapped to 
@@ -42,13 +42,7 @@ The LLM did not update the HL KB correctly. There are two main errors:
   ``` 
   assuming that the robotic arm would always start from (4, 4), which instead is not the case. 
 
-- The low-level actions use also predicates from the HL KB, which would not be a problem as long as 
-  the LLM uses caution. Instead, in this case, the LL action `gripper_start` checks as precondition 
-  that the block is in the same position as the arm by checking the presence of the predicate 
-  `at(Block, X, Y)`. The problem is that the start of the HL action removes the same predicate, 
-  which then will not be found by the planner and it will fail. 
-
-After fixing this mistakes, the planner managed to find a solution in 5s.
+After fixing this mistake, the planner managed to find a solution in 1.643s.
 
 
 ## Variations

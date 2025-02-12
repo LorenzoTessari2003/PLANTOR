@@ -3,8 +3,8 @@
 ## Consistency Check
 
 The LLM did detect correctly an inconsistency in the descriptions. Indeed, the high-level description 
-states that there are 3 agents, but the low-level description only specifies the position for 2 of them. 
-When correcting the error, the queries passed the consistency test as expected.
+states that there are 3 agents, but the low-level description only specifies the position for 2 of 
+them. When correcting the error, the queries passed the consistency test as expected.
 
 ## High-Level Generation
 
@@ -19,7 +19,7 @@ The goal state correctly describe the movement of the block from the table to th
 block.
 
 The LLM generated all the actions dividing them in start and final actions. By running the HL planner
-there seems to not be any error as it finds the correct solution in 8ms. Is worth to mention that the plan is not optimal.  
+there seems to not be any error as it finds the correct solution in 8ms. 
 
 ## Low-Level Generation
 

@@ -10,5 +10,5 @@ entries:
     clearly stated in the examples or in the description of the scenario."
   files: 
     - "hl/general.yaml"
-    - "hl/arch/few-shots-arch.yaml"
+    # - "hl/arch/few-shots-arch.yaml"
     - "hl/blocksworld/few-shots-blocksworld.yaml"

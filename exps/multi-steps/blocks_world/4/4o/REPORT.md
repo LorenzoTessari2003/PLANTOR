@@ -17,12 +17,29 @@ The goal state correctly describe the movement of the block from the table to th
 block.
 
 The LLM generated all the actions dividing them in start and final actions. By running the HL planner
-there seems to not be any error as it finds the correct solution in 8ms. Is worth to mention that the plan is not optimal.  
+there seems to not be any error as it finds the correct solution in 15ms. Is worth to mention that the plan is not optimal.  
 
 ## Low-Level Generation
 
-Find HL plan but could not apply mappings since there was an error in every mapping
-move_arm_*(Agent, X1, Y1, X1, Y1), has to be move_arm_*(Agent, _, _, X1, Y1),
-Changing this solves the problem
+The LLM did not update the HL KB correctly. There main error is:
 
-When changed solves in 72 sec
+- The mapping for `move_*` is not completely correct. For example, the HL action
+  `move_table_to_table_start` was initially mapped to 
+  ```prolog
+  mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
+    [
+        move_arm_start(Agent, 10, 10, X1, Y1),
+        move_arm_end(Agent, 10, 10, X1, Y1),
+        close_gripper_start(Agent, Block),
+        close_gripper_end(Agent, Block),
+        move_arm_start(Agent, X1, Y1, X2, Y2),
+        move_arm_end(Agent, X1, Y1, X2, Y2),
+        open_gripper_start(Agent),
+        open_gripper_end(Agent)
+    ]
+  ).
+  ``` 
+  assuming that the robotic arm would always start from (10, 10), which instead is not the case. 
+
+After fixing this mistake, the planner managed to find a solution in 48ms.
+
