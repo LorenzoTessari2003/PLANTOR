@@ -84,13 +84,13 @@ check_resource_in_verify(Resource, [H|T]) :-
 
 extract_resources_list(Resources) :-
   findall(X, resources(X), AllResources),
-  format('All resources ~w~n', [AllResources]),
+  % format('All resources ~w~n', [AllResources]),
   extract_resources_list(AllResources, [], Resources).
 
 extract_resources_list([], Resources, Resources).
 extract_resources_list([Resource|T], TmpResources, Resources) :- 
   findall(Resource, Resource, List),
-  format('List ~w~n', [List]),
+  % format('List ~w~n', [List]),
   functor(Resource, ResourceName, _),
   append([ResourceName-List], TmpResources, NewTmpResources),
   extract_resources_list(T, NewTmpResources, Resources).

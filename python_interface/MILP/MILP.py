@@ -1,6 +1,5 @@
 import collections
 from ortools.sat.python import cp_model
-import os
 
 try:
     from python_interface.utility.Graph.Graph import Graph
@@ -26,29 +25,32 @@ class MILPSolver(cp_model.CpSolver):
         self.resources_list = resources_list
         self.ll_actions_list = ll_actions_list
 
-        print("Creating MILP model")
-        print(f"tta_actions: [{type(self.tta_actions)}]", self.tta_actions)
-        print(f"actions: [{type(self.actions)}]", self.actions)
-        print(f"resources: [{type(self.resources)}]", self.resources)
-        print(f"resources_list: [{type(self.resources)}]", self.resources_list)
-        print(f"ll_actions_list: [{type(self.ll_actions_list)}]", self.ll_actions_list)
+        # print("Creating MILP model")
+        # print(f"tta_actions: [{type(self.tta_actions)}]", self.tta_actions)
+        # print(f"actions: [{type(self.actions)}]", self.actions)
+        # print(f"resources: [{type(self.resources)}]", self.resources)
+        # print(f"resources_list: [{type(self.resources)}]", self.resources_list)
+        # print(f"ll_actions_list: [{type(self.ll_actions_list)}]", self.ll_actions_list)
 
         from math import log
 
         for space_id in range(int(log(len(self.adj_matrix), 10)) + 2):
-            print('', end=" ")
+            # print('', end=" ")
+            pass
         for col_id in range(len(self.adj_matrix[0])):
-            print(f"{col_id:>{len(str(len(self.adj_matrix)))}}", end=" ")
-        print()
+            # print(f"{col_id:>{len(str(len(self.adj_matrix)))}}", end=" ")
+            pass
+        # print()
         
         for row_id in range(len(self.adj_matrix)):
             self.adj_matrix[row_id][row_id] = 0
             #print row_id occupying as many spaces as math.log(len(self.adj_matrix), 10) + 1
-            print(f"{row_id:>{len(str(len(self.adj_matrix)))}}", end=" ")
+            # print(f"{row_id:>{len(str(len(self.adj_matrix)))}}", end=" ")
             for col_id in range(len(self.adj_matrix[row_id])):
-                print(f"{self.adj_matrix[row_id][col_id]:>{len(str(len(self.adj_matrix)))}}", end=" ")
-            print()
-        print(self.resources)
+                pass
+                # print(f"{self.adj_matrix[row_id][col_id]:>{len(str(len(self.adj_matrix)))}}", end=" ")
+            # print()
+        # print(self.resources)
 
         # Create dependency graph
         edges = []
@@ -75,7 +77,7 @@ class MILPSolver(cp_model.CpSolver):
         self.all_tta = {}
         self.all_resources = collections.defaultdict(list)
 
-        print('Printing tta_actions:')
+        # print('Printing tta_actions:')
         for tta in self.tta_actions.keys():
             prefix = f"{tta}_"
             start_var = self.model.NewIntVar(0, horizon, prefix + "s")
@@ -84,7 +86,7 @@ class MILPSolver(cp_model.CpSolver):
             interval_var = self.model.NewIntervalVar(start_var, duration, end_var, prefix + "i")
             self.all_tta[tta] = task_type(start=start_var, end=end_var, interval=interval_var)
         
-            print(self.tta_actions[tta])
+            # print(self.tta_actions[tta])
             if self.tta_actions[tta]['R'] != []:
                 for res in self.tta_actions[tta]['R']:
                     self.all_resources[res].append(self.all_tta[tta].interval)
@@ -126,7 +128,7 @@ class MILPSolver(cp_model.CpSolver):
         for node in self.graph.nodes:
             (cycles, edges) = self.graph.find_cycle(node)
             if cycles:
-                print(edges)
+                # print(edges)
                 raise Exception("Error: Graph has at least one cycle between nodes")
         
         import networkx as nx
@@ -211,8 +213,9 @@ class MILPSolver(cp_model.CpSolver):
         # The number of tasks using a resource must be less than the resource capacity
         for res in self.all_resources.keys():
             for n_tta in self.all_resources[res]:
-                print(n_tta, end=" ")
-            print("\n", str([1 for n_tta in self.all_resources[res]]))
+                pass
+                # print(n_tta, end=" ")
+            # print("\n", str([1 for n_tta in self.all_resources[res]]))
             self.model.AddCumulative(self.all_resources[res], [1 for n_tta in self.all_resources[res]], self.resources[res])
 
     def solve(self) -> None:
@@ -227,23 +230,23 @@ class MILPSolver(cp_model.CpSolver):
         self.status = super().solve(self.model)
         
         if self.status == cp_model.OPTIMAL or self.status == cp_model.FEASIBLE:
-            print("Solution found. Assigning values.")
+            # print("Solution found. Assigning values.")
             self.print_solution()
         else:
-            print("No solution found.", self.solution_info())
+            raise Exception(f"No solution found. {self.solution_info()}")
 
         # Statistics.
-        print("\nStatistics")
-        print(f"  - conflicts: {self.num_conflicts}")
-        print(f"  - branches : {self.num_branches}")
-        print(f"  - wall time: {self.wall_time}s")
+        # print("\nStatistics")
+        # print(f"  - conflicts: {self.num_conflicts}")
+        # print(f"  - branches : {self.num_branches}")
+        # print(f"  - wall time: {self.wall_time}s")
 
         self.add_more_enablers()
         
 
     def print_solution(self) -> None:
         """
-        Prints the solution of the MILP problem.
+        # Prints the solution of the MILP problem.
 
         If the MILP problem has an optimal or feasible solution, this method prints the solution
         by iterating over all tasks and printing their start time, end time, and duration.
@@ -252,7 +255,7 @@ class MILPSolver(cp_model.CpSolver):
             None
         """
         if self.status == cp_model.OPTIMAL or self.status == cp_model.FEASIBLE:
-            print("Solution:")
+            # print("Solution:")
 
             # Print the start, end, and duration of each task. Format "tta : [start -> end, duration]"
             output = ""
@@ -262,8 +265,8 @@ class MILPSolver(cp_model.CpSolver):
                 duration = self.Value(self.all_tta[tta].interval.size_expr())
                 output += f"{tta} : [{start} -> {end}, {duration}]\n"
 
-            print(f"Optimal Schedule Length: {self.objective_value}")
-            print(output)
+            # print(f"Optimal Schedule Length: {self.objective_value}")
+            # print(output)
 
             # Print the start, end, and duration of each task. Format "tta.start(start_t) -> tta.end(end_t), duration]"
             output = ""
@@ -272,7 +275,7 @@ class MILPSolver(cp_model.CpSolver):
                 end = self.Value(self.all_tta[tta].end)
                 duration = self.Value(self.all_tta[tta].interval.size_expr())
                 output += f"{self.tta_actions[tta]['s']}({start}) -> {self.tta_actions[tta]['e']}({end}), {duration}]\n"
-            print(output)
+            # print(output)
 
             # self.draw_intervals()
 
@@ -329,8 +332,8 @@ class MILPSolver(cp_model.CpSolver):
             times_for_sas[self.tta_actions[tta]['s']] = self.Value(self.all_tta[tta].start)
             times_for_sas[self.tta_actions[tta]['e']] = self.Value(self.all_tta[tta].end)
 
-        print("\n\n", times_for_ttas)
-        print("\n\n", times_for_sas)
+        # print("\n\n", times_for_ttas)
+        # print("\n\n", times_for_sas)
 
         root_name = self.tta_actions['0']['s']
         root_stn = Node(root_name)
@@ -355,7 +358,7 @@ class MILPSolver(cp_model.CpSolver):
                 debug = True
             else: 
                 debug = False
-            print(f"{tab}Node {action_name}, has children {out_nodes}") if debug else None
+            # print(f"{tab}Node {action_name}, has children {out_nodes}") if debug else None
 
             for child_action in out_nodes:
                 if "end_e()" in child_action:
@@ -368,25 +371,26 @@ class MILPSolver(cp_model.CpSolver):
                 elif "_start(" not in child_action:
                     raise Exception(f"Invalid action {child_action}")
                 
-                print(f"{tab}Testing action {child_action} ({hl_t}, {ll_t})") #if debug else None
+                # print(f"{tab}Testing action {child_action} ({hl_t}, {ll_t})") #if debug else None
                 if child_action not in visited:
-                    print(f"{tab}Node {child_action} not visited") if debug else None
+                    # print(f"{tab}Node {child_action} not visited") if debug else None
 
                     if is_child_action_ll_t:
                         if is_child_action_start:
-                            print(f"{tab}Node {child_action} is a start action") if debug else None
+                            # print(f"{tab}Node {child_action} is a start action") if debug else None
                             if times_for_ttas[child_action][0] <= ll_t:
-                                print(f"{tab}Node {child_action} starts before {ll_t} >= {times_for_ttas[child_action][0]}") if debug else None
+                                # print(f"{tab}Node {child_action} starts before {ll_t} >= {times_for_ttas[child_action][0]}") if debug else None
                                 child_node = Node(child_action)
                                 child_node.time = times_for_ttas[child_action][0]
                                 child_node.action_type = "start"
                                 tree_nodes[child_action] = child_node
                                 node.add_child(child_node)
                                 ll_t = times_for_ttas[child_action][0]
-                                print(f"{tab}Node {child_action} is a LL action, new time {ll_t}") if debug else None
+                                # print(f"{tab}Node {child_action} is a LL action, new time {ll_t}") if debug else None
                                 add_children(child_node, child_action, graph, visited, tab+'  ', hl_t, ll_t)
                             else:
-                                print(f"{tab}Node {child_action} starts after {ll_t} -> {times_for_ttas[child_action][0]}") if debug else None
+                                pass
+                                # print(f"{tab}Node {child_action} starts after {ll_t} -> {times_for_ttas[child_action][0]}") if debug else None
 
                         else:
                             # find corresponding start action
@@ -397,7 +401,7 @@ class MILPSolver(cp_model.CpSolver):
                                     break
 
                             if start_action in tree_nodes:
-                                print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
+                                # print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
                                 # tree_nodes[start_action].time = times_for_sas[child_action]
                                 ll_t = times_for_ttas[start_action][1] 
                                 
@@ -408,24 +412,25 @@ class MILPSolver(cp_model.CpSolver):
                                 tree_nodes[start_action].related = child_node.name                                
                                 node.add_child(child_node)
                                 
-                                print(f"{tab}Node {child_action} is a LL action, new time {ll_t}") if debug else None
+                                # print(f"{tab}Node {child_action} is a LL action, new time {ll_t}") if debug else None
                                 add_children(child_node, child_action, graph, visited, tab+'  ', hl_t, ll_t)
 
                     else:
                         if is_child_action_start:
-                            print(f"{tab}Node {child_action} is a start action") if debug else None
+                            # print(f"{tab}Node {child_action} is a start action") if debug else None
                             if times_for_ttas[child_action][0] <= hl_t:
-                                print(f"{tab}Node {child_action} starts before {hl_t} >= {times_for_ttas[child_action][0]}") if debug else None
+                                # print(f"{tab}Node {child_action} starts before {hl_t} >= {times_for_ttas[child_action][0]}") if debug else None
                                 child_node = Node(child_action)
                                 child_node.time = times_for_ttas[child_action][0]
                                 child_node.action_type = "end"
                                 tree_nodes[child_action] = child_node
                                 node.add_child(child_node)
                                 hl_t = times_for_ttas[child_action][0]
-                                print(f"{tab}Node {child_action} is a LL action, new time {hl_t}") if debug else None
+                                # print(f"{tab}Node {child_action} is a LL action, new time {hl_t}") if debug else None
                                 add_children(child_node, child_action, graph, visited, tab+'  ', hl_t, ll_t)
                             else:
-                                print(f"{tab}Node {child_action} starts after {hl_t} -> {times_for_ttas[child_action][0]}") if debug else None
+                                pass
+                                # print(f"{tab}Node {child_action} starts after {hl_t} -> {times_for_ttas[child_action][0]}") if debug else None
 
                         else:
                             # find corresponding start action
@@ -436,7 +441,7 @@ class MILPSolver(cp_model.CpSolver):
                                     break
 
                             if start_action in tree_nodes:
-                                print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
+                                # print(f"{tab}Node {child_action} is the end action of {start_action}") if debug else None
                                 # tree_nodes[start_action].time = times_for_sas[child_action]
                                 hl_t = times_for_ttas[start_action][1] 
                                 
@@ -447,12 +452,12 @@ class MILPSolver(cp_model.CpSolver):
                                 tree_nodes[start_action].related = child_node.name
                                 node.add_child(child_node)
 
-                                print(f"{tab}Node {child_action} is a LL action, new time {hl_t}") if debug else None
+                                # print(f"{tab}Node {child_action} is a LL action, new time {hl_t}") if debug else None
                                 add_children(child_node, child_action, graph, visited, tab+'  ', hl_t, ll_t)
 
 
                 else:
-                    print(f"{tab}Node {child_action} already visited") if debug else None
+                    # print(f"{tab}Node {child_action} already visited") if debug else None
                     continue
 
 
@@ -462,27 +467,27 @@ class MILPSolver(cp_model.CpSolver):
             low-level actions (checked with is_ll_action()) and attaching the children of the removed node to the 
             parent. 
             """
-            print(f"Pruning node {node}")
+            # print(f"Pruning node {node}")
             if parent is None or self.is_ll_action(node.name) or "0_init" in node.name:
-                print(f"Node {node.name} is a low-level action")
+                # print(f"Node {node.name} is a low-level action")
                 for child in node.children:
                     prune_bt(child, node)
             else:
-                print(f"Node {node.name} is not a low-level action")
+                # print(f"Node {node.name} is not a low-level action")
                 for child in node.children:
                     parent.add_child(child)
-                print(f"parent: {parent}")
+                # print(f"parent: {parent}")
                 if node in parent.children:
                     parent.children.remove(node)
                     prune_bt(parent, node)
             return
 
                     
-        print('\n\n%%%%%%%%%%%%%%%%%%%%%%%%')
+        # print('\n\n%%%%%%%%%%%%%%%%%%%%%%%%')
         add_children(root_stn, root_stn.name, self.graph)
-        print("\n")
+        # print("\n")
         prune_bt(root_stn)
-        print('\n\n%%%%%%%%%%%%%%%%%%%%%%%%')
+        # print('\n\n%%%%%%%%%%%%%%%%%%%%%%%%')
 
         # resources_x_action = self.extract_resources_x_action()
         # print("resources_x_action:", resources_x_action)
@@ -501,10 +506,11 @@ class MILPSolver(cp_model.CpSolver):
         nodesD = {}
         get_edges_weights_nodesD(root_stn, edges, weights, nodesD)
         for i in range(len(edges)):
-            print(f"Edge {edges[i]} has weight {weights[i]}")
+            pass
+            # print(f"Edge {edges[i]} has weight {weights[i]}")
         
         stn = SimpTempNet(edges, weights, nodesD)
-        print("Displaying graph")
+        # print("Displaying graph")
         stn.draw(title="BehaviourTree.html", open_browser=False)
 
         # new_graph = Graph(edges)
@@ -552,7 +558,7 @@ class MILPSolver(cp_model.CpSolver):
         if not "init" in bt.name:
             # If the current node is a leaf node and the to_visit list is empty, return
             if to_visit == [] and bt.children == []:
-                print(f"Leaf node {bt.name}")
+                # print(f"Leaf node {bt.name}")
                 return
             
             # Reassign the resources of the father if it has ended
@@ -567,7 +573,7 @@ class MILPSolver(cp_model.CpSolver):
                 bt.resources.append((res_name, self.resources_list[res_name][-1]))
                 self.resources_list[res_name] = self.resources_list[res_name][:-1]
 
-            print(f"{bt.name} uses resources {bt.resources}")
+            # print(f"{bt.name} uses resources {bt.resources}")
         
         # Add the children to the to_visit list and sort them for starting time
         for child in bt.children:

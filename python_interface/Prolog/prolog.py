@@ -129,7 +129,7 @@ def extract_tt_actions(tt_actions, res_x_action) -> dict:
 ###############################################################################
 
 
-def execTest(query = "plan", kb_path = "") -> dict:
+def execTest(query = "plan", plan_len = 0, kb_path = "") -> dict:
     """
     Looks for the planner in the prolog_planner directory and executes the query specified in the argument.
 
@@ -152,7 +152,7 @@ def execTest(query = "plan", kb_path = "") -> dict:
     print(f"Consulting planner at {PLANNER_PATH}")
     prolog.consult(PLANNER_PATH)
         
-    planner = pyswip.Functor(query, 7)
+    planner = pyswip.Functor(query, 8)
     actions_var = pyswip.Variable()
     tt_actions_var = pyswip.Variable()
     adj_matrix_var = pyswip.Variable()
@@ -161,7 +161,10 @@ def execTest(query = "plan", kb_path = "") -> dict:
     resources_list = pyswip.Variable()
     ll_actions_list_var = pyswip.Variable()
 
-    sol = pyswip.Query(planner(actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
+    if plan_len == 0:
+        sol = pyswip.Query(planner(actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
+    else:
+        sol = pyswip.Query(planner(plan_len, actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
 
     succ = sol.nextSolution()
 

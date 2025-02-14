@@ -158,6 +158,8 @@ class BehaviourTree(nx.DiGraph):
         ros2_dict = {}
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "actions.json"), "r") as f:
             ros2_dict = json.load(f)
+
+        # print(f"ros2_dict = {ros2_dict}")
         
         func_d = {}
         actions_dict = {}
@@ -166,7 +168,7 @@ class BehaviourTree(nx.DiGraph):
             def get_key_name(action_name):
                 return action_name.replace(" ", "_").replace("(", "_").replace(")", "_").replace("[", "_").replace("]", "_").replace(",", "_")
 
-            print(f"toXMLRec: {node} {dictionary}")
+            # print(f"toXMLRec: {node} {dictionary}")
             if bt.nodes[node]["type"] == "INIT" or bt.nodes[node]["type"] == "SEQ":
                 dictionary["Sequence"] = []
                 for _, child in bt.out_edges(node):
@@ -185,7 +187,7 @@ class BehaviourTree(nx.DiGraph):
             
             elif bt.nodes[node]["type"] == "ES":
                 match = re.match(RE_ACTION, str(node))
-                print(node, type(node), node.get_STN_node()["label"])
+                # print(node, type(node), node.get_STN_node()["label"])
                 if match is not None:
                     # Create action name and check if it is already in the actions dictionary
                     action_name = "Action_"+str(node)
@@ -196,7 +198,8 @@ class BehaviourTree(nx.DiGraph):
                     dictionary[action_name] = {}
 
                     # Get the corresponding ROS2 node and service name
-                    ros2_node_dict = ros2_dict[match.group("action_name")]
+                    match_action_name = match.group("action_name") if not match.group("action_name").startswith("ll_") else match.group("action_name")[3:]
+                    ros2_node_dict = ros2_dict[match_action_name]
                     ros2_node_name = ros2_node_dict["ros2_node"]
                     ros2_serv_name = ros2_node_dict["service_name"]
                     ros2_args_name = ros2_node_dict["args"]
@@ -209,7 +212,7 @@ class BehaviourTree(nx.DiGraph):
                     args = " ".join([f"{ros2_args_name[i]}=\"{args_name[i]}\"" for i in range(len(args_name))])
 
                     final_replecement = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args}"
-                    print(f"{action_name} -> {final_replecement}")
+                    # print(f"{action_name} -> {final_replecement}")
 
                     key_val = get_key_name(action_name)
                     actions_dict[key_val] = f"{ros2_node_name} service_name=\"{ros2_serv_name}\" {args} _onsuccess=\"{key_val}=DONE\""
@@ -243,7 +246,7 @@ class BehaviourTree(nx.DiGraph):
         re_m = "<Delay>(?P<an>[^<]*)</Delay>"
         def delay_change(matchobj):
             if matchobj:
-                print('test', matchobj.group('an'))
+                # print('test', matchobj.group('an'))
                 return f"<SleepNode name=\"sleep for {matchobj.group('an')}\" msec=\"1\" _while=\"{matchobj.group('an')}!='DONE'\"/>"
             else:
                 raise Exception("Error in delay_change, patter could not be matched")
@@ -256,7 +259,7 @@ class BehaviourTree(nx.DiGraph):
                 with open(filepath, "w") as f:
                     f.write(xml)
             else:
-                print("Filepath {} does not exist".format(filepath))
+                raise Exception("Filepath {} does not exist".format(filepath))
         return xml
         
 

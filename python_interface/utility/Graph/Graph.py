@@ -17,16 +17,17 @@ class Graph(nx.DiGraph):
             weighted_edges = [(edges[i][0], edges[i][1], weights[i]) for i in range(len(edges))]
             self.add_weighted_edges_from(weighted_edges)
         
-        print('nodesD', nodesD)
+        # print('nodesD', nodesD)
 
         for node in self.nodes:
-            print(node)
+            # print(node)
+            pass
 
         if len(nodesD) > 0:
             nx.set_node_attributes(self, nodesD)
 
         attributes = nx.get_node_attributes(self, 'type')
-        print('attributes', attributes)
+        # print('attributes', attributes)
 
 
     def __remove_redundant_edges(self):
@@ -83,7 +84,7 @@ class Graph(nx.DiGraph):
         for node_id, node in enumerate(self.nodes):
             ret += f"{node}-["
             for edge in self.edges(node):
-                print(f"\t{edge}")
+                # print(f"\t{edge}")
                 for edge_id, edge in enumerate(self.edges(node)):
                     ret += f"{edge}"
                     if edge != len(self.edges(node)) - 1:
