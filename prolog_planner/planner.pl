@@ -34,59 +34,62 @@ plan_ll(MaxDepth):-
 
 
 plan(Actions, AdjMatrix, TTActionList, Resources, ActionXResources, ResourcesList, LLActions) :-
+  plan(6, Actions, AdjMatrix, TTActionList, Resources, ActionXResources, ResourcesList, LLActions).
+
+plan(PlanLength, Actions, AdjMatrix, TTActionList, Resources, ActionXResources, ResourcesList, LLActions) :-
   disable_debug,
   init_state(Init),
   goal_state(Goal),
   % trace(apply_action_map),
-  debug_format('Planning from: ~w to: ~w~n', [Init, Goal]),
+  format('Planning from: ~w to: ~w~n', [Init, Goal]),
   % leash(-all), etrace,
   % extract_hl_goal(Goal, HLGoal),
-  generate_plan(Init, Goal, TOActions, LastAchievers),
-  debug_format('Total-order plan: ~n'),
+  generate_plan(Init, Goal, TOActions, LastAchievers, PlanLength),
+  format('Total-order plan: ~n'),
   reverse(TOActions, TOActionsReversed),
-  print_list(TOActionsReversed),
-  debug_format('Last achievers: ~n'),
+  % print_list(TOActionsReversed),
+  format('Last achievers: ~n'),
   reverse(LastAchievers, LastAchieversReversed),
-  print_list(LastAchieversReversed),
+  % print_list(LastAchieversReversed),
   nl,nl,nl,
   
   extract_adj_matrix_actions(LastAchievers, AdjMatrix, Actions),
   debug_format('Adjacency matrix:~n'),
-  print_list(AdjMatrix),
+  % print_list(AdjMatrix),
   debug_format('Actions:~n'),
-  print_list(Actions),
+  % print_list(Actions),
   nl,nl,nl,
 
   extract_tt_action_list(Actions, TTActionList),
   debug_format('Time-triggered actions:~n'),
-  print_list(TTActionList),
+  % print_list(TTActionList),
   nl,nl,nl,
 
   extract_ll_actions(LLActions),
   debug_format('Low-level Action:~n'),
-  print_list(LLActions),
+  % print_list(LLActions),
   nl,nl,nl,
 
   extract_resources_number(Resources),
   debug_format('Resources:~n'),
-  print_list(Resources),
+  % print_list(Resources),
   nl,nl,nl,
 
   extract_resources_list(ResourcesList),
   debug_format('Resources list:~n'),
-  print_list(ResourcesList),
+  % print_list(ResourcesList),
   nl,nl,nl,
 
   extract_resources_per_action(TTActionList, Resources, ActionXResources),
   debug_format('Resources per action:~n'),
-  print_list(ActionXResources),
+  % print_list(ActionXResources),
   nl,nl,nl,
 
   format('Finished planning.~n'),
 
   true.
 
-plan(_Actions, _AdjMatrix, _TTActionList, _Resources, _ActionXResources, _ResourcesList, _LLActionsList) :-
+plan(_PlanLength, _Actions, _AdjMatrix, _TTActionList, _Resources, _ActionXResources, _ResourcesList, _LLActionsList) :-
   init_state(Init),
   goal_state(Goal),
   % trace(apply_action_map),
@@ -99,5 +102,10 @@ plan(_Actions, _AdjMatrix, _TTActionList, _Resources, _ActionXResources, _Resour
 plan :-
   disable_debug,
   plan(_, _, _, _, _, _, _).  
+
+
+plan(PlanLength) :-
+  disable_debug,
+  plan(PlanLength, _, _, _, _, _, _, _).  
 
 

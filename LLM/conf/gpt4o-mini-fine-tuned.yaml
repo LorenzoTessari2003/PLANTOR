@@ -1,0 +1,5 @@
+LLM_VERSION : "GPT-4o-mini-01"
+API_KEY_NAME : "OPENAI_API_KEY_fine_tune"
+ENDPOINT : "https://disi-logicprogramming-finetuning.openai.azure.com/"
+API_VERSION : "2024-07-18"
+SYSTEM_FINGERPRINT : "None"

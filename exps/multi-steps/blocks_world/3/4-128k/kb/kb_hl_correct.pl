@@ -33,6 +33,7 @@ init_state([
     ontable(a), on(b, a), on(c, b), on(d, c),
     at(a, 1, 1), at(b, 1, 1), at(c, 1, 1), at(d, 1, 1),
     clear(d),
+    arm_at(agent1, 0, 0), arm_at(agent2, 3, 3)
     available(agent1), available(agent2)
 ]).
 
@@ -51,10 +52,10 @@ goal_state([
 %%%%%%%%%%%%%%%%%%%%%%%
 % Move a block from a position to another position on the table
 action(move_block_start(Agent, Block, X1, Y1, X2, Y2),
-  [available(Agent), clear(Block), ontable(Block), at(Block, X1, Y1), pos(X2, Y2)],
+  [available(Agent), clear(Block), ontable(Block), at(Block, X1, Y1)],
   [at(_, X2, Y2)],
   [],
-  [block(Block), agent(Agent)],
+  [block(Block), agent(Agent), pos(X2, Y2), pos(X1, Y1), X1\=X2, Y1\=Y2],
   [
     del(available(Agent)), del(clear(Block)), del(ontable(Block)), del(at(Block, X1, Y1)),
     add(moving(Agent, Block, X1, Y1, X2, Y2))
@@ -76,7 +77,7 @@ action(move_block_to_top_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [available(Agent), clear(Block1), clear(Block2), ontable(Block1), at(Block1, X1, Y1), at(Block2, X2, Y2)],
   [],
   [],
-  [block(Block1), block(Block2), agent(Agent), Block1 \= Block2],
+  [block(Block1), block(Block2), agent(Agent), Block1 \= Block2, pos(X1, Y1), pos(X2, Y2), X1\=X2, Y1\=Y2],
   [
     del(available(Agent)), del(clear(Block1)), del(clear(Block2)), del(ontable(Block1)), del(at(Block1, X1, Y1)),
     add(moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2))
@@ -121,7 +122,7 @@ action(move_top_block_to_top_start(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2
   [available(Agent), clear(Block1), clear(Block3), on(Block1, Block2), at(Block1, X1, Y1), at(Block3, X2, Y2)],
   [],
   [],
-  [block(Block1), block(Block2), block(Block3), agent(Agent), Block1 \= Block2, Block1 \= Block3, Block2 \= Block3],
+  [block(Block1), block(Block2), block(Block3), agent(Agent), Block1 \= Block2, Block1 \= Block3, Block2 \= Block3, pos(X1, Y1), pos(X2, Y2), X1 \= X2, Block1 \= Block2],
   [
     del(available(Agent)), del(clear(Block1)), del(clear(Block3)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
     add(moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2))

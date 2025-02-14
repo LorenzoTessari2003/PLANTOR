@@ -1,0 +1,182 @@
+KB: The updated general knowledge base, including the new low-level predicates and resources, is as follows:
+
+```kb
+% Positions
+pos(1,1).
+pos(2,2).
+pos(3,3).
+pos(6,6).
+pos(9,6).
+
+% Blocks
+block(b1).
+block(b2).
+block(b3).
+
+% Dimensions
+dimension(b1, 1, 1, 1).
+dimension(b2, 1, 1, 1).
+dimension(b3, 1, 1, 3).
+
+% Agents
+agent(robotic_arm).
+
+% Low-level predicates
+ll_arm_at(robotic_arm, 4, 4).
+ll_arm_at(robotic_arm, 5, 5).
+ll_gripper(robotic_arm, open).
+
+% Resources
+resources(agent(robotic_arm)).
+```
+
+The low-level predicates `ll_arm_at/3` and `ll_gripper/2` are added to represent the initial positions of the agents' end-effectors and the state of the grippers. The `resources/1` predicate is also updated to include the resource `agent(robotic_arm)`.
+INIT: The updated initial and goal states for the low-level part are as follows:
+
+```init
+init_state([
+  ll_arm_at(robotic_arm, 4, 4),
+  ll_arm_at(robotic_arm, 5, 5),
+  ll_gripper(robotic_arm, open),
+  ll_block_at(b1, 1, 1),
+  ll_block_at(b2, 2, 2),
+  ll_block_at(b3, 3, 3),
+  ll_clear(b1),
+  ll_clear(b2),
+  ll_clear(b3),
+  ll_ontable(b1),
+  ll_ontable(b2),
+  ll_ontable(b3),
+  ll_available(robotic_arm)
+]).
+```
+
+```goal
+goal_state([
+  ll_block_at(b1, 6, 6),
+  ll_block_at(b2, 9, 6),
+  ll_block_at(b3, 7, 6),
+  ll_clear(b1),
+  ll_clear(b2),
+  ll_clear(b3),
+  ll_ontable(b1),
+  ll_ontable(b2),
+  ll_ontable(b3),
+  ll_on(b3, b1),
+  ll_on(b3, b2),
+  ll_available(robotic_arm)
+]).
+```
+
+In the updated initial state, we include the low-level predicates to represent the positions of the blocks, the clear status of the blocks, the ontable status of the blocks, the availability of the robotic arm, and the position of the robotic arm's end-effector. We also include the low-level predicates to represent the initial state of the gripper.
+
+In the updated goal state, we include the low-level predicates to represent the desired positions of the blocks, the clear status of the blocks, the ontable status of the blocks, the on status of the blocks, and the availability of the robotic arm.
+ACTIONS: Sure! Here is the low-level action set for the given task:
+
+```ll_actions
+ll_action(move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+  [ll_arm_at(robotic_arm, X1, Y1)],
+  [moving_arm(robotic_arm, _, _, _, _, _, _), gripping(robotic_arm, _), releasing(robotic_arm)],
+  [],
+  [ll_arm(robotic_arm), pos(X1, Y1), pos(X2, Y2)],
+  [
+    add(moving_arm(robotic_arm, X1, Y1, X2, Y2)),
+    del(ll_arm_at(robotic_arm, X1, Y1))
+  ]
+).
+
+ll_action(move_arm_end(robotic_arm, X1, Y1, X2, Y2),
+  [moving_arm(robotic_arm, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [],
+  [
+    del(moving_arm(robotic_arm, X1, Y1, X2, Y2)),
+    add(ll_arm_at(robotic_arm, X2, Y2))
+  ]
+).
+
+ll_action(close_gripper_start(robotic_arm),
+  [ll_gripper(robotic_arm, open)],
+  [moving_arm(robotic_arm, _, _, _, _, _, _), gripping(robotic_arm, _), releasing(robotic_arm), gripped(robotic_arm)],
+  [],
+  [ll_gripper(robotic_arm)],
+  [
+    del(ll_gripper(robotic_arm, open)),
+    add(gripping(robotic_arm, _))
+  ]
+).
+
+ll_action(close_gripper_end(robotic_arm),
+  [gripping(robotic_arm, _)],
+  [],
+  [],
+  [ll_gripper(robotic_arm)],
+  [
+    del(gripping(robotic_arm, _)),
+    add(gripped(robotic_arm)), add(ll_gripper(robotic_arm, close))
+  ]
+).
+
+ll_action(open_gripper_start(robotic_arm),
+  [gripped(robotic_arm)],
+  [moving_arm(robotic_arm, _, _, _, _, _, _), gripping(robotic_arm, _), releasing(robotic_arm)],
+  [],
+  [ll_gripper(robotic_arm)],
+  [
+    del(gripped(robotic_arm)), del(ll_gripper(robotic_arm, close)),
+    add(releasing(robotic_arm))
+  ]
+).
+
+ll_action(open_gripper_end(robotic_arm),
+  [releasing(robotic_arm)],
+  [],
+  [],
+  [ll_gripper(robotic_arm)],
+  [
+    del(releasing(robotic_arm)),
+    add(ll_gripper(robotic_arm, open))
+  ]
+).
+```
+
+These low-level actions define the movement of the robotic arm and the opening and closing of the gripper. The `move_arm_start` and `move_arm_end` actions are responsible for moving the end-effector of the robotic arm from one position to another. The `close_gripper_start` and `close_gripper_end` actions close the gripper, while the `open_gripper_start` and `open_gripper_end` actions open the gripper. These actions can be used to perform the required tasks in the low-level planning.
+MAPPINGS: Sure! Here are the mappings from high-level actions to low-level actions:
+```mappings
+mapping(move_table_to_table_start(robotic_arm, Block, X1, Y1, X2, Y2),
+  [
+    move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+    move_arm_end(robotic_arm, X1, Y1, X2, Y2)
+  ]
+).
+
+mapping(move_table_to_block_start(robotic_arm, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+    move_arm_end(robotic_arm, X1, Y1, X2, Y2)
+  ]
+).
+
+mapping(move_block_to_table_start(robotic_arm, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+    move_arm_end(robotic_arm, X1, Y1, X2, Y2)
+  ]
+).
+
+mapping(move_block_to_block_start(robotic_arm, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [
+    move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+    move_arm_end(robotic_arm, X1, Y1, X2, Y2)
+  ]
+).
+
+mapping(place_architrave_start(robotic_arm, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [
+    move_arm_start(robotic_arm, X1, Y1, X2, Y2),
+    move_arm_end(robotic_arm, X1, Y1, X2, Y2)
+  ]
+).
+```
+These mappings define the low-level actions that correspond to the start actions of the high-level actions. Each high-level action is mapped to the corresponding low-level actions for moving the arm. The `move_arm_start` and `move_arm_end` actions are used to move the end-effector of the robotic arm from one position to another. The mappings ensure that the low-level actions are executed to achieve the high-level actions.

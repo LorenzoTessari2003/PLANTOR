@@ -1,5 +1,7 @@
-:- ensure_loaded('utility/utility.pl').
+% :- discontiguous ll_action/6.
+
 :- ensure_loaded('includes.pl').
+:- ensure_loaded('utility/utility.pl').
 
 :- dynamic map/2.
 
@@ -12,65 +14,65 @@ goal_reached(State, Goal) :-
 % This function applies the mappings of an action. It also checks that the ll action is applicable and changes the state accordingly 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 apply_mappings(Init, HL_Plan, LL_Plan) :-
-  debug_format('[apply_mappings1] The HL plan is ~w\n', [HL_Plan]),
+  % format('[apply_mappings1] The HL plan is ~w\n', [HL_Plan]),
   apply_mappings(Init, HL_Plan, [], LL_Plan).
   
 
 apply_mappings(_, [], LL_Plan, LL_Plan) :-
-  debug_format('[apply_mappings2] Reached this point ~w\n', [LL_Plan]),
+  % format('[apply_mappings2] Reached this point ~w\n', [LL_Plan]),
   true.
 
 
 apply_mappings(State, [[IDHLAction-HL_Action]|T_HL_Actions], Plan, RetPlan) :-
-  debug_format('\n\n[apply_mappings3] HL_Action: ~w-~w\n', [IDHLAction, HL_Action]), 
+  % format('\n\n[apply_mappings3] HL_Action: ~w-~w\n', [IDHLAction, HL_Action]), 
   
   length(Plan, Length),
   action(HL_Action, PreconditionsT, PreconditionsF, _FinalConditionsF, Verify, Effects),
   append([Length-HL_Action], Plan, TempPlan),
   change_state(State, Effects, CurrentState),
 
-  debug_format('[apply_mappings3] Finding last achievers for: ~w\n', [HL_Action]),
-  debug_format('[apply_mappings3] PreconditionsT: ~w\n', [PreconditionsT]),
-  debug_format('[apply_mappings3] PreconditionsF: ~w\n', [PreconditionsF]),
-  debug_format('[apply_mappings3] Verify: ~w\n', [Verify]),
-  debug_format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
-  debug_format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]),
+  % format('[apply_mappings3] Finding last achievers for: ~w\n', [HL_Action]),
+  % format('[apply_mappings3] PreconditionsT: ~w\n', [PreconditionsT]),
+  % format('[apply_mappings3] PreconditionsF: ~w\n', [PreconditionsF]),
+  % format('[apply_mappings3] Verify: ~w\n', [Verify]),
+  % format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
+  % format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]),
 
   Pre = '\t',
   (
-    debug_format('[apply_mappings3] Checking if there is a mapping for action ~w\n', [HL_Action]),
+    % format('[apply_mappings3] Checking if there is a mapping for action ~w\n', [HL_Action]),
     mapping(HL_Action, Mappings) 
     ->(      
-      debug_format('[apply_mappings3] Found mapping for action ~w ~w ~w\n', [HL_Action, Mappings, Length]),
-      debug_format('[apply_mappings3] Calling apply_action_map with'),
-      debug_format('[apply_mappings3] Mappings: ~w\n', [Mappings]), 
-      debug_format('[apply_mappings3] Length: ~w\n', [Length]), 
-      debug_format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]), 
-      debug_format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
+      % format('[apply_mappings3] Found mapping for action ~w ~w ~w\n', [HL_Action, Mappings, Length]),
+      % format('[apply_mappings3] Calling apply_action_map with'),
+      % format('[apply_mappings3] Mappings: ~w\n', [Mappings]), 
+      % format('[apply_mappings3] Length: ~w\n', [Length]), 
+      % format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]), 
+      % format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
 
       apply_action_map(Mappings, Length, CurrentState, TempPlan, NewState, NewPlan, Pre),
-      debug_format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
-      debug_format('[apply_mappings3] Current state: ~w\n', [NewState]),
-      debug_format('[apply_mappings3] NewPlan: ~w\n', [NewPlan]),
+      % format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
+      % format('[apply_mappings3] Current state: ~w\n', [NewState]),
+      % format('[apply_mappings3] NewPlan: ~w\n', [NewPlan]),
       true
     );(
-      debug_format('[apply_mappings3] No mappings for action ~w\n', [HL_Action]),
+      % format('[apply_mappings3] No mappings for action ~w\n', [HL_Action]),
       NewState = CurrentState,
       NewPlan = TempPlan,
-      debug_format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
-      debug_format('[apply_mappings3] Current state: ~w\n', [NewState]),
-      debug_format('[apply_mappings3] NewPlan: ~w\n', [TempPlan]),
+      % format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
+      % format('[apply_mappings3] Current state: ~w\n', [NewState]),
+      % format('[apply_mappings3] NewPlan: ~w\n', [TempPlan]),
       true
     )
   ),
 
-  debug_format('[apply_mappings3] Applying next action ~w\n', [T_HL_Actions]),
+  % format('[apply_mappings3] Applying next action ~w\n', [T_HL_Actions]),
 
   apply_mappings(NewState, T_HL_Actions, NewPlan, RetPlan).
 
 
 apply_mappings(_, _, _, _, _) :-
-  debug_format('[apply_mappings5] Could not apply mappings\n'),
+  % format('[apply_mappings5] Could not apply mappings\n'),
   fail.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -81,43 +83,53 @@ apply_mappings(_, _, _, _, _) :-
 apply_action_map([], _IDHLAction, State, Plan, State, Plan, _).
 apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan, Pre) :-
   % disable_debug,
-  debug_format('\n~w[apply_action_map] Adding map to ~w ~w\n', [Pre, HAction, State]),
-  ll_action(HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
-  debug_format('~w[apply_action_map] found action ~w ~w ~w ~w ~w ~w \n', [Pre, HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects]),
+  % format('\n~w[apply_action_map] Adding map to ~w ~w\n', [Pre, HAction, State]),
+  (
+    ll_action(HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects)
+    ->(
+      % format('~w[apply_action_map] found action ~w ~w ~w ~w ~w ~w \n', [Pre, HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects]),
+      true
+    );(
+      % format('~w[apply_action_map] Could not find action ~w\n', [Pre, HAction]),
+      fail
+    )
+  ),
+  % format('~w[apply_action_map] found action ~w ~w ~w ~w ~w ~w \n', [Pre, HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects]),
   disable_debug,
   (
     is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify)
+    % true
     -> (
-      debug_format('~w[apply_action_map] applicable ~w\n', [Pre, HAction]),
+      % format('~w[apply_action_map] applicable ~w\n', [Pre, HAction]),
       length(Plan, Length),
 
       % NewPre is the concatenation of Pre and a tab
       format(atom(NewPre), '\t~w', [Pre]),
 
       stack(Length-HAction, Plan, NewPlan),
-      debug_format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
+      % format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
       % Change state.
       change_state(State, Effects, NewState),
-      debug_format('~w[apply_action_map] changed to ~w\n', [Pre, NewState]),
+      % format('~w[apply_action_map] changed to ~w\n', [Pre, NewState]),
       (
         mapping(HAction, Mappings)
         ->(
-          debug_format('~w[apply_action_map] Found mapping for action ~w ~w\n', [Pre, HAction, Mappings]),
+          % format('~w[apply_action_map] Found mapping for action ~w ~w\n', [Pre, HAction, Mappings]),
           append(Mappings, TActions, NewActionList),
           apply_action_map(NewActionList, Length, NewState, NewPlan, RetState, RetPlan, NewPre)
         );(
-          debug_format('~w[apply_action_map] No mappings for action ~w\n', [Pre, HAction]),
-          debug_format('~w[apply_action_map] Applying next action\n', [Pre]), 
-          debug_format('~w[apply_action_map] TActions: ~w\n', [Pre, TActions]),
-          debug_format('~w[apply_action_map] IDHLAction: ~w\n', [Pre, IDHLAction]),
-          debug_format('~w[apply_action_map] NewState: ~w\n', [Pre, NewState]),
-          debug_format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
+          % format('~w[apply_action_map] No mappings for action ~w\n', [Pre, HAction]),
+          % format('~w[apply_action_map] Applying next action\n', [Pre]), 
+          % format('~w[apply_action_map] TActions: ~w\n', [Pre, TActions]),
+          % format('~w[apply_action_map] IDHLAction: ~w\n', [Pre, IDHLAction]),
+          % format('~w[apply_action_map] NewState: ~w\n', [Pre, NewState]),
+          % format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
           apply_action_map(TActions, Length, NewState, NewPlan, RetState, RetPlan, Pre)
         )
       ),
       true
     );(
-      debug_format('~w[apply_action_map] Not applicable ~w\n', [Pre, HAction]),
+      % format('~w[apply_action_map] Not applicable ~w\n', [Pre, HAction]),
       why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify),
       fail
     )
@@ -126,7 +138,7 @@ apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan,
   .
 
 apply_action_map(_, _, _, _, _, _, _, _, _) :-
-  debug_format('[apply_action_map] Could not apply action map\n'),
+  % format('[apply_action_map] Could not apply action map\n'),
   fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,7 +148,7 @@ apply_action_map(_, _, _, _, _, _, _, _, _) :-
 % This function generates a plan
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 generate_plan(Init, Goal, Plan, Enablers) :-
-  generate_plan(Init, Goal, Plan, Enablers, 4).
+  generate_plan(Init, Goal, Plan, Enablers, 2).
 
 generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
@@ -148,21 +160,27 @@ generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
   debug_format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
   (
-    generate_plan_hl(Init, Goal, [], [], MaxDepth, HL_Plan)
+    call_time(generate_plan_hl(Init, Goal, [], [], MaxDepth, HL_Plan), time{cpu:HL_Time, inferences:_, wall:_})
     ->(
+      format('High-level plan generated in ~ws\n', [HL_Time]),
       % Print information on the high-level part
-      debug_format('High-level plan generated\n~w\n', [HL_Plan]),
-      
-      debug_format('Applying the mappings to obtain the low-level temporal plan\n'),
+      % format('High-level plan generated\n'),
       reverse(HL_Plan, HL_PlanReversed),
+      % print_list(HL_PlanReversed),      
+      debug_format('Applying the mappings to obtain the low-level temporal plan\n'),
       (
-        apply_mappings(Init, HL_PlanReversed, Plan)
+        % enable_debug,
+        call_time(apply_mappings(Init, HL_PlanReversed, Plan), time{cpu:LL_Time, inferences:_, wall:_})
+        % disable_debug
         ->(
-          debug_format('Plan generated~w\n', [Plan]),
+          format('Low-level plan generated in ~ws\n', [LL_Time]),
+          debug_format('Plan generated\n'),
+          % print_list(Plan),
           (
             % reverse(Plan, PlanReversed),
-            extract_achievers(Plan, EnablersD)
+            call_time(extract_achievers(Plan, EnablersD), time{cpu:Achievers_Time, inferences:_, wall:_})
             ->(
+              format('Achievers extracted in ~ws\n', [Achievers_Time]),
               debug_format('Achievers found ~w\n', [EnablersD]),
               clean_achievers(EnablersD, Plan, Enablers),
               debug_format('Cleaned achievers\n'),
@@ -347,21 +365,27 @@ generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
   % choose_action(State, Goal, Name, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
   action(Name, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
   debug_format('Checking action ~w for state: ~w\n', [Name, State]),
-  is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal),
-  debug_format('Action ~w is applicable for state ~w\n', [Name, State]),
-  
-  change_state(State, Effects, NewState),
-  debug_format('Obtained new state ~w\n', [NewState]),
-  
-  \+member_state(NewState, Been_list),
- 
-  % Change state and add action to plan
-  stack(NewState, Been_list, NewBeen_list),
-  debug_format('New state: ~w\n', [NewState]),
-  stack([Length-Name], Plan, NewPlan),
-  debug_format('New plan: ~w\n', [NewPlan]),
-  generate_plan_hl(NewState, Goal, NewBeen_list, NewPlan, MaxDepth, FinalPlan),
-  true.
+  (
+    is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal)
+    *->(
+      debug_format('Action ~w is applicable for state ~w\n', [Name, State]),
+      
+      change_state(State, Effects, NewState),
+      debug_format('Obtained new state ~w\n', [NewState]),
+      
+      \+member_state(NewState, Been_list),
+    
+      % Change state and add action to plan
+      stack(NewState, Been_list, NewBeen_list),
+      debug_format('New state: ~w\n', [NewState]),
+      stack([Length-Name], Plan, NewPlan),
+      debug_format('New plan: ~w\n', [NewPlan]),
+      generate_plan_hl(NewState, Goal, NewBeen_list, NewPlan, MaxDepth, FinalPlan)
+    );(
+      why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify),
+      fail
+    )
+  ).
 
 generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
   fail. 

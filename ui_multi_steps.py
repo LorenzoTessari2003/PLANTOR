@@ -29,6 +29,9 @@ HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yam
 WAIT = False
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
+
+os.makedirs(OUTPUT_PATH, exist_ok=True)
+
 OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
 OUTPUT_HL_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_hl.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
@@ -465,12 +468,12 @@ Remember to use the appropriate tags for the code you produce and not to use pro
 Moreover, remember that the low-level actions must not contain high-level predicates. Low-level actions must only contain predicates that start with 'll_'.
     """
 
-    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '1', 'query')
+    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'arch', '2', 'query')
     assert os.path.exists(GENERAL_DIR), f"General directory not found at {GENERAL_DIR}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_hl.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'query_hl.txt')}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_ll.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'query_ll.txt')}"
     
-    with open(os.path.join(GENERAL_DIR, 'query_hl.txt'), 'r') as file:
+    with open(os.path.join(GENERAL_DIR, 'query_hl_corrected.txt'), 'r') as file:
         query_hl = file.read()
     query_hl+="\nRemember that the tags are in the Markdown form of ```tag and not <tag>"
     with open(os.path.join(GENERAL_DIR, 'query_ll.txt'), 'r') as file:

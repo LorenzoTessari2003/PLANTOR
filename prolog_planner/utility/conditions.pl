@@ -5,9 +5,7 @@
 :- ensure_loaded('adts.pl').
 :- ensure_loaded('utility.pl').
 
-:-discontiguous ll_action/6.
-
-ll_action(action_name, pred_true, pred_f, final_f, verify, eff).
+% ll_action(action_name, pred_true, pred_f, final_f, verify, eff).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % :brief: Checks if the conditions are met
@@ -130,8 +128,8 @@ why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Veri
 
 why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
     debug_format('Checking why action is not applicable\n'),
-    verify(Verify),
-    (
+    verify(Verify)
+    ->(
         which_conditions_not_met_wrapper(PreconditionsT, State, R)
         ->(
             debug_format('Precondition ~w is not met in state ~w, but should\n', [R, State])
@@ -143,6 +141,9 @@ why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Veri
                 true
             )
         )
+    );(
+        debug_format('Verify conditions are not met\n'),
+        fail
     ),
     true.
 
