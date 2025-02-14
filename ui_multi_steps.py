@@ -30,6 +30,9 @@ HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yam
 WAIT = False
 
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
+
+os.makedirs(OUTPUT_PATH, exist_ok=True)
+
 OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
 OUTPUT_HL_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_hl.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
