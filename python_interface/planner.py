@@ -81,8 +81,6 @@ def run_tests(plan_len, input_kb_file):
 
 
 
-
-
 if __name__ == "__main__":
     help_str = "main.py [-t] -x <xml_file> -H <html_file> -i <input_file>\n-t is optional and will run the run_tests function"
     try:

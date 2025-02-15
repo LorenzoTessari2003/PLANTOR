@@ -64,21 +64,49 @@ def test_prolog():
             print("Done") 
 
 
-def parse_results(csv_file):
+def parse_results_python(csv_file):
     import csv
     data_dict = dict()
     with open(csv_file, mode="r") as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             if row[0] in data_dict:
-                data_dict[row[0]].append(float(row[1]))
+                data_dict[row[0]]["prolog"].append(float(row[1]))
+                data_dict[row[0]]["milp"].append(float(row[2]))
             else:
-                data_dict[row[0]] = [float(row[1])]
+                data_dict[row[0]] = {"prolog" : [float(row[1])], "milp" : [float(row[2])]}
 
     print(data_dict)
 
     for key in data_dict:
-        print(f"{key}: {sum(data_dict[key])/len(data_dict[key])} with std: {sum([(x - sum(data_dict[key])/len(data_dict[key]))**2 for x in data_dict[key]])/len(data_dict[key])}")
+        print(f"{key}:")
+        print(f"\tprolog: {sum(data_dict[key]['prolog'])/len(data_dict[key]['prolog'])} with std: {sum([(x - sum(data_dict[key]['prolog'])/len(data_dict[key]['prolog']))**2 for x in data_dict[key]['prolog']])/len(data_dict[key]['prolog'])}")
+        print(f"\tmilp: {sum(data_dict[key]['milp'])/len(data_dict[key]['milp'])} with std: {sum([(x - sum(data_dict[key]['milp'])/len(data_dict[key]['milp']))**2 for x in data_dict[key]['milp']])/len(data_dict[key]['milp'])}")
+
+        # print(f"{key}: {sum(data_dict[key])/len(data_dict[key])} with std: {sum([(x - sum(data_dict[key])/len(data_dict[key]))**2 for x in data_dict[key]])/len(data_dict[key])}")
+
+
+def parse_results_prolog(csv_file):
+    import csv
+    data_dict = dict()
+    with open(csv_file, mode="r") as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            if row[0] in data_dict:
+                data_dict[row[0]]["hl_time"].append(float(row[1]))
+                data_dict[row[0]]["ll_time"].append(float(row[2]))
+                data_dict[row[0]]["ach_time"].append(float(row[3]))
+            else:
+                data_dict[row[0]] = {"hl_time" : [float(row[1])], "ll_time" : [float(row[2])], "ach_time" : [float(row[3])]}
+
+    print(data_dict)
+
+    for key in data_dict:
+        print(f"{key}:")
+        print(f"\thl_time: {sum(data_dict[key]['hl_time'])/len(data_dict[key]['hl_time'])} with std: {sum([(x - sum(data_dict[key]['hl_time'])/len(data_dict[key]['hl_time']))**2 for x in data_dict[key]['hl_time']])/len(data_dict[key]['hl_time'])}")
+        print(f"\tll_time: {sum(data_dict[key]['ll_time'])/len(data_dict[key]['ll_time'])} with std: {sum([(x - sum(data_dict[key]['ll_time'])/len(data_dict[key]['ll_time']))**2 for x in data_dict[key]['ll_time']])/len(data_dict[key]['ll_time'])}")
+        print(f"\tach_time: {sum(data_dict[key]['ach_time'])/len(data_dict[key]['ach_time'])} with std: {sum([(x - sum(data_dict[key]['ach_time'])/len(data_dict[key]['ach_time']))**2 for x in data_dict[key]['ach_time']])/len(data_dict[key]['ach_time'])}")
+
 
 
 if __name__ == "__main__":
@@ -88,8 +116,12 @@ if __name__ == "__main__":
             test_python()
         elif sys.argv[1] == "2":
             test_prolog()
+        elif sys.argv[1] == "3":
+            parse_results_python("results2.csv")
+        elif sys.argv[1] == "4":
+            parse_results_prolog("results_prolog2.csv")
         
 
     # test_python()
     # test_prolog()
-    # parse_results("results.csv")
+    # parse_results("results2.csv")
