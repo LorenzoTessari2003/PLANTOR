@@ -15,7 +15,7 @@ import time
 def main_exec(xml_file = "", html_file = "", input_kb_file = "") -> float:
     start = time.time()
 
-    data_dict = PrologLib.execTest(kb_path=input_kb_file)
+    data_dict = PrologLib.execTest(plan_len=6, kb_path=input_kb_file)
 
     milp_solver = MILPSolver(
         data_dict["tt_actions"],

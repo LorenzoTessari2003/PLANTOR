@@ -7,119 +7,172 @@ entries:
       Q:
         role: 'user'
         content: |
-          There are 3 blocks on the table, two boxes and one more elongated for the arch. Our goal is to create an arch
-          with these blocks by first constructing the two pillars and then placing the architrave on top of them. The 
-          position available are as follows:
-          - a: (1, 1, 0)
-          - b: (2, 2, 0)
-          - c: (3, 4, 0)
-          - d: (5, 5, 0)
-          - e: (9, 9, 0)
-          - f: (1.5, 1.5, 0)
-          Initially, the blocks are free and the agents are available. Moreover, one block is in position c, another is 
-          in position d and the architrave is in position e.
-          We want to construct the first pillar on a, the second pillar on b and the arch on top of them. 
-          There are two agents that can carry out this task, namely a1 and a2. 
+          In this scenario, we want to construct an arch using 3 blocks and a robotic arm. The blocks are
+          initially distributed on the table in positions (32,60), (113,83), and (44,40). Blocks b1 and b2 have 
+          dimensions 1x1x1 whereas b3 is longer and is considered as an architrave. The goal is to build
+          the two pillars with b1 and b2 in positions (86,52) and (72,52), respectively, and place b3 on top of 
+          them as an architrave in position (79, 52). There are two agents that can:
+          - from a position on the table to another position on the table;
+          - from a position on the table, to the top of another block;
+          - from the top of a block, to a position on the table;
+          - from the top of a block, to the top of another block.
+          The action to place the last block on top as an architrave should be handled differently than these 
+          moves as it must check that the two pillars have been built. 
+          The agents are available and can be used. The blocks are initially free and can be moved by the agents.
           Moreover, the initial and final states and the knowledge base extracted before are the following:
           ```KB
-          :- discontiguous resources/1.
-          
-          % blocks
-          block(block1).
-          block(block2).
-          arch(arch1).
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
 
-          % agents
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
+
+          % Agents
           agent(a1).
           agent(a2).
 
-          % positions
-          pos(a, 1, 1, 0).
-          pos(b, 2, 2, 0).
-          pos(c, 3, 4, 0).
-          pos(d, 5, 5, 0).
-          pos(e, 9, 9, 0).
-          pos(f, 1.5, 1.5, 0).
-
-          % resources
-          resource(agent(_)).
+          % Resources
+          resources(agent(_)).
           ```
           ```init
-          [av(a1), av(a2), free(block1), free(block2), free(arch1), at(c, block1), at(d, block2), at(e, arch1)]
+          init_state([
+            ontable(b1), ontable(b2), ontable(b3),
+            at(b1,32,60), at(b2,113,83), at(b3,44,40),
+            clear(b1), clear(b2), clear(b3),
+            available(arm1), available(arm2)
+          ]).
           ```
           ```goal
-          [
-            av(a1), av(a2), pillar(a, block1), pillar(b, block2), arch(a, b, arch1),
-            at(a, block1), at(b, block2), at(e, arch1),
-
-          ]
+          goal_state([
+            ontable(b1), ontable(b2),
+            pillar(p1, b1), pillar(p2, b2), arch(b3, p1, p2),
+            at(b1,86,52), at(b2,72,52), at(b3,79,52),
+            clear(b3),
+            available(arm1), available(arm2)
+          ]).
           ```
           Can you provide the set of actions?
       A:
         role: 'assistant'
         content: |
-          Sure. The actions that we need to perform are two: one to build the pillars and one to place the architrave.
-          The first action is to build the pillars, which is divided into two steps (since we are doing temporal 
-          planning): one to start building the pillar and one to end building the pillar. The precondition for the
-          starting action to build the pillars are that there must be an agent available and the block must be free. 
-          Also there mus not be a pillar on the position where we want to build the pillar, nor there should be another
-          agent building another pillar on the same position. In order to guide the search, we set the forth argument 
-          of `action` to be `pillar(Pos, Block1)` so that it will be grounded against the goal state. Moreover, there 
-          are some predicates that must be ground w.r.t. the kb, in particular, the block must be a block, the agent 
-          must be an agent and the position must be a valid position. The effects of the action are to remove the agent
-          availability and the block freedom and to add the fact that the agent is building the pillar. 
-          The ending action to build a pillar is simpler, as it only requires that the agent is building the pillar, and
-          we also want to make sure that by change an agent hasn't built another pillar on the same position. The 
-          effects are that we remove the predicate of building the pillar, we add the agent is available and we add the
-          fact that the pillar has been built.
-          The second action is to place the architrave, which is also divided into two steps. The starting action 
-          requires that the agent is available, that the two pillars are built and that the architrave is free. We test
-          against the final state that the positions and the arch is correct, and we ground the arch, the agent and the 
-          positions to verify that they exist. Also we ensure that the two positions are different. Finally, the effects
-          are that the agent is not available anymore and that the agent is placing the architrave. 
-          The ending action is simpler, as it only requires that the agent is placing the architrave. We also make sure
-          that there is no architrave on those same pillars. The effects are that the agent is available again and that
-          the architrave has been placed.
-
           ```actions
-          action(build_pillar_start(A, Pos, Block1),
-            [av(A), free(Block1)],
-            [pillar(Pos, _), pillaring(_, Pos, _)],
-            [pillar(Pos, Block1)],
-            [block(Block1), agent(A), pos(Pos,_,_,_)],
+          % Move a block from a position on the table to another position on the table
+          action(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+            [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
+            [at(_, X2, Y2), on(Block, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
+            [],
+            [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block), X1\=X2, Y1\=Y2],
             [
-              del(av(A)), del(free(Block1)),
-              add(pillaring(A, Pos, Block1))
+              del(available(Agent)), del(clear(Block)), del(ontable(Block)), del(at(Block, X1, Y1)),
+              add(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2))
             ]
           ).
-          action(build_pillar_end(A, Pos, Block1),
-            [pillaring(A, Pos, Block1)],
-            [pillar(Pos, _)],
+          action(move_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+            [moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)],
+            [at(_, X2, Y2)],
             [],
             [],
             [
-              del(pillaring(A, Pos, Block1)),
-              add(av(A)), add(pillar(Pos, Block1))
+              del(moving_table_to_table(Agent, Block, X1, Y1, X2, Y2)),
+              add(ontable(Block)), add(at(Block, X2, Y2)), add(clear(Block)), add(available(Agent))
             ]
           ).
-          action(place_arch_start(A, Pos1, Pos2, Arch),
-            [av(A), pillar(Pos1, _), pillar(Pos2, _), free(Arch)],
-            [placing_arch(_, Pos1, Pos2, _), placed_arch(Pos1, Pos2, _)],
-            [placed_arch(Pos1, Pos2, Arch)],
-            [arch(Arch), agent(A), pos(Pos1,_,_,_), pos(Pos2,_,_,_), Pos1\=Pos2],
+
+          % Move a block from a position on the table to the top of another block
+          action(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+            [available(Agent), ontable(Block1), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
+            [on(_, Block1), on(Block1, _), moving_table_to_table(_, Block, _, _, _, _), moving_table_to_block(_, Block, _, _, _, _, _)],
+            [],
+            [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2), Block1 \= Block2],
             [
-              del(av(A)), del(free(Arch)),
-              add(placing_arch(A, Pos1, Pos2, Arch))
+              del(available(Agent)), del(clear(Block1)), del(ontable(Block1)), del(at(Block1, X1, Y1)),
+              add(moving_table_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2))
             ]
           ).
-          action(place_arch_end(A, Pos1, Pos2, Arch),
-            [placing_arch(A, Pos1, Pos2, Arch)],
-            [arch(_, Pos1, Pos2)],
+          action(move_table_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+            [moving_table_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
+            [],
+            [],
+            [agent(Agent)],
+            [
+              del(clear(Block2)), del(moving_table_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+              add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+            ]
+          ).
+
+          % Move a block from the top of another block to a position on the table
+          action(move_onblock_to_table_start(Agent, Block1, X1, Y1, X2, Y2),
+            [available(Agent), on(Block1, Block2), at(Block1, X1, Y1), at(Block2, X1, Y1), clear(Block1)],
+            [moving_onblock_to_table(_, Block1, _, _, _, _), on(_, Block1), ontable(Block1), at(_, X2, Y2)],
+            [],
+            [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2), Block1 \= Block2],
+            [
+              del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
+              add(moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)), add(clear(Block2))
+            ]
+          ).
+          action(move_onblock_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
+            [moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)],
+            [at(_, X2, Y2)],
+            [],
+            [agent(Agent)],
+            [
+              del(moving_onblock_to_table(Agent, Block1, X1, Y1, X2, Y2)),
+              add(ontable(Block1)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+            ]
+          ).
+
+          % Move a block from the top of another block to the top of another block
+          action(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+            [available(Agent), on(Block1, Block3), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
+            [moving_onblock_to_block(_, Block1, _, _, _, _), on(_, Block1), ontable(Block1)],
+            [],
+            [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2), block(Block3), Block1 \= Block2, Block1 \= Block3, Block2 \= Block3],
+            [
+              del(available(Agent)), del(clear(Block1)), del(on(Block1, Block3)), del(at(Block1, X1, Y1)),
+              add(moving_onblock_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2)), add(clear(Block3))
+            ]
+          ).
+          action(move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+            [moving_onblock_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2), clear(Block2)],
+            [],
+            [],
+            [agent(Agent)],
+            [
+              del(clear(Block2)), del(moving_onblock_to_block(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+              add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+            ]
+          ).
+
+          % Place the architrave on top of the two pillars
+          action(place_architrave_start(Agent, Arch, Block1, Block2, FromArchX, FromArchY, ToArchX, ToArchY, Block1X, Block1Y, Block2X, Block2Y),
+            [available(Agent), ontable(Arch), at(Arch, FromArchX, FromArchY), at(Block1, Block1X, Block1Y), at(Block2, Block2X, Block2Y), clear(Block1), clear(Block2)],
+            [moving_table_to_table(_, Arch, _, _, _, _), moving_table_to_block(_, Arch, _, _, _, _, _), moving_onblock_to_table(_, Arch, _, _, _, _), moving_onblock_to_block(_, Arch, _, _, _, _, _)],
+            [],
+            [ 
+              agent(Agent), arch(Arch),
+              pos(ToArchX, ToArchY), FromArchX \= ToArchX, FromArchY \= ToArchY
+            ],
+            [
+              del(available(Agent)), del(clear(Arch)), del(ontable(Arch)), del(at(Arch, FromArchX, FromArchY)), del(clear(Block1)), del(clear(Block2)),
+              add(placing_arch(Agent, Arch, Block1, Block2, FromArchX, FromArchY, ToArchX, ToArchY, Block1X, Block1Y, Block2X, Block2Y))
+            ]
+          ).
+          action(place_architrave_end(Agent, Arch, Block1, Block2, FromArchX, FromArchY, ToArchX, ToArchY, Block1X, Block1Y, Block2X, Block2Y),
+            [placing_arch(Agent, Arch, Block1, Block2, FromArchX, FromArchY, ToArchX, ToArchY, Block1X, Block1Y, Block2X, Block2Y)],
+            [at(_, ToArchX, ToArchY)],
             [],
             [],
             [
-              del(placing_arch(A, Pos1, Pos2, Arch)),
-              add(arch(Pos1, Pos2, Arch)), add(av(A))
+              del(placing_arch(Agent, Arch, Block1, Block2, FromArchX, FromArchY, ToArchX, ToArchY, Block1X, Block1Y, Block2X, Block2Y)),
+              add(on(Arch, Block1)), add(on(Arch, Block2)), add(at(Arch, ToArchX, ToArchY)), add(clear(Arch)), add(available(Agent))
             ]
           ).
           ```

@@ -7,90 +7,72 @@ entries:
       Q:
         role: 'user'
         content: |
-          Given the high-level knowledge-base obtained from the high level description:
-          ```KB
-          :- discontiguous resources/1.
+          Given the high-level knowledge-base obtained from the low-level description:
+          ```kb
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+          pos(4,4).
+          pos(5,5).
 
-          % blocks
-          block(block1).
-          block(block2).
-          arch(arch1).
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
 
-          % agents
+          % Agents
           agent(a1).
           agent(a2).
 
-          % positions
-          pos(a, 1, 1, 0).
-          pos(b, 2, 2, 0).
-          pos(c, 3, 4, 0).
-          pos(d, 5, 5, 0).
-          pos(e, 9, 9, 0).
-          pos(f, 1.5, 1.5, 0).
+          % Low-level predicates for arms and grippers
+          ll_arm(a1).
+          ll_arm(a2).
 
-          % resources
-          resource(agent(_)).
+          ll_gripper(a1).
+          ll_gripper(a2).
+
+          % Resources
+          resources(agent(_)).
+          resources(ll_arm(_)).
+          resources(ll_gripper(_)).
           ```
+
+          Given the initial and final states generated from the high-level description:
           ```init
-          [av(a1), av(a2), free(block1), free(block2), free(arch1), at(c, block1), at(d, block2), at(e, arch1)]
+          init_state([
+            ontable(b1), ontable(b2), ontable(b3),
+            at(b1,32,60), at(b2,113,83), at(b3,44,40),
+            clear(b1), clear(b2), clear(b3),
+            available(arm1), available(arm2)
+          ]).
           ```
+
           ```goal
-          [
-            av(a1), av(a2), pillar(a, block1), pillar(b, block2), arch(a, b, arch1),
-            at(a, block1), at(b, block2), at(e, arch1),
-
-          ]
-          ```
-          ```actions
-          action(build_pillar_start(A, Pos, Block1),
-            [av(A), free(Block1)],
-            [pillar(Pos, _), pillaring(_, Pos, _)],
-            [pillar(Pos, Block1)],
-            [block(Block1), agent(A), pos(Pos,_,_,_)],
-            [
-            del(av(A)), del(free(Block1)),
-            add(pillaring(A, Pos, Block1))
-            ]
-          ).
-          action(build_pillar_end(A, Pos, Block1),
-            [pillaring(A, Pos, Block1)],
-            [pillar(Pos, _)],
-            [],
-            [],
-            [
-              del(pillaring(A, Pos, Block1)),
-              add(av(A)), add(pillar(Pos, Block1))
-            ]
-          ).
-          action(place_arch_start(A, Pos1, Pos2, Arch),
-            [av(A), pillar(Pos1, _), pillar(Pos2, _), free(Arch)],
-            [placing_arch(_, Pos1, Pos2, _), placed_arch(Pos1, Pos2, _)],
-            [placed_arch(Pos1, Pos2, Arch)],
-            [arch(Arch), agent(A), pos(Pos1,_,_,_), pos(Pos2,_,_,_), Pos1\=Pos2],
-            [
-              del(av(A)), del(free(Arch)),
-              add(placing_arch(A, Pos1, Pos2, Arch))
-            ]
-          ).
-          action(place_arch_end(A, Pos1, Pos2, Arch),
-            [placing_arch(A, Pos1, Pos2, Arch)],
-            [arch(_, Pos1, Pos2)],
-            [],
-            [],
-            [
-              del(placing_arch(A, Pos1, Pos2, Arch)),
-              add(arch(Pos1, Pos2, Arch)), add(av(A))
-            ]
-          ).
+          goal_state([
+            ontable(b1), ontable(b2),
+            pillar(p1, b1), pillar(p2, b2), arch(b3, p1, p2),
+            at(b1,86,52), at(b2,72,52), at(b3,79,52),
+            clear(b3),
+            available(arm1), available(arm2)
+          ]).
           ```
 
-          Consider the following description of the low-level aspect of the same problem. Each agent has an arm and a 
-          gripper and they start from position (0,0,0) for a1 and (20,20,20) for a2. Also the actual actions that the
-          agents can perform are given below:
-          move_arm(agent_id, xi, yi, zi, xf, yf, zf), which moves the arm of the agent identified by agent_id from the
-            initial position (xi, yi, zi) to the final position (xf, yf, zf).
-          open_gripper(agent_id), which opens the gripper of the agent identified by agent_id.
-          close_gripper(agent_id), which closes the gripper of the agent identified by agent_id.
+
+          Consider the following description of the low-level aspect of the same problem. 
+          
+          Let the blocks be in the same position as the high-level description. 
+          The agents are robotics arm equipped with a gripper. At the beginning, the end-effector of the 
+          agents are in position (4,4) and (5,5) for agents a1, a2, respectively. Each agent has the following 
+          APIs:
+          - move_arm(Agent, x, y, z), which moves the end-effector to a position (x, y, z).
+          - close_gripper(Agent), which closes the gripper.
+          - open_gripper(Agent), which opens the gripper.
+          Remember that, while the blocks have to be left on the table, the architrave has to be placed higher.
+          Remember to use the appropriate tags for the code you produce and not to use prolog tags.
 
           Can you update the initial and final states from the previous knowledge base to reflect these changes?
 
@@ -100,18 +82,25 @@ entries:
           Sure. We need to integrate the position of the arm and the state of the gripper. We start with an open gripper 
           and from the two initial positions that were given.
           ```init
-          [
-            av(a1), av(a2), free(block1), free(block2), free(arch1), 
-            at(c, block1), at(d, block2), at(e, arch1),
-            arm_at(a1, 0, 0, 0), arm_at(a2, 20, 20, 20), gripper(a1, open), gripper(a2, close)
-          ]
+          init_state([
+            ontable(b1), ontable(b2), ontable(b3),
+            at(b1,32,60), at(b2,113,83), at(b3,44,40),
+            clear(b1), clear(b2), clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,4,4,_), ll_arm_at(a2,5,5,_),
+            ll_gripper(a1,open), ll_gripper(a2,open)
+          ]).
           ```
-          For the final state, the only thing that is specified is that the gripper should be open, whereas we don't
-          care about the position of the arm. So the final state would be:
+
+          We don't care about the final position of the arms. So the final state would be:
           ```goal
-          [
-            av(a1), av(a2), pillar(a, block1), pillar(b, block2), arch(a, b, arch1),
-            at(a, block1), at(b, block2), at(e, arch1),
-            arm_at(a1, _, _, _), arm_at(a2, _, _, _), gripper(a1, open), gripper(a2, close)
-          ]
+          goal_state([
+            ontable(b1), ontable(b2),
+            on(b3, b1), on(b3, b2),
+            at(b1,86,52), at(b2,72,52), at(b3,79,52),
+            clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,_,_,_), ll_arm_at(a2,_,_,_),
+            ll_gripper(a1,_), ll_gripper(a2,_)
+          ]).
           ```

@@ -7,40 +7,62 @@ entries:
       Q:
         role: 'user'
         content: |
-          Given the high-level knowledge-base obtained from the high level description:
-          ```KB
-          :- discontiguous resources/1.
+          Given the general knowledge-base obtained from the low-level description:
+          ```kb
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+          pos(4,4).
+          pos(5,5).
 
-          % blocks
-          block(block1).
-          block(block2).
-          arch(arch1).
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
 
-          % agents
+          % Agents
           agent(a1).
           agent(a2).
 
-          % positions
-          pos(a, 1, 1, 0).
-          pos(b, 2, 2, 0).
-          pos(c, 3, 4, 0).
-          pos(d, 5, 5, 0).
-          pos(e, 9, 9, 0).
-          pos(f, 1.5, 1.5, 0).
+          % Low-level predicates for arms and grippers
+          ll_arm(a1).
+          ll_arm(a2).
 
-          % resources
-          resource(agent(_)).
+          ll_gripper(a1).
+          ll_gripper(a2).
+
+          % Resources
+          resources(agent(_)).
+          resources(ll_arm(_)).
+          resources(ll_gripper(_)).
           ```
+          Given the initial and final states generated from the low-level description:
           ```init
-          [av(a1), av(a2), free(block1), free(block2), free(arch1), at(c, block1), at(d, block2), at(e, arch1)]
+          init_state([
+            ontable(b1), ontable(b2), ontable(b3),
+            at(b1,32,60), at(b2,113,83), at(b3,44,40),
+            clear(b1), clear(b2), clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,4,4,_), ll_arm_at(a2,5,5,_),
+            ll_gripper(a1,open), ll_gripper(a2,open)
+          ]).
           ```
           ```goal
-          [
-            av(a1), av(a2), pillar(a, block1), pillar(b, block2), arch(a, b, arch1),
-            at(a, block1), at(b, block2), at(e, arch1),
-
-          ]
+          goal_state([
+            ontable(b1), ontable(b2),
+            on(b3, b1), on(b3, b2),
+            at(b1,86,52), at(b2,72,52), at(b3,79,52),
+            clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,_,_,_), ll_arm_at(a2,_,_,_),
+            ll_gripper(a1,_), ll_gripper(a2,_)
+          ]).
           ```
+          Given the high-level actions generated from the high-level description:
           ```actions
           action(build_pillar_start(A, Pos, Block1),
             [av(A), free(Block1)],
@@ -84,104 +106,87 @@ entries:
           ).
           ```
 
-          Consider the following description of the low-level aspect of the same problem. Each agent has an arm and a 
-          gripper and they start from position (0,0,0) for a1 and (20,20,20) for a2. Also the actual actions that the
-          agents can perform are given below:
-          move_arm(agent_id, xi, yi, zi, xf, yf, zf), which moves the arm of the agent identified by agent_id from the
-            initial position (xi, yi, zi) to the final position (xf, yf, zf).
-          open_gripper(agent_id), which opens the gripper of the agent identified by agent_id.
-          close_gripper(agent_id), which closes the gripper of the agent identified by agent_id.
+          Consider the following description of the low-level aspect of the same problem. 
+          
+          Let the blocks be in the same position as the high-level description. 
+          The agents are robotics arm equipped with a gripper. At the beginning, the end-effector of the 
+          agents are in position (4,4) and (5,5) for agents a1, a2, respectively. Each agent has the following 
+          APIs:
+          - move_arm(Agent, x, y, z), which moves the end-effector to a position (x, y, z).
+          - close_gripper(Agent), which closes the gripper.
+          - open_gripper(Agent), which opens the gripper.
+          Remember that, while the blocks have to be left on the table, the architrave has to be placed higher.
+          Remember to use the appropriate tags for the code you produce and not to use prolog tags.
 
           Can you update the set of actions to also include actions for the low-level part?
 
       A:
         role: 'assistant'
         content: |
-          Sure. First of all, since we are solving a temporal plan, we need to divide the actions into start and end. We 
-          will have then 6 snap actions, namely `move_arm_start`, `move_arm_end`, `open_gripper_start`,
-          `open_gripper_end`, `close_gripper_start`, `close_gripper_end`. 
-          `move_arm_start` has as positive precondition the position of the arm for that agent. It also requires that
-            the arm is not moving, nor gripping or releasing anything. Moreover, its arguments must be grounded, so we 
-            need to check that the agent chosen actually has an arm and that the final position exists. For the effects,
-            we add a transitioning predicate which states that the arm is moving from the initial to the final position,
-            and we remove the predicate that states that the arm is in a certain position.
-          `move_arm_end` has as positive precondition the fact that the arm is moving from the initial to the final
-            position. It has no negative preconditions. The effects are that the arm is no longer moving, the arm is in
-            the final position.
-          `open_gripper_start` it requires that the arm has something gripped and that it is not moving, nor gripping, 
-            nor releasing. Also, we must make sure that in the KB the agent A actually has a gripper. The effects are
-            that we remove the gripped predicate and that the gripper is close, while we state that the gripper is 
-            opening.
-          `open_gripper_end` has as positive precondition that the gripper is opening. It has no negative preconditions,
-            but we must make sure that the agent has a gripper. The effects are that the gripper is open and that the
-            gripper is no longer opening.
-          `close_gripper_start` it requires that the gripper is open and that it is not moving, nor gripping, nor
-            releasing, not that it has something gripped. Also, we must make sure that in the KB the agent A actually 
-            has a gripper. The effects are that we remove the open gripper predicate and we must state that the 
-            gripper is closing.
-          `close_gripper_end` has as positive precondition that the gripper is closing. It has no negative
-            preconditions, but we must make sure that the agent has a gripper. The effects are that the gripper is close
-            and that the gripper is no longer closing and that it has something gripped.
+          Sure
+          ```ll_actions          
+          ll_action(ll_move_arm_start(Agent, X, Y, Z),
+            [],
+            [ll_arm_at(_, X, Y, Z)],
+            [],
+            [agent(Agent), pos(X, Y), ll_arm(Agent)],
+            [
+              add(ll_moving_arm(Agent, X, Y, Z))
+            ]
+          ).
 
-          ```ll_actions
-          ll_action(move_arm_start(A, To, X1, Y1, Z1, X2, Y2, Z2),
-            [arm_at(A, X1, Y1, Z1)],
-            [moving_arm(A, _, _, _, _, _, _), gripping(A, _), releasing(A)],
+          ll_action(ll_move_arm_end(Agent, X, Y, Z),
+            [ll_moving_arm(Agent, X, Y, Z)],
+            [ll_arm_at(_, X, Y, Z)],
             [],
-            [arm(A), pos(To, X2, Y2, Z2)],
+            [],
             [
-              add(moving_arm(A, To, X1, Y1, Z1, X2, Y2, Z2)),
-              del(arm_at(A, X1, Y1, Z1))
+              del(ll_moving_arm(Agent, X, Y, Z)),
+              add(ll_arm_at(Agent, X, Y, Z))
             ]
           ).
-          ll_action(move_arm_end(A, To, X1, Y1, Z1, X2, Y2, Z2),
-            [moving_arm(A, To, X1, Y1, Z1, X2, Y2, Z2)],
+
+          ll_action(ll_close_gripper_start(Agent),
+            [ll_gripper(Agent, open)],
             [],
             [],
-            [],
+            [agent(Agent), ll_gripper(Agent)],
             [
-              del(moving_arm(A, To, X1, Y1, Z1, X2, Y2, Z2)),
-              add(arm_at(A, X2, Y2, Z2))
+              del(ll_gripper(Agent, open)),
+              add(ll_closing_gripper(Agent))
             ]
           ).
-          ll_action(grip_start(A, B),
-            [gripper(A, open)],
-            [moving_arm(A, _, _, _, _, _, _), gripping(A, _), releasing(A), gripped(A)],
+
+          ll_action(ll_close_gripper_end(Agent),
+            [ll_closing_gripper(Agent)],
             [],
-            [gripper(A)],
+            [],
+            [],
             [
-              del(gripper(A, open)),
-              add(gripping(A, B))
+              del(ll_closing_gripper(Agent)),
+              add(ll_gripper(Agent, closed))
             ]
           ).
-          ll_action(grip_end(A, B),
-            [gripping(A, B)],
+
+          ll_action(ll_open_gripper_start(Agent),
+            [ll_gripper(Agent, closed)],
             [],
             [],
-            [gripper(A)],
+            [agent(Agent), ll_gripper(Agent)],
             [
-              del(gripping(A, B)),
-              add(gripped(A)), add(gripper(A, close))
+              del(ll_gripper(Agent, closed)),
+              add(ll_opening_gripper(Agent))
             ]
           ).
-          ll_action(release_start(A),
-            [gripped(A)],
-            [moving_arm(A, _, _, _, _, _, _), gripping(A, _), releasing(A)],
+
+          ll_action(ll_open_gripper_end(Agent),
+            [ll_opening_gripper(Agent)],
             [],
-            [gripper(A)],
+            [],
+            [],
             [
-              del(gripped(A)), del(gripper(A, close)),
-              add(releasing(A))
-            ]
-          ).
-          ll_action(release_end(A),
-            [releasing(A)],
-            [],
-            [],
-            [gripper(A)],
-            [
-              del(releasing(A)),
-              add(gripper(A, open))
+              del(ll_opening_gripper(Agent)),
+              add(ll_gripper(Agent, open))
             ]
           ).
           ```

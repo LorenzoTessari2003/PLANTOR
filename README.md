@@ -12,7 +12,7 @@
 </a>
 
 <p align='center'>
-    <h1 align="center">Probabilistic and Logic Oriented Planning (PLOP)</h1>
+    <h1 align="center">PLanning with Natural language for Task-Oriented Robots (PLANTOR)</h1>
 </p>
 
 ----------
@@ -23,10 +23,13 @@
 - [Clone the repo](#clone-the-repo)
 - [Requirements](#requirements)
   - [Prolog](#prolog)
+  - [NodeJS](#nodejs)
   - [Python dependencies](#python-dependencies)
   - [C++ / ROS2 dependencies](#c--ros2-dependencies)
 - [Compiling](#compiling)
 - [Running](#running)
+  - [Running the Server](#running-the-server)
+  - [User Interface](#user-interface)
   - [The whole framework](#the-whole-framework)
   - [GPT Fine-Tuning](#gpt-fine-tuning)
   - [LLM KB Generation](#llm-kb-generation)
@@ -37,7 +40,7 @@
 - [Contributors](#contributors)
 
 ## Project Description
-The goal of this project is to create a general multi-agent planning framework which emplys LLMs capabilities to populate a Prolog knowledge base. 
+The goal of this project is to create a general multi-agent planning framework which employs LLMs capabilities to populate a Prolog knowledge base. 
 
 ## Framework structure
 ![](data/img/f_structure.png)

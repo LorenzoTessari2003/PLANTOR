@@ -1,0 +1,37 @@
+"move_arm" : {
+    "ros2_node" : "MoveArmRequester",
+    "service_name" : "move_arm",
+    "args" : ["arm", "x", "y", "z"]
+},
+"close" : {
+
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "close_gripper",
+    "args" : ["gripper"]
+},
+"open" : {
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "open_gripper",
+    "args" : ["gripper"]
+},
+"close_gripper" : {
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "close_gripper",
+    "args" : ["gripper"]
+},
+
+"open_gripper" : {
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "open_gripper",
+    "args" : ["gripper"]
+},
+"grip" : {
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "close_gripper",
+    "args" : ["gripper"]
+},
+"release" : {
+    "ros2_node" : "MoveGripperRequester",
+    "service_name" : "open_gripper",
+    "args" : ["gripper"]
+}

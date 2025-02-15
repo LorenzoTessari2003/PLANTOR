@@ -54,4 +54,54 @@ entries:
           % resources
           resource(agent(_)).
           ```
+    ############################################################################
+    ###############################     1     ##################################
+    ############################################################################
+    1: 
+      Q:
+        role: 'user'
+        content: |
+          In this scenario, we want to construct an arch using 3 blocks and a robotic arm. The blocks are
+          initially distributed on the table in positions (32,60), (113,83), and (44,40). Blocks b1 and b2 have 
+          dimensions 1x1x1 whereas b3 is longer and is considered as an architrave. The goal is to build
+          the two pillars with b1 and b2 in positions (86,52) and (72,52), respectively, and place b3 on top of 
+          them as an architrave in position (79, 52). There are two agents that can:
+          - from a position on the table to another position on the table;
+          - from a position on the table, to the top of another block;
+          - from the top of a block, to a position on the table;
+          - from the top of a block, to the top of another block.
+          The action to place the last block on top as an architrave should be handled differently than these 
+          moves as it must check that the two pillars have been built. 
+          The agents are available and can be used. The blocks are initially free and can be moved by the agents.
+          Can you provide the general knowledge base and specify the resources available?
 
+      A:
+        role: 'assistant'
+        content: |
+          Sure. The description states that we have 3 blocks, of which two are boxes and one is elongated for the arch.
+          To express the difference, we use `block(B)` for the blocks and `arch(A)` for the architrave.
+          The description also tells us that there are two agents, `a1` and `a2`, that can carry out the task.
+          Moreover, we have a list of positions available for the blocks, which will be expressed using the `pos`
+          predicate. Finally, the only resource that we have that can accomplish tasks is the agents, so we will use 
+          the predicate `resource(agent(_))` to express this.
+          ```kb
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
+
+          % Agents
+          agent(a1).
+          agent(a2).
+
+          % Resources
+          resources(agent(_)).
+          ```

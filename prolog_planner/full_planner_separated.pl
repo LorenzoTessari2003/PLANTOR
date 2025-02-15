@@ -143,6 +143,31 @@ apply_action_map(_, _, _, _, _, _, _, _, _) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+stash_resources(R) :-
+  findall(Resource, resources(Resource), RTypes),
+  stash_resources(RTypes, [], R).
+
+stash_resources([], R, R).
+stash_resources([ResourceType|T], R, RetR) :-
+  findall(ResourceType, ResourceType, [FirstResource|AdditionalResources]),
+  append([FirstResource], R, NewR),
+  append(AdditionalResources, NewR, NewNewR),
+  remove_additional_resources(AdditionalResources),
+  stash_resources(T, NewNewR, RetR).
+
+remove_additional_resources([]).
+remove_additional_resources([H|T]) :-
+  retract(H),
+  remove_additional_resources(T).
+
+unstash_resources([]).
+unstash_resources([H|T]) :-
+  H,
+  unstash_resources(T). 
+unstash_resources([H|T]) :-
+  assert(H),
+  unstash_resources(T).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function generates a plan
@@ -151,12 +176,18 @@ generate_plan(Init, Goal, Plan, Enablers) :-
   generate_plan(Init, Goal, Plan, Enablers, 2).
 
 generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
+  stash_resources(R),
+  generate_plan_stashed(Init, Goal, Plan, Enablers, MaxDepth),
+  unstash_resources(R).
+
+
+generate_plan_stashed(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
   debug_format('Checking if the initial state is the goal state ~w ~w\n', [Init, Goal]),
   goal_reached(Init, Goal),
   debug_format('Goal reached\n').
 
-generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
+generate_plan_stashed(Init, Goal, Plan, Enablers, MaxDepth) :-
   % enable_debug,
   debug_format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
   (

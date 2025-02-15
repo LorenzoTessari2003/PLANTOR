@@ -78,9 +78,9 @@ is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify) :
     is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, []).
 
 is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
+    conditions_met_wrapper(PreconditionsT, State),
     verify(Verify),
-    debug_format('Grounded ~w\n', [Verify]),
-    conditions_met_wrapper(PreconditionsT, State)
+    debug_format('Grounded ~w\n', [Verify])
     *->(
         debug_format('Checked that the preconditions are met ~w in state ~w\n', [PreconditionsT, State]),
         conditions_not_met_wrapper(PreconditionsF, State)
@@ -127,22 +127,22 @@ why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Veri
     why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, []).
 
 why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
-    debug_format('Checking why action is not applicable\n'),
+    format('Checking why action is not applicable\n'),
     verify(Verify)
     ->(
         which_conditions_not_met_wrapper(PreconditionsT, State, R)
         ->(
-            debug_format('Precondition ~w is not met in state ~w, but should\n', [R, State])
+            format('Precondition ~w is not met in state ~w, but should\n', [R, State])
         );(
             which_conditions_met_wrapper(PreconditionsF, State, R)
             ->(
-                debug_format('Precondition ~w is met in state ~w, but should not\n', [R, State])
+                format('Precondition ~w is met in state ~w, but should not\n', [R, State])
             );(
                 true
             )
         )
     );(
-        debug_format('Verify conditions are not met\n'),
+        format('Verify conditions are not met\n'),
         fail
     ),
     true.

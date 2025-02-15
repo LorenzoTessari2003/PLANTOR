@@ -8,89 +8,39 @@ entries:
         role: 'user'
         content: |
           Given the high-level knowledge-base obtained from the high level description:
-          ```KB
-          :- discontiguous resources/1.
+          ```kb
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
 
-          % blocks
-          block(block1).
-          block(block2).
-          arch(arch1).
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
 
-          % agents
+          % Agents
           agent(a1).
           agent(a2).
 
-          % positions
-          pos(a, 1, 1, 0).
-          pos(b, 2, 2, 0).
-          pos(c, 3, 4, 0).
-          pos(d, 5, 5, 0).
-          pos(e, 9, 9, 0).
-          pos(f, 1.5, 1.5, 0).
-
-          % resources
-          resource(agent(_)).
-          ```
-          ```init
-          [av(a1), av(a2), free(block1), free(block2), free(arch1), at(c, block1), at(d, block2), at(e, arch1)]
-          ```
-          ```goal
-          [
-            av(a1), av(a2), pillar(a, block1), pillar(b, block2), arch(a, b, arch1),
-            at(a, block1), at(b, block2), at(e, arch1),
-
-          ]
-          ```
-          ```actions
-          action(build_pillar_start(A, Pos, Block1),
-            [av(A), free(Block1)],
-            [pillar(Pos, _), pillaring(_, Pos, _)],
-            [pillar(Pos, Block1)],
-            [block(Block1), agent(A), pos(Pos,_,_,_)],
-            [
-            del(av(A)), del(free(Block1)),
-            add(pillaring(A, Pos, Block1))
-            ]
-          ).
-          action(build_pillar_end(A, Pos, Block1),
-            [pillaring(A, Pos, Block1)],
-            [pillar(Pos, _)],
-            [],
-            [],
-            [
-              del(pillaring(A, Pos, Block1)),
-              add(av(A)), add(pillar(Pos, Block1))
-            ]
-          ).
-          action(place_arch_start(A, Pos1, Pos2, Arch),
-            [av(A), pillar(Pos1, _), pillar(Pos2, _), free(Arch)],
-            [placing_arch(_, Pos1, Pos2, _), placed_arch(Pos1, Pos2, _)],
-            [placed_arch(Pos1, Pos2, Arch)],
-            [arch(Arch), agent(A), pos(Pos1,_,_,_), pos(Pos2,_,_,_), Pos1\=Pos2],
-            [
-              del(av(A)), del(free(Arch)),
-              add(placing_arch(A, Pos1, Pos2, Arch))
-            ]
-          ).
-          action(place_arch_end(A, Pos1, Pos2, Arch),
-            [placing_arch(A, Pos1, Pos2, Arch)],
-            [arch(_, Pos1, Pos2)],
-            [],
-            [],
-            [
-              del(placing_arch(A, Pos1, Pos2, Arch)),
-              add(arch(Pos1, Pos2, Arch)), add(av(A))
-            ]
-          ).
+          % Resources
+          resources(agent(_)).
           ```
 
-          Consider the following description of the low-level aspect of the same problem. Each agent has an arm and a 
-          gripper. Also the actual actions that the agents can perform are given below:
-
-          move_arm(agent_id, xi, yi, zi, xf, yf, zf), which moves the arm of the agent identified by agent_id from the
-            initial position (xi, yi, zi) to the final position (xf, yf, zf).
-          open_gripper(agent_id), which opens the gripper of the agent identified by agent_id.
-          close_gripper(agent_id), which closes the gripper of the agent identified by agent_id.
+          Consider the following description of the low-level aspect of the same problem. 
+          
+          Let the blocks be in the same position as the high-level description. 
+          The agents are robotics arm equipped with a gripper. At the beginning, the end-effector of the 
+          agents are in position (4,4) and (5,5) for agents a1, a2, respectively. Each agent has the following 
+          APIs:
+          - move_arm(Agent, x, y, z), which moves the end-effector to a position (x, y, z).
+          - close_gripper(Agent), which closes the gripper.
+          - open_gripper(Agent), which opens the gripper.
+          Remember that, while the blocks have to be left on the table, the architrave has to be placed higher.
+          Remember to use the appropriate tags for the code you produce and not to use prolog tags.
 
           Can you integrate the previous high-level knowledge-base with predicates needed for the low-level 
           knowledge-base?
@@ -102,35 +52,34 @@ entries:
           them. Moreover, they are also both resources so they must be explicitly marked as such. Here is the final
           integration:
           ```KB
-          :- discontiguous resources/1.
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+          pos(4,4).
+          pos(5,5).
 
-          % blocks
-          block(block1).
-          block(block2).
-          arch(arch1).
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
 
-          % agents
+          % Agents
           agent(a1).
           agent(a2).
 
-          % positions
-          pos(a, 1, 1, 0).
-          pos(b, 2, 2, 0).
-          pos(c, 3, 4, 0).
-          pos(d, 5, 5, 0).
-          pos(e, 9, 9, 0).
-          pos(f, 1.5, 1.5, 0).
-          pos(g, 0, 0, 0).
-          pos(h, 20, 20, 20).
+          % Low-level predicates for arms and grippers
+          ll_arm(a1).
+          ll_arm(a2).
 
-          arm(a1).
-          arm(a2).
+          ll_gripper(a1).
+          ll_gripper(a2).
 
-          gripper(a1).
-          gripper(a2).
-
-          % resources
-          resource(agent(_)).
-          resources(arm(_)).
-          resources(gripper(_)).
+          % Resources
+          resources(agent(_)).
+          resources(ll_arm(_)).
+          resources(ll_gripper(_)).
           ```
