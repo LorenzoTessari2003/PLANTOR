@@ -71,18 +71,18 @@ plan(PlanLength, Actions, AdjMatrix, TTActionList, Resources, ActionXResources, 
   nl,nl,nl,
 
   extract_resources_number(Resources),
-  debug_format('Resources:~n'),
-  % print_list(Resources),
+  format('Resources:~n'),
+  print_list(Resources),
   nl,nl,nl,
 
   extract_resources_list(ResourcesList),
-  debug_format('Resources list:~n'),
-  % print_list(ResourcesList),
+  format('Resources list:~n'),
+  print_list(ResourcesList),
   nl,nl,nl,
 
   extract_resources_per_action(TTActionList, Resources, ActionXResources),
   debug_format('Resources per action:~n'),
-  % print_list(ActionXResources),
+  print_list(ActionXResources),
   nl,nl,nl,
 
   format('Finished planning.~n'),
