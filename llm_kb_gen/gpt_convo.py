@@ -8,17 +8,23 @@ from openai import AzureOpenAI
 from retry import retry
 
 # =======================================================================#
-#                           OPENAI API KEY                              #
+#                            API Paramters                               #
 # =======================================================================#
-openai.api_key = os.environ["OPENAI_API_KEY"]  #
+class Params():
+    def __init__(
+        self,
+        llm_version  = "",
+        api_key_name = "",
+        endpoint     = "",
+        api_version  = ""
+    ):
+        self.LLM_VERSION  = llm_version
+        self.API_KEY_NAME = api_key_name
+        self.ENDPOINT     = endpoint
+        self.API_VERSION  = api_version
 # =======================================================================#
 
-
-# ===============================================#
-# Available GPT versions:                       #
-# =============================================================#
-llm_versions = ["LLMPlanning", "LLMPlanning2", "LLMPlanning35"]  #
-# =============================================================#
+params = Params()
 
 
 # ===================================================================================================================#
@@ -78,9 +84,9 @@ def connect_openai(
 ):
     # UNITN-key
     client = AzureOpenAI(
-        api_key=os.environ["OPENAI_API_KEY"],
-        azure_endpoint="https://disi-logic-programming.openai.azure.com/",
-        api_version="2023-05-15",
+        api_key=os.environ[params.API_KEY_NAME],
+        azure_endpoint=params.ENDPOINT,
+        api_version=params.API_VERSION,
     )
     response = client.chat.completions.create(
         model=engine,
@@ -160,10 +166,10 @@ class GPT_model:
 def includeYAML(file_name: str, messages: list, system_msg: str):
     print("Adding examples from file:", file_name)
     with open(file_name) as file:
-        yaml_file = yaml.load(file, Loader=yaml.FullLoader)["few_shots"]
+        yaml_file = yaml.load(file, Loader=yaml.FullLoader)["entries"]
         # Set headers for few-shots learning
-        # Check if system_msg (a dict) has alrteady been added
-        if system_msg == "" and "system_msg" in yaml_file:
+        # Check if system_msg (a dict) has already been added
+        if system_msg == "" and "system_msg" in yaml_file.keys():
             system_msg = yaml_file["system_msg"]
             messages.append(system_msg)
         elif system_msg and "system_msg" in yaml_file:
@@ -204,8 +210,10 @@ def num_tokens_from_string(string: str, encoding_name: str) -> int:
 # ===================================================================================================================#
 #                                               	MAIN FUNCTION                                               #
 # ===================================================================================================================#
-def main(llm_version, yaml_files):
-    llm_gpt = GPT_model(engine=llm_version)
+def main(yaml_files):
+    openai.api_key = os.environ[params.API_KEY_NAME]
+
+    llm_gpt = GPT_model(engine=params.LLM_VERSION)
     messages = []
     system_msg = ""
 
@@ -270,32 +278,41 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Adding optional argument
-    parser.add_argument("-v", "--version", help="ChatGPT version")
+    parser.add_argument("-L", "--LLM", help="ChatGPT configuration file, default is ./conf/gpt40-8k.yaml", default="./conf/gpt40-8k.yaml")
     parser.add_argument(
         "-y",
         "--yaml_files",
         nargs="+",
         help="A space defined list of YAML files containing the few-shots examples",
+        default=[]
     )
 
     # Read arguments from command line
     args = parser.parse_args()
 
-    if args.version in llm_versions:
-        llm_version = args.version
-    else:
-        if args.version == None:
-            llm_version = llm_versions[0]
-            print("The default version({}) has been selected".format(llm_version))
-        else:
-            print("Please choose an available version of GPT")
-            print("Available versions : ")
-            for v in llm_versions:
-                print("\t - " + v)
-            exit()
-        if args.yaml_files != None:
-            for file in args.yaml_files:
-                assert os.path.isfile(file), "File {} does not exist".format(file)
+    if args.yaml_files != None:
+        for file in args.yaml_files:
+            assert os.path.isfile(file), "File {} does not exist".format(file)
 
-    llm_version = "LLMPlanning35"
-    main(llm_version, args.yaml_files)
+    llm_conf_file = args.LLM
+    print("LLM configuration file: ", llm_conf_file)
+    if llm_conf_file.endswith(".yaml") and os.path.isfile(llm_conf_file):
+        with open(llm_conf_file) as file:
+            print("Opened")
+            llm_conf = yaml.load(file, Loader=yaml.FullLoader)
+
+            params.LLM_VERSION  = llm_conf["LLM_VERSION"]
+            params.API_KEY_NAME = llm_conf["API_KEY_NAME"]
+            params.ENDPOINT     = llm_conf["ENDPOINT"]
+            params.API_VERSION  = llm_conf["API_VERSION"]
+
+            print("LLM_VERSION: ", params.LLM_VERSION)
+            print("API_KEY_NAME: ", params.API_KEY_NAME)
+            print("ENDPOINT: ", params.ENDPOINT)
+            print("API_VERSION: ", params.API_VERSION)
+
+    else:
+        print("The selected file {} does not exist or is not a yaml file".format(llm_conf_file))
+        exit()
+
+    main(args.yaml_files)

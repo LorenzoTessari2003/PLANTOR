@@ -1,0 +1,9 @@
+graphviz
+matplotlib
+bokeh
+pyswip
+networkx
+pillow>=7.1.0
+ortools
+pyvis
+dict2xml

@@ -1,0 +1,85 @@
+entries:
+  convo:
+    ############################################################################
+    ###############################     0     ##################################
+    ############################################################################
+    0: 
+      Q:
+        role: 'user'
+        content: |
+          Given the high-level knowledge-base obtained from the high level description:
+          ```kb
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
+
+          % Agents
+          agent(a1).
+          agent(a2).
+
+          % Resources
+          resources(agent(_)).
+          ```
+
+          Consider the following description of the low-level aspect of the same problem. 
+          
+          Let the blocks be in the same position as the high-level description. 
+          The agents are robotics arm equipped with a gripper. At the beginning, the end-effector of the 
+          agents are in position (4,4) and (5,5) for agents a1, a2, respectively. Each agent has the following 
+          APIs:
+          - move_arm(Agent, x, y, z), which moves the end-effector to a position (x, y, z).
+          - close_gripper(Agent), which closes the gripper.
+          - open_gripper(Agent), which opens the gripper.
+          Remember that, while the blocks have to be left on the table, the architrave has to be placed higher.
+          Remember to use the appropriate tags for the code you produce and not to use prolog tags.
+
+          Can you integrate the previous high-level knowledge-base with predicates needed for the low-level 
+          knowledge-base?
+
+      A:
+        role: 'assistant'
+        content: |
+          Sure. The description says that there are two arms and two grippers, so we have to define the predicates for
+          them. Moreover, they are also both resources so they must be explicitly marked as such. Here is the final
+          integration:
+          ```KB
+          % Positions
+          pos(32,60).
+          pos(113,83).
+          pos(44,40).
+          pos(86,52).
+          pos(72,52).
+          pos(79,52).
+          pos(4,4).
+          pos(5,5).
+
+          % Blocks
+          block(b1).
+          block(b2).
+          arch(b3).
+
+          % Agents
+          agent(a1).
+          agent(a2).
+
+          % Low-level predicates for arms and grippers
+          ll_arm(a1).
+          ll_arm(a2).
+
+          ll_gripper(a1).
+          ll_gripper(a2).
+
+          % Resources
+          resources(agent(_)).
+          resources(ll_arm(_)).
+          resources(ll_gripper(_)).
+          ```

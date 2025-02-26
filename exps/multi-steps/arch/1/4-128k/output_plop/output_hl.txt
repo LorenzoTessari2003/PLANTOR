@@ -1,0 +1,158 @@
+KB: ```kb
+% Define positions on the table
+pos(1,1).
+pos(2,2).
+pos(3,3).
+pos(6,6).
+pos(7,6).
+
+% Define blocks
+block(b1).
+block(b2).
+block(b3).
+
+% Define the robotic arm as an agent
+agent(arm).
+
+% Define the robotic arm as a resource
+resources(agent(arm)).
+
+% Define the structure of a pillar
+pillar(X, Y, Block) :- block(Block), pos(X, Y).
+
+% Define the structure of an architrave
+architrave(Block, Pillar1, Pillar2) :- block(Block), pillar(X1, Y1, Pillar1), pillar(X2, Y2, Pillar2), X1 \= X2.
+```
+INIT: Here are the initial and final states for the scenario:
+
+```init
+init_state([
+  ontable(b1), ontable(b2), ontable(b3),
+  at(b1,1,1), at(b2,2,2), at(b3,3,3),
+  clear(b1), clear(b2), clear(b3),
+  available(arm)
+]).
+```
+
+```goal
+goal_state([
+  ontable(b1), ontable(b2),
+  on(b3, b1), on(b3, b2),
+  at(b1,6,6), at(b2,7,6), at(b3,6.5,6),
+  clear(b3),
+  available(arm)
+]).
+```
+ACTIONS: Here is the set of temporal actions divided into _start and _end actions for the given scenario:
+
+```actions
+% Move a block from a position on the table to another position on the table
+action(move_block_start(Agent, Block, X1, Y1, X2, Y2),
+  [available(Agent), ontable(Block), at(Block, X1, Y1), clear(Block)],
+  [at(_, X2, Y2)],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block)],
+  [
+    del(available(Agent)), del(ontable(Block)), del(at(Block, X1, Y1)), del(clear(Block)),
+    add(moving(Agent, Block, X1, Y1, X2, Y2))
+  ]
+).
+action(move_block_end(Agent, Block, X1, Y1, X2, Y2),
+  [moving(Agent, Block, X1, Y1, X2, Y2)],
+  [at(_, X2, Y2)],
+  [],
+  [agent(Agent)],
+  [
+    del(moving(Agent, Block, X1, Y1, X2, Y2)),
+    add(ontable(Block)), add(at(Block, X2, Y2)), add(clear(Block)), add(available(Agent))
+  ]
+).
+
+% Move a block from a position on the table to the top of another block
+action(move_block_to_top_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [available(Agent), ontable(Block1), at(Block1, X1, Y1), clear(Block1), at(Block2, X2, Y2), clear(Block2)],
+  [],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2)],
+  [
+    del(available(Agent)), del(ontable(Block1)), del(at(Block1, X1, Y1)), del(clear(Block1)), del(clear(Block2)),
+    add(moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2))
+  ]
+).
+action(move_block_to_top_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [agent(Agent)],
+  [
+    del(moving_to_top(Agent, Block1, Block2, X1, Y1, X2, Y2)),
+    add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+  ]
+).
+
+% Move a block from the top of a block to a position on the table
+action(move_top_to_table_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [available(Agent), on(Block1, Block2), at(Block1, X1, Y1), clear(Block1)],
+  [at(_, X2, Y2)],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2)],
+  [
+    del(available(Agent)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)), del(clear(Block1)),
+    add(moving_to_table(Agent, Block1, X1, Y1, X2, Y2)), add(clear(Block2))
+  ]
+).
+action(move_top_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
+  [moving_to_table(Agent, Block1, X1, Y1, X2, Y2)],
+  [at(_, X2, Y2)],
+  [],
+  [agent(Agent)],
+  [
+    del(moving_to_table(Agent, Block1, X1, Y1, X2, Y2)),
+    add(ontable(Block1)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+  ]
+).
+
+% Move a block from the top of a block to the top of another block
+action(move_top_to_top_start(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [available(Agent), on(Block1, Block2), at(Block1, X1, Y1), clear(Block1), at(Block3, X2, Y2), clear(Block3)],
+  [],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Block1), block(Block2), block(Block3)],
+  [
+    del(available(Agent)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)), del(clear(Block1)), del(clear(Block3)),
+    add(moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2)), add(clear(Block2))
+  ]
+).
+action(move_top_to_top_end(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [agent(Agent)],
+  [
+    del(moving_top_to_top(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2)),
+    add(on(Block1, Block3)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
+  ]
+).
+
+% Special action to place the architrave on top of the two pillars
+action(place_architrave_start(Agent, Architrave, Pillar1, Pillar2, X1, Y1, X2, Y2),
+  [available(Agent), ontable(Architrave), at(Architrave, X1, Y1), clear(Architrave), pillar(X2, Y2, Pillar1), pillar(X2, Y2, Pillar2)],
+  [],
+  [],
+  [agent(Agent), pos(X1, Y1), pos(X2, Y2), block(Architrave), block(Pillar1), block(Pillar2)],
+  [
+    del(available(Agent)), del(ontable(Architrave)), del(at(Architrave, X1, Y1)), del(clear(Architrave)),
+    add(moving_architrave(Agent, Architrave, Pillar1, Pillar2, X1, Y1, X2, Y2))
+  ]
+).
+action(place_architrave_end(Agent, Architrave, Pillar1, Pillar2, X1, Y1, X2, Y2),
+  [moving_architrave(Agent, Architrave, Pillar1, Pillar2, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [agent(Agent)],
+  [
+    del(moving_architrave(Agent, Architrave, Pillar1, Pillar2, X1, Y1, X2, Y2)),
+    add(on(Architrave, Pillar1)), add(on(Architrave, Pillar2)), add(at(Architrave, X2, Y2)), add(clear(Architrave)), add(available(Agent))
+  ]
+).
+```

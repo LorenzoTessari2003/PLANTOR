@@ -1,0 +1,12 @@
+In this scenario, we want to construct two arches using 8 blocks and two robotic arm. The blocks are
+initially distributed on the table in positions (1,1), (2,2), (3,3), (4,4), (2,1), (4,2), (5,3) and 
+(6,4). The goal is to build:
+- an arch with the pillars in position (6,6) and (7,6) using b1 and b7 for the left pillar, and b4 and b8 for the right pillar, and b5 as the architrave
+- an arch with the pillars in position (10,6) and (11,6) using b2 and b3, respectively, and b6 as the architrave
+The robotic arm can move the blocks:
+- from a position on the table to another position on the table;
+- from a position on the table, to the top of another block;
+- from the top of a block, to a position on the table;
+- from the top of a block, to the top of another block.
+The action to place the last block on top as an architrave should be handled differently than these 
+moves as it must check that the two pillars have been built. 

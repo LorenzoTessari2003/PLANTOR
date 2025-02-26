@@ -1,0 +1,10 @@
+In this scenario, we want to construct an arch using 3 blocks and a robotic arm. The blocks are
+initially distributed on the table in positions (1,1), (2,2), and (3,3). The goal is to build
+the two pillars with b1 and b2 in positions (6,6) and (9,6), respectively, and place b3 on top of 
+them as an architrave. All blocks have a dimension of 1x1x1. The robotic arm can move the blocks:
+- from a position on the table to another position on the table;
+- from a position on the table, to the top of another block;
+- from the top of a block, to a position on the table;
+- from the top of a block, to the top of another block.
+The action to place the last block on top as an architrave should be handled differently than these 
+moves as it must check that the two pillars have been built. 

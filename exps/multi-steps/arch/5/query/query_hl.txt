@@ -1,0 +1,21 @@
+In this scenario, we aim to construct three arches using 20 blocks and 5 robotic arms. The blocks
+are initially scattered across the table at various positions, including (1,1), (2,2), (3,3), (4,4),
+(5,5), (6,6), (7,7), (8,8), (9,9), (10,10), (2,1), (4,2), (6,3), (8,4), (10,5), (12,6), (14,7),
+(16,8), (18,9), and (20,10). 
+
+The goal is to build:
+
+- An arch at (5,8) and (6,8) using b1 and b2 for the left pillar, b3 and b4 for the right pillar, and b5 as the architrave. 
+- An arch at (10,8) and (11,8) using b6, b7, and b8 for the left pillar, b9 and b10 for the right pillar, and b11 as the architrave.
+- An arch at (15,8) and (16,8) using b12 and b13 for the left pillar, b14 and b15 for the right pillar, and b16 as the architrave.
+
+The robotic arms can manipulate the blocks in the following ways:
+
+- Move a block from a position on the table to another position on the table.
+- Move a block from a position on the table to the top of another block.
+- Move a block from the top of a stack to a position on the table.
+- Move a block from the top of one stack to the top of another stack.
+
+The placement of the final block as an architrave requires a specific handling process to ensure
+both pillars are completed before the block is placed. Coordination among the 5 robotic arms is
+essential to efficiently construct all three arches. 

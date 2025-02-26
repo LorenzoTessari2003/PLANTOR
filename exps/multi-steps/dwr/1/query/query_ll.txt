@@ -1,0 +1,14 @@
+Let the container, crane and robot and their positions be described in the high-level part.
+There is available only one robot that can:
+- move_start(robot, locationFrom, locationTo), which makes the robot starting to move from position (x1,y1) to position (x2,y2).
+- move_end(robot, locationFrom, locationTo), which completes the movement of the robot from position (x1,y1) to position (x2,y2).
+There are one crane for location that can:
+- go_to_c_start(crane, container), which makes the crane move on the top of the container.
+- go_to_c_end(crane, container), which completes the movement of the crane to go on the top of the container.
+- close_start(crane), which makes the gripper starting to close.
+- close_end(crane), which indicates the gripper has closed.
+- open_start(crane), which makes the gripper starting to open.
+- open_end(crane), which indicates the gripper has opened.
+Remember to use the appropriate tags for the code you produce and not to use prolog tags.
+Moreover, remember that the low-level actions must not contain high-level predicates. Low-level
+actions must only contain predicates that start with 'll_'. 

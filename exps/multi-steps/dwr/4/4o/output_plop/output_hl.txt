@@ -1,0 +1,190 @@
+KB: ```kb
+% Locations
+location(location1).
+location(location2).
+
+% Containers
+container(c1).
+container(c2).
+container(c3).
+container(c4).
+
+% Robot
+robot(r1).
+
+% Cranes
+crane(crane1, location1).
+crane(crane2, location2).
+
+% Initial positions of containers
+at(c1, location1, ground).
+on(c2, c1).
+at(c3, location2, ground).
+on(c4, c3).
+
+% Initial position of the robot
+at(r1, location1).
+
+% Resources
+resources(robot(_)).
+
+% Connections between locations
+connected(location1, location2).
+connected(location2, location1).
+```
+
+In this knowledge base, we have defined the locations, containers, robot, and cranes. We have also specified the initial positions of the containers and the robot. The `resources` predicate indicates that the robot is a resource. Finally, we have defined the connections between the locations, allowing for movement between them.
+INIT: Sure, here is the description of the initial and final states:
+
+```init
+init_state([
+  at(c1, location1, ground), on(c2, c1), at(c3, location2, ground), on(c4, c3),
+  at(r1, location1),
+  clear(c2), clear(c4)
+]).
+```
+
+The initial state describes the positions of the containers and the robot. The containers c1 and c3 are on the ground in their respective locations, while c2 is on top of c1 and c4 is on top of c3. The robot is in location1. The containers c2 and c4 are clear, meaning there is nothing on top of them.
+
+```goal
+goal_state([
+  at(c1, location1, ground), on(c2, c3), at(c3, location2, ground), on(c4, c1),
+  at(r1, location1),
+  clear(c2), clear(c4)
+]).
+```
+
+The goal state describes the desired positions of the containers and the robot. The containers c1 and c3 remain on the ground in their respective locations. Container c2 is moved to the top of c3, and container c4 is moved to the top of c1. The robot is back in location1. The containers c2 and c4 are clear, meaning there is nothing on top of them.
+ACTIONS: ```actions
+% Move a container from the ground to the top of another container within the same location
+action(move_ground_to_top_start(Crane, Container1, Container2, Location),
+  [at(Container1, Location, ground), clear(Container1), clear(Container2), crane(Crane, Location)],
+  [on(_, Container1), on(Container1, _), moving_ground_to_top(_, Container1, _, _)],
+  [],
+  [container(Container1), container(Container2), location(Location), crane(Crane, Location)],
+  [
+    del(at(Container1, Location, ground)), del(clear(Container1)), del(clear(Container2)),
+    add(moving_ground_to_top(Crane, Container1, Container2, Location))
+  ]
+).
+action(move_ground_to_top_end(Crane, Container1, Container2, Location),
+  [moving_ground_to_top(Crane, Container1, Container2, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(moving_ground_to_top(Crane, Container1, Container2, Location)),
+    add(on(Container1, Container2)), add(clear(Container1))
+  ]
+).
+
+% Load a container onto the robot
+action(load_container_start(Crane, Container, Robot, Location),
+  [at(Container, Location, ground), clear(Container), at(Robot, Location), crane(Crane, Location)],
+  [on(_, Container), on(Container, _), loading_container(_, Container, _, _)],
+  [],
+  [container(Container), robot(Robot), location(Location), crane(Crane, Location)],
+  [
+    del(at(Container, Location, ground)), del(clear(Container)),
+    add(loading_container(Crane, Container, Robot, Location))
+  ]
+).
+action(load_container_end(Crane, Container, Robot, Location),
+  [loading_container(Crane, Container, Robot, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(loading_container(Crane, Container, Robot, Location)),
+    add(on(Container, Robot)), add(clear(Container))
+  ]
+).
+
+% Unload a container from the robot
+action(unload_container_start(Crane, Container, Robot, Location),
+  [on(Container, Robot), clear(Container), at(Robot, Location), crane(Crane, Location)],
+  [on(_, Container), on(Container, _), unloading_container(_, Container, _, _)],
+  [],
+  [container(Container), robot(Robot), location(Location), crane(Crane, Location)],
+  [
+    del(on(Container, Robot)), del(clear(Container)),
+    add(unloading_container(Crane, Container, Robot, Location))
+  ]
+).
+action(unload_container_end(Crane, Container, Robot, Location),
+  [unloading_container(Crane, Container, Robot, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(unloading_container(Crane, Container, Robot, Location)),
+    add(at(Container, Location, ground)), add(clear(Container))
+  ]
+).
+
+% Move a container from the top of another container to the ground within the same location
+action(move_top_to_ground_start(Crane, Container1, Container2, Location),
+  [on(Container1, Container2), clear(Container1), crane(Crane, Location)],
+  [on(_, Container1), on(Container1, _), moving_top_to_ground(_, Container1, _, _)],
+  [],
+  [container(Container1), container(Container2), location(Location), crane(Crane, Location)],
+  [
+    del(on(Container1, Container2)), del(clear(Container1)),
+    add(moving_top_to_ground(Crane, Container1, Container2, Location)), add(clear(Container2))
+  ]
+).
+action(move_top_to_ground_end(Crane, Container1, Container2, Location),
+  [moving_top_to_ground(Crane, Container1, Container2, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(moving_top_to_ground(Crane, Container1, Container2, Location)),
+    add(at(Container1, Location, ground)), add(clear(Container1))
+  ]
+).
+
+% Move a container from the top of another container to the top of another container within the same location
+action(move_top_to_top_start(Crane, Container1, Container2, Container3, Location),
+  [on(Container1, Container2), clear(Container1), clear(Container3), crane(Crane, Location)],
+  [on(_, Container1), on(Container1, _), moving_top_to_top(_, Container1, _, _, _)],
+  [],
+  [container(Container1), container(Container2), container(Container3), location(Location), crane(Crane, Location)],
+  [
+    del(on(Container1, Container2)), del(clear(Container1)), del(clear(Container3)),
+    add(moving_top_to_top(Crane, Container1, Container2, Container3, Location)), add(clear(Container2))
+  ]
+).
+action(move_top_to_top_end(Crane, Container1, Container2, Container3, Location),
+  [moving_top_to_top(Crane, Container1, Container2, Container3, Location)],
+  [],
+  [],
+  [crane(Crane, Location)],
+  [
+    del(moving_top_to_top(Crane, Container1, Container2, Container3, Location)),
+    add(on(Container1, Container3)), add(clear(Container1))
+  ]
+).
+
+% Move the robot from one location to another
+action(move_robot_start(Robot, Location1, Location2),
+  [at(Robot, Location1)],
+  [moving_robot(_, _, _)],
+  [],
+  [robot(Robot), location(Location1), location(Location2), connected(Location1, Location2)],
+  [
+    del(at(Robot, Location1)),
+    add(moving_robot(Robot, Location1, Location2))
+  ]
+).
+action(move_robot_end(Robot, Location1, Location2),
+  [moving_robot(Robot, Location1, Location2)],
+  [],
+  [],
+  [robot(Robot)],
+  [
+    del(moving_robot(Robot, Location1, Location2)),
+    add(at(Robot, Location2))
+  ]
+).
+```

@@ -1,0 +1,8 @@
+There are 3 blocks on the table in positions (1,1), (2,3) and (3,4) respectively. The goal is to put
+the first in position (5,5), put the second on top of it and the third on top of the second.
+There is only one agent that can do this operation. It is available at the beginning and will be 
+available at the end. Moreover, it can:
+- Move a block from a position on the table to another position in the table
+- Move a block that is on the table to the top of another block
+- Move a block on top of a block to another position on the table
+- Move a block on top of a block to the top of another block
