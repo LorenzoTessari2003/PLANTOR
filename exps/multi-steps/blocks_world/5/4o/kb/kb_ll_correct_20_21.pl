@@ -131,6 +131,8 @@ action(move_onblock_to_table_end(Agent, Block1, X1, Y1, X2, Y2),
   ]
 ).
 
+%86
+
 % Move a block from the top of another block to the top of another block
 action(move_onblock_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
   [available(Agent), on(Block1, Block3), at(Block1, X1, Y1), at(Block2, X2, Y2), clear(Block2), clear(Block1)],
@@ -152,6 +154,8 @@ action(move_onblock_to_block_end(Agent, Block1, Block2, X1, Y1, X2, Y2),
     add(on(Block1, Block2)), add(at(Block1, X2, Y2)), add(clear(Block1)), add(available(Agent))
   ]
 ).
+
+%116
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % ll_actions
