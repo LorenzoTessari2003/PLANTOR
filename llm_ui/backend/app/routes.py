@@ -1,7 +1,7 @@
 import os, subprocess
 from flask import Flask, request, jsonify, Blueprint, current_app
 
-from . import PUBLIC_PATH, PLOP_PATH
+from . import PUBLIC_PATH, PLANTOR_PATH
 from ui_multi_steps import llm_scenario_comprehension, hl_llm_multi_step, ll_llm_multi_step, write_to_file, find_plan
 
 MOCK = False
@@ -44,7 +44,7 @@ def generate_behavior_tree(kb):
     if os.path.exists(bt_xml_path):
         os.remove(bt_xml_path)
 
-    planner_path = os.path.join(PLOP_PATH, "python_interface", "planner.py")
+    planner_path = os.path.join(PLANTOR_PATH, "python_interface", "planner.py")
 
     subprocess.run(["mkdir", "-p", "/app/test/test2"])
 

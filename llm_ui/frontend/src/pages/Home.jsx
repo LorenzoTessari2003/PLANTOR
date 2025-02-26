@@ -83,7 +83,7 @@ const Home = () => {
             setLLKBContent(result.kb);
             setLLInitContent(result.init);
             setLLGoalContent(result.goal);
-            setLLActionsContent(result.actions);
+            setLLActionsContent(result.ll_actions);
             setLLMappingsContent(result.mappings);
             console.log(llKBContent, llInitContent, llGoalContent, llActionsContent, llMappingsContent);
         } catch (error) {

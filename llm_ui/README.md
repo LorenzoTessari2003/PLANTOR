@@ -1,4 +1,4 @@
-# PLOP UI
+# PLANTOR UI
 
 The UI is provided via browser. The front-end is written in React, while the backend relies on 
 Python3 with Flask in order to server the APIs. 
@@ -22,8 +22,8 @@ before.
 
 ```shell
 # Consider using virtualenv
-# virtualenv plop_venv
-# source plop_venv/bin/activate
+# virtualenv plantor_venv
+# source plantor_venv/bin/activate
 cd llm_ui/backend 
 python3 -m pip install -r requirements.txt
 ```

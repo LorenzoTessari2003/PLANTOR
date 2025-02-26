@@ -65,13 +65,13 @@ Briefly, the main folders are:
 The repo uses external libraries for some modules, so one must either clone it with all the submodules:
 
 ```
-$ git clone --recurse-submodules git@github.com:idra-lab/PLOP.git
+$ git clone --recurse-submodules git@github.com:idra-lab/PLANTOR.git
 ```
 
 or initialize the submodules at a later time:
 
 ```
-$ git clone git@github.com:idra-lab/PLOP.git
+$ git clone git@github.com:idra-lab/PLANTOR.git
 $ git submodule update --init --recursive --remote 
 ```
 

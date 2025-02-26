@@ -1,1 +1,1 @@
-# Front-end for PLOP
+# Front-end for PLANTOR
