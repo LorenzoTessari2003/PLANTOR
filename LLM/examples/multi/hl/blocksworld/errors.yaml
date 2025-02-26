@@ -1,0 +1,347 @@
+entries:
+  convo:
+    ###########################################################################
+    ##############################     0     ##################################
+    ###########################################################################
+    # 0: 
+    #   Q:
+    #     role: 'user'
+    #     content: |
+    #       Consider the following complete knowledge base for a blocksworld domain:
+    #       ```kb
+    #       % Positions
+    #       pos(2,2).
+    #       pos(4,4).
+    #       pos(8,8).
+    #       pos(1,1).
+    #       pos(3,3).
+    #       pos(5,5).
+    #       pos(6,6).
+
+    #       % Blocks
+    #       block(b1).
+    #       block(b2).
+    #       block(b3).
+    #       block(b4).
+    #       block(b5).
+    #       block(b6).
+    #       block(b7).
+
+    #       % Agents
+    #       agent(a1).
+    #       agent(a2).
+
+    #       % Resources
+    #       resources(agent(_)).
+    #       ```
+          
+    #       ```init_state
+    #       init_state([
+    #         ontable(b1), ontable(b2), ontable(b4), ontable(b6), ontable(b7),
+    #         on(b5, b1), on(b3, b2), 
+    #         at(b1,2,2), at(b2,4,4), at(b4,8,8), at(b5,2,2), at(b3,4,4), at(b6,1,1), at(b7,3,3),
+    #         clear(b5), clear(b3), clear(b4), clear(b6), clear(b7),
+    #         available(a1), available(a2)
+    #       ]).
+    #       ```
+
+    #       ```goal_state
+    #       goal_state([
+    #         ontable(b1), ontable(b2), ontable(b3), ontable(b6), ontable(b7),
+    #         on(b5, b4),
+    #         at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+    #         clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+    #         available(a1), available(a2)
+    #       ]).
+    #       ```
+    #       ```actions
+    #       % Move a block from a position on the table to another position on the table
+    #       action(move_block_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+    #         [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
+    #         [moving_block_table_to_table(_, Block, _, _), moving_block_table_to_block(_, Block, _, _, _, _, _), moving_block_on_to_table(_, Block, _, _, _, _), moving_block_on_to_block(_, Block, _, _, _, _, _)],
+    #         [ontable(Block), at(Block, X2, Y2)],
+    #         [pos(X1, Y1), pos(X2, Y2), block(Block), agent(Agent)],
+    #         [
+    #           del(available(Agent)), del(clear(Block)), del(at(Block, X1, Y1)), del(ontable(Block)),
+    #           add(moving_block_table_to_table(Agent, Block, X1, Y1))
+    #         ]
+    #       ).                           
+
+    #       action(move_block_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+    #         [moving_block_table_to_table(Agent, Block, X1, Y1)],
+    #         [at(_, X2, Y2)],
+    #         [],
+    #         [],
+    #         [
+    #           del(moving_block_table_to_table(Agent, Block, X1, Y1)), 
+    #           add(available(Agent)), add(at(Block, X2, Y2)), add(ontable(Block)), add(clear(Block))
+    #         ]
+    #       ).
+
+    #       % Move a block from a position on the table to the top of another block
+    #       action(move_block_table_to_block_start(Agent, Block1, X1, Y1, Block2), 
+    #         [ontable(Block1), at(Block1, X1, Y1), available(Agent), clear(Block1), clear(Block2)],
+    #         [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+    #         [on(Block1, Block2)],
+    #         [pos(X1, Y1), block(Block1), block(Block2), agent(Agent)],
+    #         [
+    #           del(available(Agent)), del(clear(Block1)), del(at(Block1, X1, Y1)), del(ontable(Block1)),
+    #           add(moving_block_table_to_block(Agent, Block1, X1, Y1, Block2))
+    #         ]
+    #       ).                           
+
+    #       action(move_block_table_to_block_end(Agent, Block1, X1, Y1, Block2),
+    #         [moving_block_table_to_block(Agent, Block1, X1, Y1, Block2)],
+    #         [],
+    #         [],
+    #         [],
+    #         [
+    #           del(moving_block_table_to_block(Agent, Block1, X1, Y1, Block2)), 
+    #           add(available(Agent)), add(on(Block1, Block2)), add(clear(Block1))
+    #         ]
+    #       ).
+
+    #       % Move a block from the top of another block to a position on the table
+    #       action(move_block_on_to_table_start(Agent, Block1, Block2, X2, Y2), 
+    #         [on(Block1, Block2), at(Block1, X1, Y1), available(Agent), clear(Block1)],
+    #         [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+    #         [ontable(Block1), at(Block1, X2, Y2)],
+    #         [pos(X2, Y2), block(Block1), block(Block2), agent(Agent)],
+    #         [
+    #           del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
+    #           add(moving_block_on_to_table(Agent, Block1, Block2, X2, Y2))
+    #         ]
+    #       ).                           
+
+    #       action(move_block_on_to_table_end(Agent, Block1, Block2, X2, Y2),
+    #         [moving_block_on_to_table(Agent, Block1, Block2, X2, Y2)],
+    #         [at(_, X2, Y2)],
+    #         [],
+    #         [],
+    #         [
+    #           del(moving_block_on_to_table(Agent, Block1, Block2, X2, Y2)), 
+    #           add(available(Agent)), add(at(Block1, X2, Y2)), add(ontable(Block1)), add(clear(Block1)), add(clear(Block2))
+    #         ]
+    #       ).
+
+    #       % Move a block from the top of another block to the top of another block
+    #       action(move_block_on_to_block_start(Agent, Block1, Block2, Block3), 
+    #         [on(Block1, Block2), available(Agent), clear(Block1), clear(Block3)],
+    #         [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+    #         [on(Block1, Block3)],
+    #         [block(Block1), block(Block2), block(Block3), agent(Agent)],
+    #         [
+    #           del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)),
+    #           add(moving_block_on_to_block(Agent, Block1, Block2, Block3))
+    #         ]
+    #       ).                           
+
+    #       action(move_block_on_to_block_end(Agent, Block1, Block2, Block3),
+    #         [moving_block_on_to_block(Agent, Block1, Block2, Block3)],
+    #         [],
+    #         [],
+    #         [],
+    #         [
+    #           del(moving_block_on_to_block(Agent, Block1, Block2, Block3)), 
+    #           add(available(Agent)), add(on(Block1, Block3)), add(clear(Block1)), add(clear(Block2))
+    #         ]
+    #       ).
+    #       ```
+
+    #       There is a problem with the actions `move_block_on_to_block_start` and 
+    #       `move_block_on_to_block_end`. Can you identify the problem and provide a solution?
+    #   A: 
+    #     role : 'assistant' 
+    #     content: |
+    #       Sure. The problem is that the description states that at the beginning the block is in a 
+    #       given position, which is the same as B2, and that at the end it is on top of another block
+    #       B3 and in the same position as this block. However, the preconditions of the action
+    #       `move_block_on_to_block_start` are not consistent with the description. The action must 
+    #       check that B1 is in the same position as B2, which is done by using the `at` predicate.
+    #       Similarly, in the effects, the start action must remove the `at` predicate for B1 and add
+    #       then add it back ad the end of the action changing it from the same position of B2 to the
+    #       same position of B3. The corrected actions are shown below:
+    #       ```actions
+    #       % Move a block from the top of another block to the top of another block
+    #       action(move_block_on_to_block_start(Agent, Block1, Block2, Block3), 
+    #         [on(Block1, Block2), at(Block1, X1, Y1), available(Agent), clear(Block1), clear(Block3), at(Block1, X1, Y1), at(Block2, X1, Y1)],
+    #         [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+    #         [on(Block1, Block3)],
+    #         [block(Block1), block(Block2), block(Block3), agent(Agent)],
+    #         [
+    #           del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)), del(at(Block1, X1, Y1)),
+    #           add(moving_block_on_to_block(Agent, Block1, Block2, Block3))
+    #         ]
+    #       ).                           
+
+    #       action(move_block_on_to_block_end(Agent, Block1, Block2, Block3),
+    #         [moving_block_on_to_block(Agent, Block1, Block2, Block3), at(Block3, X3, Y3), clear(Block3)],
+    #         [],
+    #         [],
+    #         [],
+    #         [
+    #           del(moving_block_on_to_block(Agent, Block1, Block2, Block3)), del(clear(Block3)), 
+    #           add(available(Agent)), add(on(Block1, Block3)), add(clear(Block1)), add(clear(Block2)), add(at(Block1, X3, Y3))
+    #         ]
+    #       ).
+    #       ```
+          
+    ###########################################################################
+    ##############################     1     ##################################
+    ###########################################################################
+    1: 
+      Q:
+        role: 'user'
+        content: |
+          Consider the following high-level description:
+
+          There are 7 blocks on a table. In the initial state of the simulation, block b1 is in 
+          position (2,2), block b2 is in position (4,4), block b4 is in position (8,8). Block b5 is 
+          on top of block b1 in position (2,2) and block b3 is on top of block b2 in position (4,4). 
+          After moving the blocks around during the simulation, at the end, we have b5 on top of 
+          block b4, both in position (8,8), and the remaining blocks b1, b2 and b3 are in the same 
+          positions as in the initial state. The position of other blocks, such as b6, is irrelevant 
+          at the moment and can be considered as random positions on the table. Please explicitly 
+          assign these positions when generating the knowledge base.There are 2 agents with a 
+          robotic arm. The agents can:- Move a block from a position on the table to another 
+          position on the table. At the beginning, the block must be  free, i.e., there is no other 
+          block on top of it, and the agent must be available. At the end, the final position on 
+          the table must still be free, i.e., there are no blocks occupying it. After the execution 
+          of the action, the  agent is available again, the block is in the new position. The 
+          previous position has been freed as soon as the action starts. 
+          - Move a block B1 from a position on the table, to the top of another block B2. At the 
+          beginning, the B1 must be free and the agent must be available. To complete the action, 
+          B2 must be free. At the end, B1 is on top of B2, and the agent is available again. The 
+          previous position of B1 has been freed as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the table. At the beginning, B1 must 
+          be on top of B2, B1 must be free and the agent must be available. At the end, B1 is on the 
+          table in a new position, and the agent is   available again. B2 becomes free (since the 
+          block it had on top has been removed) as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the top of another block B3. At the 
+          beginning, B1 must be on  top of B2 with the same initial position, B1 must be free and 
+          the agent must be available. To complete the action, B3 must be free, i.e., not have any 
+          other block on top of it. At the end, B1 is on top of B3, and the agent is available 
+          again. B2 becomes free as soon as the action starts. B1 will not be in the initial 
+          position after the start of the action, but will have the same position of B3 at the end 
+          of the action.
+
+          and consider the following initial and final states. There are some errors. Can you please
+          identify and correct them?
+          ```init_state 
+            init_state([
+            ontable(b1), ontable(b2), ontable(b4), ontable(b6), ontable(b7),
+            on(b5, b1), on(b3, b2), 
+            at(b1,2,2), at(b2,4,4), at(b4,8,8), at(b5,2,2), at(b3,4,4), at(b6,1,1), at(b7,3,3),
+            clear(b5), clear(b3), clear(b4), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]).
+          ```
+
+          ```goal_state
+          goal_state([
+            ontable(b1), ontable(b2), ontable(b6), ontable(b7),
+            on(b5, b4),
+            at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+            clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]). 
+          ```
+          
+      A: 
+        role : 'assistant' 
+        content: |
+          Sure. The main errors consist in the fact that some predicates are missing in the final 
+          state. Indeed, the final state should contain the predicates `on(b3, b2)` and 
+          `ontable(b4)` since none of these blocks have been moved during the simulation. The only
+          thing that changed for b4 was the fact that, after b1 is placed on top of it, it is no
+          longer clear.
+          Also notice that the `ontable(b3)` predicate cannot be there as b3 is actually on top of 
+          b2 and has not been moved. The corrected goal state is shown below:
+          ```goal_state
+          goal_state([
+            ontable(b1), ontable(b2), ontable(b6), ontable(b7), ontable(b4),
+            on(b5, b4), on(b3, b2),
+            at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+            clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]). 
+          ```
+
+    ###########################################################################
+    ##############################     2     ##################################
+    ###########################################################################
+    2: 
+      Q:
+        role: 'user'
+        content: |
+          Consider the following high-level description:
+
+          There are 7 blocks on a table. In the initial state of the simulation, block b1 is in 
+          position (2,2), block b2 is in position (4,4), block b4 is in position (8,8). Block b5 is 
+          on top of block b1 in position (2,2) and block b3 is on top of block b2 in position (4,4). 
+          After moving the blocks around during the simulation, at the end, we have b5 on top of 
+          block b4, both in position (8,8), and the remaining blocks b1, b2 and b3 are in the same 
+          positions as in the initial state. The position of other blocks, such as b6, is irrelevant 
+          at the moment and can be considered as random positions on the table. Please explicitly 
+          assign these positions when generating the knowledge base.There are 2 agents with a 
+          robotic arm. The agents can:- Move a block from a position on the table to another 
+          position on the table. At the beginning, the block must be  free, i.e., there is no other 
+          block on top of it, and the agent must be available. At the end, the final position on 
+          the table must still be free, i.e., there are no blocks occupying it. After the execution 
+          of the action, the  agent is available again, the block is in the new position. The 
+          previous position has been freed as soon as the action starts. 
+          - Move a block B1 from a position on the table, to the top of another block B2. At the 
+          beginning, the B1 must be free and the agent must be available. To complete the action, 
+          B2 must be free. At the end, B1 is on top of B2, and the agent is available again. The 
+          previous position of B1 has been freed as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the table. At the beginning, B1 must 
+          be on top of B2, B1 must be free and the agent must be available. At the end, B1 is on the 
+          table in a new position, and the agent is   available again. B2 becomes free (since the 
+          block it had on top has been removed) as soon as the action starts.
+          - Move a block B1 from the top of another block B2 to the top of another block B3. At the 
+          beginning, B1 must be on  top of B2 with the same initial position, B1 must be free and 
+          the agent must be available. To complete the action, B3 must be free, i.e., not have any 
+          other block on top of it. At the end, B1 is on top of B3, and the agent is available 
+          again. B2 becomes free as soon as the action starts. B1 will not be in the initial 
+          position after the start of the action, but will have the same position of B3 at the end 
+          of the action.
+
+          and consider the following initial and final states. There are some errors. Can you please
+          identify and correct them?
+          ```init_state 
+            init_state([
+            ontable(b1), ontable(b2), ontable(b4), ontable(b6), ontable(b7),
+            on(b5, b1), on(b3, b2), 
+            at(b1,2,2), at(b2,4,4), at(b4,8,8), at(b5,2,2), at(b3,4,4), at(b6,1,1), at(b7,3,3),
+            clear(b5), clear(b3), clear(b4), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]).
+          ```
+
+          ```goal_state
+          goal_state([
+            ontable(b1), ontable(b2), ontable(b3), ontable(b6), ontable(b7),
+            on(b5, b4), on(b3, b2),
+            at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+            clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]). 
+          ```
+          
+      A: 
+        role : 'assistant' 
+        content: |
+          Sure. The main error is that the predicate `ontable(b3)` in the goal state is wrong since
+          block b3 has not been moved and is still on top of block b2. On the contrary, there is 
+          nothing about the position of block b4.
+          The corrected goal state is shown below:
+
+          ```goal_state
+          goal_state([
+            ontable(b1), ontable(b2), ontable(b4), ontable(b6), ontable(b7), ontable(b4),
+            on(b5, b4), on(b3, b2),
+            at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+            clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+            available(a1), available(a2)
+          ]). 
+          ```

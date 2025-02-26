@@ -1,0 +1,6 @@
+Let the blocks be in the same position as the high-level description. 
+The agents are robotics arm equipped with a gripper. At the beginning, the end-effector of the agents are in position (4,4) and (5,5) for agents a1, a2, respectively. Each agent has the following APIs:
+- move_arm(Agent, x1, y1, x2, y2), which moves the end-effector from a position (x1, y1) to (x2, y2).
+- close_gripper(Agent), which closes the gripper.
+- open_gripper(Agent), which opens the gripper.
+Remember to use the appropriate tags for the code you produce and not to use prolog tags.

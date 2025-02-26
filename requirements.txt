@@ -1,9 +1,9 @@
-matplotlib
-pygraphviz
-matplotlib==3.5.1
-bokeh
-pyswip
-networkx
-pillow>=7.1.0
-scipy
+-r llm_kb_gen/requirements.txt
+-r llm_ll_gen/requirements.txt
+-r LLM/requirements.txt
+-r python_interface/requirements.txt
+-r llm_ui/backend/requirements.txt
 
+art
+networkx
+pygraphviz

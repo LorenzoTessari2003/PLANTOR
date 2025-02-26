@@ -1,0 +1,11 @@
+Planning from: [ontable(a),on(b,a),on(c,b),on(d,c),at(a,1,1),at(b,1,1),at(c,1,1),at(d,1,1),clear(d),at(a1,0,0),at(a2,3,3),available(a1),available(a2)] to: [ontable(a),ontable(b),ontable(c),on(d,a),at(a,1,1),at(b,2,1),at(c,3,1),at(d,1,1),clear(d),clear(b),clear(c),at(a1,0,0),at(a2,3,3),available(a1),available(a2)]
+Plan: 
+[0] [0-move_onblock_to_table_start(a1,d,1,1,2,1)]
+[1] [1-move_onblock_to_table_start(a2,c,1,1,3,1)]
+[2] [2-move_onblock_to_table_end(a2,c,1,1,3,1)]
+[3] [3-move_onblock_to_table_start(a2,b,1,1,2,1)]
+[4] [4-move_onblock_to_table_end(a1,d,1,1,2,1)]
+[5] [5-move_table_to_block_start(a1,d,a,2,1,1,1)]
+[6] [6-move_table_to_block_end(a1,d,a,2,1,1,1)]
+[7] [7-move_onblock_to_table_end(a2,b,1,1,2,1)]
+% 57,385,984 inferences, 1.578 CPU in 1.579 seconds (100% CPU, 36355530 Lips)

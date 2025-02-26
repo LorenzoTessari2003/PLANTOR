@@ -1,0 +1,303 @@
+entries:
+  convo:
+    ###########################################################################
+    ##############################     0     ##################################
+    ###########################################################################
+    0: 
+      Q:
+        role: 'user'
+        content: |
+          Consider the following complete knowledge base for a blocksworld domain:
+          ```kb
+        % Positions
+        pos(2,2).
+        pos(4,4).
+        pos(8,8).
+        pos(1,1).
+        pos(3,3).
+        pos(5,5).
+        pos(6,6).
+
+        % Blocks
+        block(b1).
+        block(b2).
+        block(b3).
+        block(b4).
+        block(b5).
+        block(b6).
+        block(b7).
+
+        % Agents
+        agent(a1).
+        agent(a2).
+
+        % Arms
+        ll_arm(a1).
+        ll_arm(a2).
+
+        % Resources
+        resources(agent(_)).
+        resources(ll_arm(_)).
+        ```
+        
+        ```init_state
+        init_state([
+          ontable(b1), ontable(b2), ontable(b4), ontable(b6), ontable(b7),
+          on(b5, b1), on(b3, b2), 
+          at(b1,2,2), at(b2,4,4), at(b4,8,8), at(b5,2,2), at(b3,4,4), at(b6,1,1), at(b7,3,3),
+          clear(b5), clear(b3), clear(b4), clear(b6), clear(b7),
+          available(a1), available(a2), 
+          ll_arm_at(a1,0,0), ll_arm_at(a2,1,1),
+          ll_gripper(a1,open), ll_gripper(a2,open)
+        ]).
+        ```
+
+        ```goal_state
+        goal_state([
+          ontable(b1), ontable(b2), ontable(b3), ontable(b6), ontable(b7),
+          on(b5, b4),
+          at(b1,2,2), at(b2,4,4), at(b3,4,4), at(b4,8,8), at(b5,8,8), at(b6,1,1), at(b7,3,3),
+          clear(b1), clear(b3), clear(b5), clear(b6), clear(b7),
+          available(a1), available(a2), 
+          ll_arm_at(a1,_,_), ll_arm_at(a2,_,_), 
+          ll_gripper(a1,_), ll_gripper(a2,_)
+        ]).
+        ```
+        ```actions
+        % Move a block from a position on the table to another position on the table
+        action(move_block_table_to_table_start(Agent, Block, X1, Y1, X2, Y2), 
+          [ontable(Block), at(Block, X1, Y1), available(Agent), clear(Block)],
+          [moving_block_table_to_table(_, Block, _, _), moving_block_table_to_block(_, Block, _, _, _, _, _), moving_block_on_to_table(_, Block, _, _, _, _), moving_block_on_to_block(_, Block, _, _, _, _, _)],
+          [ontable(Block), at(Block, X2, Y2)],
+          [pos(X1, Y1), pos(X2, Y2), block(Block), agent(Agent)],
+          [
+            del(available(Agent)), del(clear(Block)), del(at(Block, X1, Y1)), del(ontable(Block)),
+            add(moving_block_table_to_table(Agent, Block, X1, Y1))
+          ]
+        ).                           
+
+        action(move_block_table_to_table_end(Agent, Block, X1, Y1, X2, Y2),
+          [moving_block_table_to_table(Agent, Block, X1, Y1)],
+          [at(_, X2, Y2)],
+          [],
+          [],
+          [
+            del(moving_block_table_to_table(Agent, Block, X1, Y1)), 
+            add(available(Agent)), add(at(Block, X2, Y2)), add(ontable(Block)), add(clear(Block))
+          ]
+        ).
+
+        % Move a block from a position on the table to the top of another block
+        action(move_block_table_to_block_start(Agent, Block1, X1, Y1, Block2), 
+          [ontable(Block1), at(Block1, X1, Y1), available(Agent), clear(Block1), clear(Block2)],
+          [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+          [on(Block1, Block2)],
+          [pos(X1, Y1), block(Block1), block(Block2), agent(Agent)],
+          [
+            del(available(Agent)), del(clear(Block1)), del(at(Block1, X1, Y1)), del(ontable(Block1)),
+            add(moving_block_table_to_block(Agent, Block1, X1, Y1, Block2))
+          ]
+        ).                           
+
+        action(move_block_table_to_block_end(Agent, Block1, X1, Y1, Block2),
+          [moving_block_table_to_block(Agent, Block1, X1, Y1, Block2)],
+          [],
+          [],
+          [],
+          [
+            del(moving_block_table_to_block(Agent, Block1, X1, Y1, Block2)), 
+            add(available(Agent)), add(on(Block1, Block2)), add(clear(Block1))
+          ]
+        ).
+
+        % Move a block from the top of another block to a position on the table
+        action(move_block_on_to_table_start(Agent, Block1, Block2, X2, Y2), 
+          [on(Block1, Block2), at(Block1, X1, Y1), available(Agent), clear(Block1)],
+          [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+          [ontable(Block1), at(Block1, X2, Y2)],
+          [pos(X2, Y2), block(Block1), block(Block2), agent(Agent)],
+          [
+            del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)),
+            add(moving_block_on_to_table(Agent, Block1, Block2, X2, Y2))
+          ]
+        ).                           
+
+        action(move_block_on_to_table_end(Agent, Block1, Block2, X2, Y2),
+          [moving_block_on_to_table(Agent, Block1, Block2, X2, Y2)],
+          [at(_, X2, Y2)],
+          [],
+          [],
+          [
+            del(moving_block_on_to_table(Agent, Block1, Block2, X2, Y2)), 
+            add(available(Agent)), add(at(Block1, X2, Y2)), add(ontable(Block1)), add(clear(Block1)), add(clear(Block2))
+          ]
+        ).
+
+        % Move a block from the top of another block to the top of another block
+        action(move_block_on_to_block_start(Agent, Block1, Block2, Block3), 
+          [on(Block1, Block2), at(Block1, X1, Y1), available(Agent), clear(Block1), clear(Block3), at(Block1, X1, Y1), at(Block2, X1, Y1)],
+          [moving_block_table_to_table(_, Block1, _, _), moving_block_table_to_block(_, Block1, _, _, _, _, _), moving_block_on_to_table(_, Block1, _, _, _, _), moving_block_on_to_block(_, Block1, _, _, _, _, _)],
+          [on(Block1, Block3)],
+          [block(Block1), block(Block2), block(Block3), agent(Agent)],
+          [
+            del(available(Agent)), del(clear(Block1)), del(on(Block1, Block2)), del(at(Block1, X1, Y1)), del(at(Block1, X1, Y1)),
+            add(moving_block_on_to_block(Agent, Block1, Block2, Block3))
+          ]
+        ).                           
+
+        action(move_block_on_to_block_end(Agent, Block1, Block2, Block3),
+          [moving_block_on_to_block(Agent, Block1, Block2, Block3), at(Block3, X3, Y3), clear(Block3)],
+          [],
+          [],
+          [],
+          [
+            del(moving_block_on_to_block(Agent, Block1, Block2, Block3)), del(clear(Block3)), 
+            add(available(Agent)), add(on(Block1, Block3)), add(clear(Block1)), add(clear(Block2)), add(at(Block1, X3, Y3))
+          ]
+        ).
+        ```
+
+        ```ll_actions
+        ll_action(move_arm_start(Arm, X1, Y1, X2, Y2),
+          [ll_arm_at(Arm, X1, Y1)],
+          [moving_arm(Arm, _, _, _, _), gripping(Arm, _), releasing(Arm)],
+          [],
+          [ll_arm(Arm), pos(X1, Y1), pos(X2, Y2)],
+          [
+            add(moving_arm(Arm, X1, Y1, X2, Y2)),
+            del(ll_arm_at(Arm, X1, Y1))
+          ]
+        ).
+
+        ll_action(move_arm_end(Arm, X1, Y1, X2, Y2),
+          [moving_arm(Arm, X1, Y1, X2, Y2)],
+          [],
+          [],
+          [],
+          [
+            del(moving_arm(Arm, X1, Y1, X2, Y2)),
+            add(ll_arm_at(Arm, X2, Y2))
+          ]
+        ).
+
+        ll_action(close_start(Arm),
+          [ll_gripper(Arm, open)],
+          [gripping(Arm, _), releasing(Arm)],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripper(Arm, open)),
+            add(gripping(Arm, closing))
+          ]
+        ).
+
+        ll_action(close_end(Arm),
+          [gripping(Arm, closing)],
+          [],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(gripping(Arm, closing)),
+            add(ll_gripper(Arm, closed))
+          ]
+        ).
+
+        ll_action(open_start(Arm),
+          [ll_gripper(Arm, closed)],
+          [gripping(Arm, _), releasing(Arm)],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripper(Arm, closed)),
+            add(gripping(Arm, opening))
+          ]
+        ).
+
+        ll_action(open_end(Arm),
+          [gripping(Arm, opening)],
+          [],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(gripping(Arm, opening)),
+            add(ll_gripper(Arm, open))
+          ]
+        ).
+        ```
+        There is a problem in the low-level actions. Can you identify it?
+      A: 
+        role : 'assistant' 
+        content: | 
+        Sure. The low-level actions should not contain predicates that are not part of the low-level
+        predicates, i.e., prefixed with "ll_", such as `gripping`, `releasing`, and `moving_arm`. 
+        It also must not change the high-level predicates. Predicates such as `pos` inside the 
+        Verify list of predicates are allowed. Also, the actions `open` and `close` were not making
+        sure that the arm was not moving before closing or opening. Here are the corrected low-level
+        actions:
+        ```ll_actions
+        ll_action(move_arm_start(Arm, X1, Y1, X2, Y2),
+          [ll_arm_at(Arm, X1, Y1)],
+          [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
+          [],
+          [ll_arm(Arm), pos(X1, Y1), pos(X2, Y2)],
+          [
+            add(ll_moving_arm(Arm, X1, Y1, X2, Y2)),
+            del(ll_arm_at(Arm, X1, Y1))
+          ]
+        ).
+
+        ll_action(move_arm_end(Arm, X1, Y1, X2, Y2),
+          [ll_moving_arm(Arm, X1, Y1, X2, Y2)],
+          [],
+          [],
+          [],
+          [
+            del(ll_moving_arm(Arm, X1, Y1, X2, Y2)),
+            add(ll_arm_at(Arm, X2, Y2))
+          ]
+        ).
+
+        ll_action(close_start(Arm),
+          [ll_gripper(Arm, open)],
+          [ll_gripping(Arm, _), ll_releasing(Arm), ll_moving_arm(Arm, _, _, _, _)],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripper(Arm, open)),
+            add(ll_gripping(Arm, closing))
+          ]
+        ).
+
+        ll_action(close_end(Arm),
+          [ll_gripping(Arm, closing)],
+          [],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripping(Arm, closing)),
+            add(ll_gripper(Arm, closed))
+          ]
+        ).
+
+        ll_action(open_start(Arm),
+          [ll_gripper(Arm, closed)],
+          [ll_gripping(Arm, _), ll_releasing(Arm), ll_moving_arm(Arm, _, _, _, _)],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripper(Arm, closed)),
+            add(ll_gripping(Arm, opening))
+          ]
+        ).
+
+        ll_action(open_end(Arm),
+          [ll_gripping(Arm, opening)],
+          [],
+          [],
+          [ll_arm(Arm)],
+          [
+            del(ll_gripping(Arm, opening)),
+            add(ll_gripper(Arm, open))
+          ]
+        ).
+        ```

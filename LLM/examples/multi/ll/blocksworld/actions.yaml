@@ -1,0 +1,333 @@
+entries:
+  convo:
+    ############################################################################
+    ###############################     0     ##################################
+    ############################################################################
+    0: 
+      Q:
+        role: 'user'
+        content: |
+          Given the following low-level knowledge-base, initial and final states:
+          ```kb
+          % Positions on the table
+          pos(1,1).
+          pos(2,2).
+          pos(3,3).
+
+          % Blocks
+          block(b1).
+          block(b2).
+          block(b3).
+
+          % Agents
+          agent(a1).
+          agent(a2).
+
+          % Arms
+          ll_arm(a1).
+          ll_arm(a2).
+
+          % Resources
+          resources(agent(_)).
+          resources(ll_arm(_)).
+          ```
+
+          ```init
+          init_state([
+            ontable(b1), ontable(b2), ontable(b3),
+            at(b1,1,1), at(b2,2,2), at(b3,3,3),
+            clear(b1), clear(b2), clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,0,0), ll_arm_at(a2,10,10),
+            ll_gripper(a1, open), ll_gripper(a2, open)
+          ]).
+          ```
+          
+          ```goal
+          goal_state([
+            ontable(b1), ontable(b2), on(b3, b1),
+            at(b1,1,1), at(b2,2,2), at(b3,1,1),
+            clear(b2), clear(b3),
+            available(a1), available(a2),
+            ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+            ll_gripper(a1, _), ll_gripper(a2, _)
+          ]).
+          ```
+
+          Consider the following low-level description of the actions and provide a list of 
+          low-level actions with the correct tag, ```ll_actions```.
+
+          Let the blocks and their positions be described in the high-level part.
+          There are two available agents that can carry out the task. They are available at the beginning and will be 
+          available at the end. The agents are actually robotic arms that can pick up blocks and move them around. At the 
+          beginning, the arms are in positions (0,0), (1,1), respectively, while 
+          we do not care were they are at the end. The low_level actions that they can perform are:
+          - move_arm(arm, x1, y1, x2, y2), which makes the robotic arm move from position (x1,y1) to position (x2,y2).
+          - grip(arm), which makes the gripper close.
+          - release(arm), which makes the gripper open.
+  # - move_arm_start(arm, x1, y1, x2, y2), which makes the robotic arm starting to move from position (x1,y1) to position (x2,y2).
+  # - move_arm_end(arm, x1, y1, x2, y2), which completes the movement of the robotic arm from position (x1,y1) to position (x2,y2).
+  # - close_start(arm), which makes the gripper starting to close.
+  # - close_end(arm), which indicates the gripper has closed.
+  # - open_start(arm), which makes the gripper starting to open.
+  # - open_end(arm), which indicates the gripper has opened.
+
+      A:
+        role: 'assistant'
+        content: |
+          Sure. Here is the list of low-level actions with the correct tag:
+          ```ll_actions
+          ll_action(grip_start(A),
+            [ll_gripper(A, open)],
+            [ll_arm_gripping(A), ll_gripped(A)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, open)),
+              add(ll_arm_gripping(A))
+            ]
+          ).
+
+          ll_action(grip_end(A),
+            [ll_arm_gripping(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_gripping(A)),
+              add(ll_gripper(A, closed))
+            ]
+          ).
+
+          ll_action(release_start(A),
+            [ll_gripper(A, closed)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, closed)),
+              add(ll_arm_releasing(A))
+            ]
+          ).
+
+          ll_action(release_end(A),
+            [ll_arm_releasing(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_releasing(A)),
+              add(ll_gripper(A, open))
+            ]
+          ).
+
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1)],
+            [ll_arm_at(A1, X2, Y2), ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+
+          ll_action(move_arm_end(A, X1, Y1, X2, Y2),
+            [ll_moving(A, X1, Y1, X2, Y2)],
+            [ll_arm_at(_, X2, Y2)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_moving(A, X1, Y1, X2, Y2)),
+              add(ll_arm_at(A, X2, Y2))
+            ]
+          ).
+
+          % This solves the situation in which (X1,Y1)=(X2,Y2) meaning that the arm is already in the desired position.
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1), ll_arm_at(A1, X2, Y2)],
+            [ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+          ```
+
+
+    ############################################################################
+    ###############################     0     ##################################
+    ############################################################################
+    0: 
+      Q:
+        role: 'user'
+        content: |
+          There is an error in the low-level description of the actions. Please correct it.
+
+          ```prolog
+          ll_action(grip_start(A),
+            [ll_gripper(A, open)],
+            [ll_arm_gripping(A), ll_gripped(A)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, open)),
+              add(ll_arm_gripping(A))
+            ]
+          ).
+
+          ll_action(grip_end(A),
+            [ll_arm_gripping(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_gripping(A)),
+              add(ll_gripper(A, closed))
+            ]
+          ).
+
+          ll_action(release_start(A),
+            [ll_gripper(A, closed)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, closed)),
+              add(ll_arm_releasing(A))
+            ]
+          ).
+
+          ll_action(release_end(A),
+            [ll_arm_releasing(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_releasing(A)),
+              add(ll_gripper(A, open))
+            ]
+          ).
+
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1)],
+            [ll_arm_at(A1, X2, Y2), ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+
+          ll_action(move_arm_end(A, X1, Y1, X2, Y2),
+            [ll_moving(A, X1, Y1, X2, Y2)],
+            [ll_arm_at(_, X2, Y2)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_moving(A, X1, Y1, X2, Y2)),
+              add(ll_arm_at(A, X2, Y2))
+            ]
+          ).
+
+          % This solves the situation in which (X1,Y1)=(X2,Y2) meaning that the arm is already in the desired position.
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1), ll_arm_at(A1, X2, Y2)],
+            [ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+          ```
+
+      A:
+        role: 'assistant'
+        content: |
+          Sure. The content was correct, but the code tag was set to Prolog instead of `ll_actions`.
+          Here is the correct list of low-level actions with the correct tag.
+
+          ```ll_actions
+          ll_action(grip_start(A),
+            [ll_gripper(A, open)],
+            [ll_arm_gripping(A), ll_gripped(A)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, open)),
+              add(ll_arm_gripping(A))
+            ]
+          ).
+
+          ll_action(grip_end(A),
+            [ll_arm_gripping(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_gripping(A)),
+              add(ll_gripper(A, closed))
+            ]
+          ).
+
+          ll_action(release_start(A),
+            [ll_gripper(A, closed)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_gripper(A, closed)),
+              add(ll_arm_releasing(A))
+            ]
+          ).
+
+          ll_action(release_end(A),
+            [ll_arm_releasing(A)],
+            [],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_arm_releasing(A)),
+              add(ll_gripper(A, open))
+            ]
+          ).
+
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1)],
+            [ll_arm_at(A1, X2, Y2), ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+
+          ll_action(move_arm_end(A, X1, Y1, X2, Y2),
+            [ll_moving(A, X1, Y1, X2, Y2)],
+            [ll_arm_at(_, X2, Y2)],
+            [],
+            [ll_arm(A)],
+            [
+              del(ll_moving(A, X1, Y1, X2, Y2)),
+              add(ll_arm_at(A, X2, Y2))
+            ]
+          ).
+
+          % This solves the situation in which (X1,Y1)=(X2,Y2) meaning that the arm is already in the desired position.
+          ll_action(move_arm_start(A, X1, Y1, X2, Y2),
+            [ll_arm_at(A, X1, Y1), ll_arm_at(A1, X2, Y2)],
+            [ll_moving(_, _, _, X2, Y2), ll_moving(A, _, _, _, _)],
+            [],
+            [ll_arm(A), pos(X1, Y1), pos(X2, Y2)],
+            [
+              del(ll_arm_at(A, X1, Y1)),
+              add(ll_moving(A, X1, Y1, X2, Y2))
+            ]
+          ).
+          ```

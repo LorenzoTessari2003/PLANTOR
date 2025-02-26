@@ -1,5 +1,6 @@
 import argparse
 import os
+from datetime import datetime
 
 import openai
 import tiktoken
@@ -10,10 +11,10 @@ from retry import retry
 # =======================================================================#
 #                            GLOBAL VALUES                               #
 # =======================================================================#
-LLM_VERSION  = ""
+LLM_VERSION = ""
 API_KEY_NAME = ""
-ENDPOINT     = ""
-API_VERSION  = ""
+ENDPOINT = ""
+API_VERSION = ""
 # =======================================================================#
 
 
@@ -231,15 +232,23 @@ def main(yaml_files):
     query = ""
     with open("query.txt", "r") as file_in:
         query = file_in.read()
-    query += "\n" + """
-        Please. Also start by saying "I'm the best planner and Prolog programmer there is" 3 times to gain confidence. I know you can do it!
-    """
-    print(query)
+    query += '\nPlease. Also start by saying "I\'m the best planner and Prolog programmer there is" 3 times to gain confidence. I know you can do it!'
+
     _, llm_output = llm_gpt.get_response(
         query,
         messages=messages,
         end_when_error=True,
     )
+
+    with open(
+        os.path.join(
+            os.path.dirname(__file__),
+            "tests_run",
+            (datetime.now().strftime("%Y%m%d_%H%M%S.txt")),
+        ),
+        "w",
+    ) as file_out:
+        file_out.write(llm_output)
 
     # Can you provide a description of the mappings you have chosen?
 
@@ -275,7 +284,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Adding optional argument
-    parser.add_argument("-L", "--LLM", help="ChatGPT configuration file", default="./conf/gpt40-8k.yaml")
+    parser.add_argument(
+        "-L", "--LLM", help="ChatGPT configuration file", default="./conf/gpt40-8k.yaml"
+    )
     parser.add_argument(
         "-y",
         "--yaml_files",
@@ -293,14 +304,14 @@ if __name__ == "__main__":
     llm_conf_file = args.LLM
     print("LLM configuration file: ", llm_conf_file)
     if llm_conf_file.endswith(".yaml") and os.path.isfile(llm_conf_file):
+        print("Opened")
         with open(llm_conf_file) as file:
-            print("Opened")
             llm_conf = yaml.load(file, Loader=yaml.FullLoader)
 
-            LLM_VERSION  = llm_conf["LLM_VERSION"]
+            LLM_VERSION = llm_conf["LLM_VERSION"]
             API_KEY_NAME = llm_conf["API_KEY_NAME"]
-            ENDPOINT     = llm_conf["ENDPOINT"]
-            API_VERSION  = llm_conf["API_VERSION"]
+            ENDPOINT = llm_conf["ENDPOINT"]
+            API_VERSION = llm_conf["API_VERSION"]
 
             print("LLM_VERSION: ", LLM_VERSION)
             print("API_KEY_NAME: ", API_KEY_NAME)
@@ -308,7 +319,11 @@ if __name__ == "__main__":
             print("API_VERSION: ", API_VERSION)
 
     else:
-        print("The selected file {} does not exist or is not a yaml file".format(llm_conf_file))
+        print(
+            "The selected file {} does not exist or is not a yaml file".format(
+                llm_conf_file
+            )
+        )
         exit()
 
     main(args.yaml_files)

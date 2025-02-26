@@ -1,0 +1,37 @@
+entries:
+  convo:
+    ############################################################################
+    ###############################     0     ##################################
+    ############################################################################
+    0:
+      Q: 
+        role: 'user'
+        content: |
+          Can you generate a prolog code including a set of actions in order for an agent to fill a kettle which is initially empty and that is already been hold by the robot?    
+      A: 
+        role: 'assistant'
+        content: |
+          Sure, here is the Prolog code for the action template:
+          ```prolog
+          % The robot starts to put water in a kettle
+          action(fill_kettle_start, 
+            [at(robot, kitchen), holding(kettle), empty(kettle)], 
+            [full(kettle)], 
+            [], 
+            [],
+            [del(empty(kettle))]
+          ).
+
+
+          % The robot stops to put water in a kettle
+          action(fill_kettle_end, 
+            [at(robot, kitchen), holding(kettle)], 
+            [empty(kettle)], 
+            [], 
+            [],
+            [add(full(kettle)), add(cold(water))]
+          ).
+          ```
+          In InvalidConditions of the action `fill_kettle_start, [full(kettle)]` implies that the kettle must not have already been full.
+          In InvalidConditions of the action `fill_kettle_end, [empty(kettle)]` implies that the action of filling the kettle can not be finalized if the kettle is empty.
+

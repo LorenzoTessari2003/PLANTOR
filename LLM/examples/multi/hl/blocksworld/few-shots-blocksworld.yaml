@@ -1,0 +1,6 @@
+entries:
+  files: 
+    - "actions.yaml"
+    - "kb.yaml"
+    - "states.yaml"
+    - "errors.yaml"
