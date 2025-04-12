@@ -20,7 +20,7 @@ Ollama per Windows è attualmente in fase di anteprima.
     ```
     Consulta la [documentazione ufficiale di Ollama per Windows](https://github.com/ollama/ollama/blob/main/docs/windows.md) per ulteriori dettagli o risoluzione problemi.
 
-    ### macOS
+### macOS
 
 1.  **Scarica:** Vai su [https://ollama.com/download](https://ollama.com/download) e scarica l'applicazione per macOS.
 2.  **Installa:** Apri il file `.zip` scaricato e trascina `Ollama.app` nella cartella Applicazioni.
