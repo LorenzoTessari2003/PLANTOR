@@ -1,4 +1,4 @@
-LLM_VERSION: "ollama-local"  # Nome identificativo per Ollama locale
-API_TYPE: "ollama"         # Indica che si usa l'API Ollama
-BASE_URL: "http://localhost:11434" # URL del server Ollama (di solito localhost:11434)
-MODEL_NAME: "llama2"       # Sostituisci con il nome del modello Ollama scaricato (es. llama2, mistral)
+LLM_VERSION: "ollama-local"
+API_TYPE: "ollama"
+BASE_URL: "http://localhost:11434"
+MODEL_NAME: "llama2"

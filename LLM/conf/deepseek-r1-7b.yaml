@@ -1,4 +1,4 @@
-LLM_VERSION: "ollama-deepseek-r1-7b" # Cambia LLM_VERSION
+LLM_VERSION: "ollama-deepseek-r1-7b"
 API_TYPE: "ollama"
 BASE_URL: "http://localhost:11434"
-MODEL_NAME: "deepseek-r1:7b"       # Cambia MODEL_NAME in "deepseek-r1:7b"
+MODEL_NAME: "deepseek-r1:7b"
