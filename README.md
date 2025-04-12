@@ -251,6 +251,3 @@ You can run a series of tests
 - Edoardo Lamon: edoardo.lamon@unitn.it
 - Marco Roveri: marco.roveri@unitn.it
 - Luigi Palopoli: luigi.palopoli@unitn.it
-
-
-
