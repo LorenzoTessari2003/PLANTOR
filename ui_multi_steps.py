@@ -11,13 +11,16 @@ from python_interface.utility.utility import INFO, MSG, FAIL
 
 ## GLOBAL VARIABLES ####################################################################################################
 
-
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-mini-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-128k.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt35-turbo.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-32k.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/llama2.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/deepseek-r1-7b.yaml')
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gemma3.yaml')
+
 
 EXAMPLES_PATH           = os.path.join(os.path.dirname(__file__), 'LLM', 'examples')
 CC_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'cc', 'few-shots-cc.yaml')
@@ -269,14 +272,19 @@ def ll_llm_multi_step(query, kb) -> dict:
     # Generate actions set
     INFO("\r[LL] Generating actions set")
     ll_actions_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
-        "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
-        "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-        "\nWrite the low-level actions set. {}".format(LLM_LL_WARNING)
+    "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
+    "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
+    "\n**In this step, you need to generate ONLY the set of low-level actions.**  **" + \
+    "Do NOT include initial state, goal state, knowledge base, or any other information.**  **Just provide the list of low-level actions.**"
     succ, response = llm.query(ll_actions_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
     file.write(f"ACTIONS: {response}\n")
     scan_and_extract(kb, response)
+
+    # Print key and value for each key
+    for key, value in kb.items():
+        print(f"{key},{value}")
 
     # Generate mappings
     INFO("\r[LL] Generating mappings")
@@ -412,63 +420,23 @@ def main():
     assert os.path.exists(CC_EXAMPLES_LL_PATH), f"CC low-level examples path not found at {CC_EXAMPLES_LL_PATH}"
     assert os.path.exists(LL_EXAMPLES_CONFIG_PATH), f"Low-level examples path not found at {LL_EXAMPLES_CONFIG_PATH}"
     assert os.path.exists(HL_EXAMPLES_CONFIG_PATH), f"High-level examples path not found at {HL_EXAMPLES_CONFIG_PATH}"
+    print(HL_EXAMPLES_CONFIG_PATH)
 
     query_hl = """
-The scenario involves two distinct locations, referred to as Location1 and Location2. These two locations are directly connected, allowing for movement between them.
-Containers:
-
-    There are two containers in the system:
-        Container c1 is initially located in Location1, placed on the ground.
-        Container c2 is also in Location1, positioned on top of c1.
-
-Robot:
-
-    A robot, designated as Robot r1, is initially situated in Location1.
-    The robot is capable of transporting a container from one location to another. However, to do so:
-        The container must be placed on top of the robot.
-        The robot can only move while carrying one container at a time.
-        The robot cannot move if the container it is carrying is obstructed by another container.
-
-Cranes:
-
-    Each location is equipped with a crane:
-        The crane in Location1 operates only within that location.
-        The crane in Location2 operates exclusively within Location2.
-    Cranes are versatile and capable of performing the following operations:
-        Moving a container from the ground to the top of another container within the same location.
-        Loading a container onto the robot or unloading a container from the robot. Container could be everywhere but has to be clear
-        Placing a container on the ground in the same location, so cannot place a container in a different location (e.g crane 1 is located
-        in location1 so can only operate in location1 not in other).
-    A crane can only manipulate a container if the container is clear, meaning there is nothing on top of it.
-    When executing an action the crane is busy so it could not execute any other action till the finish of the action.
-
-Goal:
-
-    By the end of the operation:
-        Container c2 must be relocated to Location2.
-        Container c1 must remain in its original position in Location1.
-
-This setup requires a sequence of coordinated actions involving the robot and the cranes to achieve the desired arrangement of containers.
-    """
-
+    Given an initial state in which there are two blocks b1, b2 in position (1,1) and (2,2) 
+    respectively, move the block b1 to position (3,3) and place b2 on top of b1 using an 
+    agent, which is initially available and it will also be available at the end.
+        """
 
     query_ll = """
-Let the container, crane and robot and their positions be described in the high-level part.
-There is available only one robot that can:
-- move_start(robot, locationFrom, locationTo), which makes the robot starting to move from position (x1,y1) to position (x2,y2).
-- move_end(robot, locationFrom, locationTo), which completes the movement of the robot from position (x1,y1) to position (x2,y2).
-There are one crane for location that can:
-- go_to_c_start(crane, container), which makes the crane move on the top of the container.
-- go_to_c_end(crane, container), which completes the movement of the crane to go on the top of the container.
-- close_start(crane), which makes the gripper starting to close.
-- close_end(crane), which indicates the gripper has closed.
-- open_start(crane), which makes the gripper starting to open.
-- open_end(crane), which indicates the gripper has opened.
-Remember to use the appropriate tags for the code you produce and not to use prolog tags.
-Moreover, remember that the low-level actions must not contain high-level predicates. Low-level actions must only contain predicates that start with 'll_'.
-    """
+    Given an initial state in which there are two blocks b1, b2 in position
+    (1,1) and (2,2) respectively, move the block b1 to position (3,3) and place b2 on top of
+    b1 using 1 agent, which is initially available and it will also be available at the end.
+    The agent is a car-like robot. Its initial position is (0,0) and it does not matter where
+    they are at the end. 
+        """
 
-    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'arch', '2', 'query')
+    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '2', 'query')
     assert os.path.exists(GENERAL_DIR), f"General directory not found at {GENERAL_DIR}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_hl.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'query_hl.txt')}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_ll.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'query_ll.txt')}"
@@ -483,7 +451,6 @@ Moreover, remember that the low-level actions must not contain high-level predic
     compr, resp = llm_scenario_comprehension(query_hl, query_ll)
     # if not compr:
     #     FAIL(f"There was a problem with the comprehension of the scenario {resp}")
-        
     
     if WAIT:
         input("Consistency check finished, press enter to continue...")

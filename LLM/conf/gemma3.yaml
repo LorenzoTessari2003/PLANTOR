@@ -1,0 +1,4 @@
+LLM_VERSION: "ollama-gemma3-12b"  # Descriptive name for this configuration
+API_TYPE: "ollama"              # Specifies using the Ollama API connector
+BASE_URL: "http://localhost:11434" # Default URL for local Ollama server
+MODEL_NAME: "gemma3:12b"          # The exact model name registered in Ollama
