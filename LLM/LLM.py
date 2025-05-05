@@ -23,7 +23,7 @@ class LLM:
         "seed": 42
     }
 
-    def __init__(self, llm_connection_config_file = os.path.join(os.path.dirname(__file__), "conf/gemma3.yaml"), examples_yaml_file = [""], llm_config = None):
+    def __init__(self, llm_connection_config_file = os.path.join(os.path.dirname(__file__), "conf/gpt4o.yaml"), examples_yaml_file = [""], llm_config = None):
         print("[LLM Init] Starting LLM initialization...") 
         load_dotenv()
 
@@ -164,15 +164,13 @@ class LLM:
         if conn_success:
             print("[LLM Query] Query successful. Adding assistant response to main history.") 
             assistant_message = {"role": "assistant", "content": llm_output}
-            self.messages.append({"role": "user", "content": prompt}) # Aggiungi il prompt utente che ha funzionato
-            self.messages.append(assistant_message) # Aggiungi la risposta
+            self.messages.append({"role": "user", "content": prompt}) 
+            self.messages.append(assistant_message) 
         else:
             print("[LLM Query] Query failed after all retries. Main history remains unchanged for this turn.") 
 
         print(f"[LLM Query] Returning success={conn_success}. Final history length: {len(self.messages)}") 
         
-        # Stampa un pezzo dell'output per verifica rapida
-        print(f"[LLM Query] Output snippet: {llm_output[:200] if llm_output else '<<EMPTY>>'}...") 
         return conn_success, llm_output
     
     @retry(tries=2, delay=30) 

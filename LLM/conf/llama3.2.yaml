@@ -1,0 +1,4 @@
+LLM_VERSION: "ollama-llama-3.2"
+API_TYPE: "ollama"
+BASE_URL: "http://localhost:11434"
+MODEL_NAME: "llama3.2-vision:11b"

@@ -145,14 +145,27 @@ def execTest(query = "plan", plan_len = 0, kb_path = "") -> dict:
     print(f"Executing {query} from Prolog")
     
     prolog = pyswip.Prolog()
+    # print(f"PATH: {kb_path}")
+    # p_path = PLANNER_PATH.replace('\\','/')
+    # print(f"PLANNING PATH: {p_path}")
     if kb_path != "":
-        print(f"Consulting {kb_path}")
-        prolog.consult(kb_path)
-    
-    print(f"Consulting planner at {PLANNER_PATH}")
-    prolog.consult(PLANNER_PATH)
+        consult_path_kb = str(kb_path).replace('\\', '/')
+        escaped_path_kb = consult_path_kb.replace("'", "''")
+        consult_query_kb = f"consult('{escaped_path_kb}')"
+        print(f"Consulting KB using query: {consult_query_kb}")
+        # prolog.consult("output\\kb_ll.pl", relative_to=__file__)
+        list(prolog.query(consult_query_kb))
+        print(f"Consult query for KB successful.")
+    consult_path_planner = str(PLANNER_PATH).replace('\\', '/')
+    escaped_path_planner = consult_path_planner.replace("'", "''")
+    consult_query_planner = f"consult('{escaped_path_planner}')"
+    print(f"Consulting planner using query: {consult_query_planner}")
+    list(prolog.query(consult_query_planner))
+    print(f"Consult query for planner successful.")
+    # prolog.consult(PLANNER_PATH)
         
-    planner = pyswip.Functor(query, 8)
+    planner = pyswip.Functor(query, 7)
+    planner2 = pyswip.Functor(query, 8)
     actions_var = pyswip.Variable()
     tt_actions_var = pyswip.Variable()
     adj_matrix_var = pyswip.Variable()
@@ -164,7 +177,7 @@ def execTest(query = "plan", plan_len = 0, kb_path = "") -> dict:
     if plan_len == 0:
         sol = pyswip.Query(planner(actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
     else:
-        sol = pyswip.Query(planner(plan_len, actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
+        sol = pyswip.Query(planner2(plan_len, actions_var, adj_matrix_var, tt_actions_var, resources_var, res_x_actions_var, resources_list, ll_actions_list_var))
 
     succ = sol.nextSolution()
 

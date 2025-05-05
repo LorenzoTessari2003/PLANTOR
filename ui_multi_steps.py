@@ -11,15 +11,17 @@ from python_interface.utility.utility import INFO, MSG, FAIL
 
 ## GLOBAL VARIABLES ####################################################################################################
 
-# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-mini-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-128k.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt35-turbo.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-32k.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/llama2.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/llama3.2.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/deepseek-r1-7b.yaml')
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gemma3.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gemma3.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/qwen2.5.yaml') #it works
 
 
 EXAMPLES_PATH           = os.path.join(os.path.dirname(__file__), 'LLM', 'examples')
@@ -247,9 +249,16 @@ def ll_llm_multi_step(query, kb) -> dict:
     
     # Generate static knowledge-base
     INFO("\r[LL] Generating knowledge base")
-    kb_query = "\nYou know have to produce code for the task that follows.\n" + query + \
-        "Given the following high-level knowledge-base:\n{}\n".format(kb['kb']) + \
-        "\nUpdate only the generals knowledge base to contain the new low-level predicates and the resources. {}".format(LLM_LL_WARNING) 
+
+    kb_query = (
+        "\nYou now have to produce code for the task that follows.\n" + query +
+        "Given the following high-level knowledge-base:\n{}\n".format(kb['kb']) + 
+        "\n**Your task is to update the general knowledge base to include the new low-level predicates and resources.**" +
+        f"\n**Wrap the COMPLETE updated knowledge base (including blocks, agents, positions, ll_predicates, etc.) within Markdown tags ```kb ... ```.**" + 
+        f"\n**CRITICAL: Use the tag ```kb``` for the entire updated knowledge base.**" + 
+        f"\n{LLM_LL_WARNING}\n" +
+        "\nNow, generate the updated low-level knowledge base:"
+    )
     succ, response = llm.query(kb_query)
     assert succ == True, "Failed to generate LL KB"
     print(succ, response)
@@ -258,53 +267,101 @@ def ll_llm_multi_step(query, kb) -> dict:
 
     # Generate initial and final states
     INFO("\r[LL] Generating initial and final states")
-    states_query = "\nYou know have to produce code for the task that follows.\n" + query + \
-        "Given the low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-        "Given the high-level initial and final states:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + \
-        "\nUpdate the initial and final states. Mind to include all the necessary predicates. {}".format(LLM_LL_WARNING)
-        # "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
+    states_query = (
+        "\nYou now have to produce code for the task that follows.\n" + query +
+        "\nGiven the complete low-level knowledge-base generated previously:\n```kb\n{}\n```\n".format(kb["kb"]) + 
+        "And given the high-level initial and final states as reference:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + 
+        "\n**Your task is to update ONLY the initial and final states to reflect the low-level details.**" +
+        "\n**Wrap the updated initial state within Markdown tags ```init ... ```.**" + 
+        "\n**Wrap the updated final state within Markdown tags ```goal ... ```.**" + 
+        "\n**CRITICAL: Output ONLY these two blocks (`init` and `goal`).**" + 
+        "\n**Do NOT include the knowledge base (`kb`), actions (`ll_actions`), resources, or any other information.**" +
+        f"\n**Do NOT use ```python``` or any other tags besides ```init``` and ```goal```.**" + 
+        f"\n{LLM_LL_WARNING}\n" + 
+        "\nExample format:\n```init\n% Low-level initial state predicates...\ninitial_state([...]).\n```\n\n```goal\n% Low-level goal state predicates...\ngoal_state([...]).\n```\n" + 
+        "\nNow, generate the updated low-level initial and final states:" 
+    )
+
     succ, response = llm.query(states_query)
-    assert succ == True, "Failed to generate LL KB"
+    assert succ == True, "Failed to query LLM for LL init/goal states" 
     print(succ, response)
-    file.write(f"INIT: {response}\n")
+    file.write(f"{response}\n") 
     scan_and_extract(kb, response)
+
+    # Check '''init''' and '''goal''' tags
+    if "init" not in kb or "goal" not in kb:
+        FAIL(f"[LL] LLM failed to generate the required 'init' and/or 'goal' tags in its response. Raw response was:\n{response}")
+        raise ValueError("LLM did not produce the expected 'init'/'goal' tags.")
+    if "python" in kb:
+        print("[WARNING][LL] LLM generated an unexpected 'python' tag during init/goal generation. Ignoring it.")
 
     # Generate actions set
     INFO("\r[LL] Generating actions set")
-    ll_actions_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
-    "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
-    "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-    "\n**In this step, you need to generate ONLY the set of low-level actions.**  **" + \
-    "Do NOT include initial state, goal state, knowledge base, or any other information.**  **Just provide the list of low-level actions.**"
+
+    # Specific instructions to assure '''ll_actions''' tag
+    ll_actions_query = (
+        "\nGiven that the previous messages are examples, you now have to produce code for the task that follows.\n" + query +
+        "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) +
+        "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) +
+        "\nGiven the low-level initial state:\n```init\n{}\n```".format(kb["init"]) + 
+        "\nAnd the low-level goal state:\n```goal\n{}\n```".format(kb["goal"]) +
+        "\n**Your task is to generate ONLY the set of low-level actions.**" +
+        "\n**Wrap the low-level actions within Markdown tags ```ll_actions ... ```.**" + 
+        "\n**CRITICAL: Use the tag ```ll_actions``` and NOT ```actions``` or any other tag.**" + 
+        "\n**Do NOT include initial state, goal state, knowledge base, or any other information.**" +
+        "\n**Just provide the list of low-level actions inside the ```ll_actions``` tag.**" + 
+        "\nNow, generate the specific low-level actions for the current problem:" 
+    )
+
     succ, response = llm.query(ll_actions_query)
-    assert succ == True, "Failed to generate LL KB"
+    assert succ == True, "Failed to query LLM for LL actions"
+
     print(succ, response)
-    file.write(f"ACTIONS: {response}\n")
+    file.write(f"{response}\n")
+
     scan_and_extract(kb, response)
 
-    # Print key and value for each key
-    for key, value in kb.items():
-        print(f"{key},{value}")
+    # Tag correctness verification
+    if "ll_actions" not in kb:
+        error_message = f"[LL] LLM failed to generate the required 'll_actions' tag in its response."
+        # Check if it generates '''actions'''
+        fallback_content = kb.get("actions")
+        if fallback_content:
+            error_message += f" Found 'actions' tag instead. Raw response was:\n{response}"
+        else:
+            error_message += f" No 'll_actions' or 'actions' tag found. Raw response was:\n{response}"
+        FAIL(error_message) 
+        raise ValueError("LLM did not produce the expected 'll_actions' tag.")
 
     # Generate mappings
-    INFO("\r[LL] Generating mappings")
-    mappings_query = "\nGiven that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
+    mappings_query = (
+        "Given that the previous messages are examples, you know have to produce code for the task that follows.\n" + query + \
         "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
         "Given the initial state:\n```init\n{}\n```\n".format(kb["init"]) + \
         "Given the final state:\n```goal\n{}\n```\n".format(kb["goal"]) + \
         "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
-        "\nProvide the mappings from high-level actions to low-level actions. Remember that the mappings are only for the start actions. {}".format(LLM_LL_WARNING)
+        "\n**Provide the mappings from high-level actions to low-level actions.**" +
+        "\n**Remember that the mappings are only for the start actions.**" +
+        "\n**Wrap the mappings within Markdown tags ```mappings ... ```.**" + 
+        "\n**CRITICAL: Use the tag ```mappings``` and NOT ```kb``` or any other tag.**" + 
+        f"\n{LLM_LL_WARNING}\n" +
+        "\nNow, generate the mappings:"
+    )
     succ, response = llm.query(mappings_query)
-    assert succ == True, "Failed to generate LL KB"
+    assert succ == True, "Failed to generate LL Mappings" 
     print(succ, response)
-    file.write(f"MAPPINGS: {response}\n")
+    file.write(f"{response}\n") 
     scan_and_extract(kb, response)
+
+    if "mappings" not in kb:
+        FAIL(f"[LL] LLM failed to generate the required 'mappings' tag. Raw response was:\n{response}")
+        raise ValueError("LLM did not produce the expected 'mappings' tag.")
 
     file.close()
     write_to_file(kb, output_file=OUTPUT_KB_FILE)
 
-    return kb 
+    return kb
     
 
 ########################################################################################################################
@@ -316,7 +373,7 @@ def find_plan(kb_file = OUTPUT_KB_FILE, xml_file = OUTPUT_BT_FILE, stn_file = ""
 
     if not os.path.exists(kb_file):
         raise FileNotFoundError(f"Knowledge base file not found at {kb_file}")
-    
+    INFO(F"Path: {kb_file}")
     data_dict = planner.PrologLib.execTest(kb_path=kb_file)
 
     INFO("Optimizing")
@@ -450,13 +507,12 @@ def main():
 
     compr, resp = llm_scenario_comprehension(query_hl, query_ll)
     # if not compr:
-    #     FAIL(f"There was a problem with the comprehension of the scenario {resp}")
+    # FAIL(f"There was a problem with the comprehension of the scenario {resp}")
     
     if WAIT:
         input("Consistency check finished, press enter to continue...")
 
     # Use HL LLM to extract HL knowledge base
-    # hl_kb, response = hl_llm(query_hl)
     hl_kb = hl_llm_multi_step(query_hl)
     write_to_file(hl_kb)
 
@@ -470,17 +526,79 @@ def main():
 
     if WAIT:
         input("LL finished, press enter to continue...")
-    # kb = read_from_file()
+    INFO("LLM PART DONE!")
 
-    # Take the whole knowledge base and find plan
-    # bt = find_plan(kb)
+    INFO(f"\nReading final knowledge base from file: {OUTPUT_KB_FILE}")
+    try:
+        kb_from_file = read_from_file()
+        INFO("Knowledge base read successfully from file.")
+    except FileNotFoundError:
+        FAIL(f"ERROR: Knowledge base file not found at {OUTPUT_KB_FILE}. Cannot proceed.")
+        sys.exit(1)
+    except Exception as e:
+        FAIL(f"ERROR: Failed to read or parse knowledge base file {OUTPUT_KB_FILE}: {e}")
+        sys.exit(1)
 
-    # Execute the plan
-    # execute_plan(bt)
+    # Print kb
+    INFO("\nPrinting Contents of the Knowledge Base Read from File:")
+    print("=" * 80) 
+    preferred_order = ["kb", "init", "goal", "actions", "ll_actions", "mappings"] 
+    printed_keys = set()
 
-    INFO("ALL DONE!")
+    for key in preferred_order:
+        if key in kb_from_file:
+            value = kb_from_file[key]
+            print(f"### Sezione: {key.upper()} ###") # Titolo della sezione
+            print(f"--- Contenuto per la chiave: '{key}' ---")
+            content_to_print = value.strip() if isinstance(value, str) else str(value)
+            if not content_to_print:
+                print("[CONTENUTO VUOTO o NON STRINGA]")
+            else:
+                print("```")
+                print(content_to_print)
+                print("```")
+            print("-" * 80) # Separatore tra sezioni
+            printed_keys.add(key) # Segna come stampata
 
+    # Unexpected keys
+    remaining_keys = kb_from_file.keys() - printed_keys
+    if remaining_keys:
+        print("### Sezioni Aggiuntive/Inaspettate nel File ###")
+        for key in remaining_keys:
+            value = kb_from_file[key]
+            print(f"--- Contenuto per la chiave: '{key}' ---")
+            content_to_print = value.strip() if isinstance(value, str) else str(value)
+            if not content_to_print:
+                print("[CONTENUTO VUOTO o NON STRINGA]")
+            else:
+                print("```")
+                print(content_to_print)
+                print("```")
+            print("-" * 80)
 
+    print("=" * 80)
+    INFO("End of printing knowledge base from file.")
+
+    # Planning phase
+    INFO("\nProceeding with Plan Finding...")
+    try:
+        bt = find_plan(kb_file=OUTPUT_KB_FILE)
+        INFO("Plan finding completed.")
+
+        execute_plan(bt)
+        INFO("Plan execution completed.")
+
+    except FileNotFoundError as e:
+         FAIL(f"ERROR during planning: {e}")
+         sys.exit(1)
+    except Exception as e:
+         FAIL(f"ERROR during planning or execution: {e}")
+         # Considera di stampare il traceback per errori inaspettati
+         import traceback
+         traceback.print_exc()
+         sys.exit(1)
+
+    INFO("\nALL DONE!")
 
 if __name__ == "__main__":
     main()

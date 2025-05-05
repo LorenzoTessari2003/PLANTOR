@@ -1,0 +1,4 @@
+LLM_VERSION: "ollama-qwen2.5-coder"
+API_TYPE: "ollama"
+BASE_URL: "http://localhost:11434"
+MODEL_NAME: "qwen2.5-coder"
