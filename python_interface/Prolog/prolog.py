@@ -145,9 +145,6 @@ def execTest(query = "plan", plan_len = 0, kb_path = "") -> dict:
     print(f"Executing {query} from Prolog")
     
     prolog = pyswip.Prolog()
-    # print(f"PATH: {kb_path}")
-    # p_path = PLANNER_PATH.replace('\\','/')
-    # print(f"PLANNING PATH: {p_path}")
     if kb_path != "":
         consult_path_kb = str(kb_path).replace('\\', '/')
         escaped_path_kb = consult_path_kb.replace("'", "''")
@@ -162,7 +159,6 @@ def execTest(query = "plan", plan_len = 0, kb_path = "") -> dict:
     print(f"Consulting planner using query: {consult_query_planner}")
     list(prolog.query(consult_query_planner))
     print(f"Consult query for planner successful.")
-    # prolog.consult(PLANNER_PATH)
         
     planner = pyswip.Functor(query, 7)
     planner2 = pyswip.Functor(query, 8)

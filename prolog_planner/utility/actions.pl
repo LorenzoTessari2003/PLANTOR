@@ -39,7 +39,7 @@ extract_adj_matrix_actions(LastAchievers, TmpMatrix, RetMatrix, PlanLength, Plan
 
 extract_row_achievers(_, _RefActionID, 0, TmpRow, RetRow) :-
   append([0], TmpRow, RetRow),
-  length(TmpRow, Length).
+  length(TmpRow, _Length).
 extract_row_achievers([_ID-_A-AAchievers|T], RefActionID, I, TmpRow, RetRow):-
   (
     member(RefActionID, AAchievers) 
@@ -61,7 +61,7 @@ extract_tt_action_list(Actions, TTActionList) :-
 start_action(Action, ActionName, Args) :-
   Action =.. [StartActionName | Args],
   % format('Start action: ~w ~w~n', [StartActionName, Args]),
-  sub_string(StartActionName, Before, Length, After, '_start'),
+  sub_string(StartActionName, Before, Length, _After, '_start'),
   sub_string(StartActionName, 0, Before, Length, ActionName),
   % format('Action name ~w~n', [ActionName]),
   true.
@@ -69,7 +69,7 @@ start_action(Action, ActionName, Args) :-
 end_action(Action, ActionName, Args) :-
   Action =.. [EndActionName | Args],
   % format('End action: ~w ~w~n', [EndActionName, Args]),
-  sub_string(EndActionName, Before, Length, After, '_end'),
+  sub_string(EndActionName, Before, Length, _After, '_end'),
   sub_string(EndActionName, 0, Before, Length, ActionName),
   % format('Action name ~w~n', [ActionName]),
   true.
@@ -83,15 +83,15 @@ extract_tt_action_list([ID-Action|T], TT_ID, TmpTTActionList, TTActionList) :-
   NewTT_ID is TT_ID + 1,
   append([TT_ID-[ID-Action]-[EndID-EndAction]], TmpTTActionList, NewTmpTTActionList),
   extract_tt_action_list(T, NewTT_ID, NewTmpTTActionList, TTActionList).
-extract_tt_action_list([ID-Action|T], TT_ID, TmpTTActionList, TTActionList) :-
+extract_tt_action_list([_ID-Action|T], TT_ID, TmpTTActionList, TTActionList) :-
   % format('Action: ~w~n', [Action]),
-  \+start_action(Action, ActionName, Args),
+  \+start_action(Action, _ActionName, _Args),
   extract_tt_action_list(T, TT_ID, TmpTTActionList, TTActionList).
 
 find_tt_end_action([], _ActionName, _Args, _EndAction) :- 
   % format('THIS SHOULD NOT HAPPEN'), 
   fail.
-find_tt_end_action([ID-EndAction|T], ActionName, Args, [ID-EndAction]) :-
+find_tt_end_action([ID-EndAction|_T], ActionName, Args, [ID-EndAction]) :-
   % format('Testing end action: ~w against ~w ~w ~n', [EndAction, ActionName, Args]),
   end_action(EndAction, ActionName, Args).
 find_tt_end_action([_ID-EndAction|T], ActionName, Args, [RetID-RetEndAction]) :-

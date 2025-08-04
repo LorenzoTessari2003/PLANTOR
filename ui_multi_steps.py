@@ -8,10 +8,8 @@ from python_interface import planner
 from LLM.LLM import LLM
 from python_interface.utility.utility import INFO, MSG, FAIL
 
-
-## GLOBAL VARIABLES ####################################################################################################
-
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
+# Model path
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-mini-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o-fine-tuned.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt40-128k.yaml')
@@ -22,8 +20,9 @@ LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gpt4o.ya
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/deepseek-r1-7b.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gemma3.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/qwen2.5.yaml') #it works
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-qwen-0.5B.yaml')
 
-
+# Examples Path
 EXAMPLES_PATH           = os.path.join(os.path.dirname(__file__), 'LLM', 'examples')
 CC_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'cc', 'few-shots-cc.yaml')
 CC_EXAMPLES_HL_PATH     = os.path.join(EXAMPLES_PATH, 'cc', 'hl.yaml')
@@ -31,20 +30,17 @@ CC_EXAMPLES_LL_PATH     = os.path.join(EXAMPLES_PATH, 'cc', 'll.yaml')
 LL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-ll.yaml')
 HL_EXAMPLES_CONFIG_PATH = os.path.join(EXAMPLES_PATH, 'multi', 'few-shots-hl.yaml')
 
-WAIT = False
-
+# Output Path
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), 'output')
-
 os.makedirs(OUTPUT_PATH, exist_ok=True)
-
 OUTPUT_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_ll.pl')
 OUTPUT_HL_KB_FILE = os.path.join(OUTPUT_PATH, 'kb_hl.pl')
 OUTPUT_BT_FILE = os.path.join(OUTPUT_PATH, 'BT.xml')
-
 OUTPUT_FILE_CC = os.path.join(OUTPUT_PATH, "output_cc.txt")
 OUTPUT_FILE_HL = os.path.join(OUTPUT_PATH, "output_hl.txt")
 OUTPUT_FILE_LL = os.path.join(OUTPUT_PATH, "output_ll.txt")
 
+WAIT = False
 
 ## FUNCTIONS ###########################################################################################################
 
@@ -76,31 +72,15 @@ def scan_and_extract(kb, response):
 
 
 def llm_scenario_comprehension(query_hl, query_ll) -> bool:
-    """
-    :brief: This function checks if the LLM has correctly understood the scenario for both the high-level and low-level
-            descriptions. It first checks the high-level scenario and then the low-level scenario in accordance with the
-            high-level scenario.
-    :details: The function uses the LLM to check the comprehension of the scenario. It uses only high-level examples for
-                the high-level scenario and both high-level and low-level examples for the low-level scenario. The path 
-                to the high-level examples is defined in the global variable CC_EXAMPLES_HL_PATH and the path to the
-                low-level examples is defined in the global variable CC_EXAMPLES_LL_PATH. The number of token is set to 
-                1000 since it seems to be working fine for both cases, but it may be necessary to tweak it.
-                In order to check if the LLM has correctly understood the scenario, the function checks that the LLM
-                returned something successfully, and then checks if the response contains the word 'OK' or 'PROBLEM'.
-    :param query_hl: The high-level scenario
-    :param query_ll: The low-level scenario
-    """
-    
+   
+   # Check High-level consistency
     file = open(OUTPUT_FILE_CC, "w+")
-
-    # print("test\n\n\n\n\n\n\n\ntest")
-    # raise NotImplementedError("This function is not implemented yet")
     INFO("\r[CC] Checking LLM comprehension of scenario for high-level", imp=True)
     llm_scenario = LLM(
         llm_connection_config_file=LLM_CONF_PATH,
         examples_yaml_file = [CC_EXAMPLES_HL_PATH]
     )
-    llm_scenario.max_tokens = 1000
+    llm_scenario.max_tokens = 100000
 
     INFO("\r[CC] Checking LLM comprehension of scenario for high-level", imp=True)
     scenario_query_hl = f"Given the following high-level scenario:\n{query_hl}\nIf you think that there is a problem with the description, then write 'PROBLEM' and describe the problem, otherwise write 'OK'"
@@ -116,13 +96,13 @@ def llm_scenario_comprehension(query_hl, query_ll) -> bool:
         FAIL(f"Problem with the LLM\n{response}")
         sys.exit(1)
 
-    # Check comprehension of both the high-level and low-level scenarios
+    # Check constistency of both the high-level and low-level scenarios
 
     llm_scenario = LLM(
         llm_connection_config_file=LLM_CONF_PATH,
         examples_yaml_file = [CC_EXAMPLES_CONFIG_PATH]
     )
-    llm_scenario.max_tokens = 1000
+    llm_scenario.max_tokens = 100000
 
     INFO("\r[CC] Checking LLM comprehension of scenario for both levels", imp=True)
     scenario_query = f"Given the following high-level description of a scenario:\n{query_hl}\nAnd the following low-level description of the same scenario\n{query_ll}\nIf you think that there is a problem with the description, then write 'PROBLEM' and describe the problem, otherwise write 'OK'"
@@ -223,18 +203,6 @@ def ll_llm_multi_step(query, kb) -> dict:
     ```actions
     {}
     ```""".format(kb["kb"], kb["init"], kb["goal"], kb["actions"])
-    
-    # hl_kb = """
-    # ```kb
-    # {}
-    # ```
-    # ```init
-    # {}
-    # ```
-    # ```goal
-    # {}
-    # ```
-    # """.format(kb["kb"], kb["init"], kb["goal"])
 
     file = open(OUTPUT_FILE_LL, "w+")
 
@@ -366,6 +334,94 @@ def ll_llm_multi_step(query, kb) -> dict:
 
 ########################################################################################################################
 
+def add_dynamic_from_resources(kb_file_path):
+    """
+    Legge un file KB Prolog.
+    Trova i predicati definiti in `resources(PredicatoConArgomenti)`.
+    Genera le direttive `:- dynamic nome/arità` ESCLUSIVAMENTE per questi predicati.
+    Aggiunge queste direttive all'inizio del file, sovrascrivendolo.
+    """
+    predicate_signatures_from_resources = set()
+    original_content = ""
+
+    if not isinstance(kb_file_path, (str, bytes, os.PathLike)):
+        print(f"ERRORE: kb_file_path deve essere una stringa di percorso, non {type(kb_file_path)}")
+        return
+
+    try:
+        with open(kb_file_path, 'r', encoding='utf-8') as f:
+            original_content = f.read()
+
+        # Regex per trovare resources(NomePredicato(...argomenti...)).
+        resource_pattern = re.compile(r"resources\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\)\.")
+        
+        for match in resource_pattern.finditer(original_content):
+            predicate_name = match.group(1)
+            args_str = match.group(2).strip()
+            
+            # Stima l'arità
+            if not args_str or args_str == '_': 
+                arity = 1 
+                if not args_str: 
+                    arity = 0 
+            else:
+                arity = args_str.count(',') + 1
+            
+            predicate_signatures_from_resources.add(f"{predicate_name}/{arity}")
+
+    except FileNotFoundError:
+        print(f"ERRORE: File {kb_file_path} non trovato.")
+        return
+    except Exception as e:
+        print(f"ERRORE durante la lettura o l'analisi del file per 'resources': {e}")
+        return
+
+    dynamic_directives_str = ""
+    if predicate_signatures_from_resources: # Solo se abbiamo trovato qualcosa in resources/1
+        dynamic_directives_str += "% Dynamic predicates from resources (auto-generated by Python script)\n"
+        for sig in sorted(list(predicate_signatures_from_resources)):
+            dynamic_directives_str += f":- dynamic {sig}.\n"
+        dynamic_directives_str += "\n"
+    else:
+        print("No predicates found in 'resources(...)' per generare direttive dynamic.")
+
+    # Rimuovi eventuali vecchie direttive dynamic auto-generate (con questo specifico commento)
+    pattern_to_remove = re.compile(
+        r"^% Dynamic predicates from resources \(auto-generated by Python script\)\s*\n"
+        r"(?:P<directive>:- dynamic\s+.*?\.\s*\n)*\n?", 
+        re.MULTILINE
+    )
+    content_without_old_directives = pattern_to_remove.sub("", original_content)
+    content_without_old_directives = content_without_old_directives.lstrip()
+
+    # Se non ci sono nuove direttive da aggiungere E non c'era un blocco da rimuovere,
+    # potremmo evitare di riscrivere il file inutilmente.
+    # Ma per semplicità, se dynamic_directives_str è vuoto (perché predicate_signatures_from_resources era vuoto)
+    # e content_without_old_directives è uguale a original_content, potremmo saltare la scrittura.
+    # Per ora, la logica è: se ci sono direttive da scrivere (nuove o perché un vecchio blocco è stato rimosso), scrivi.
+    # Se predicate_signatures_from_resources è vuoto, dynamic_directives_str sarà vuoto.
+    # Se non c'era un blocco da rimuovere, new_content sarà uguale a original_content.
+
+    new_content = dynamic_directives_str + content_without_old_directives
+    
+    # Evita di riscrivere il file se il contenuto non è cambiato
+    if new_content.strip() == original_content.strip() and not predicate_signatures_from_resources:
+         print(f"Nessuna modifica necessaria per {kb_file_path} (nessun predicato in resources o contenuto identico).")
+         return
+
+    try:
+        with open(kb_file_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        if predicate_signatures_from_resources:
+            print(f"Aggiunte/Aggiornate direttive 'dynamic' (da resources) in {kb_file_path}")
+        elif new_content.strip() != original_content.strip(): # Caso in cui abbiamo solo rimosso un vecchio blocco
+            print(f"Rimosso vecchio blocco di direttive 'dynamic' da {kb_file_path}")
+        # else: non dovrebbe arrivare qui se abbiamo gestito il caso "nessuna modifica"
+            
+    except Exception as e:
+        print(f"ERRORE durante la scrittura del file: {e}")
+
+########################################################################################################################
 
 def find_plan(kb_file = OUTPUT_KB_FILE, xml_file = OUTPUT_BT_FILE, stn_file = "", html_file = "") -> planner.BehaviourTree:
     # Find plan
@@ -477,40 +533,31 @@ def main():
     assert os.path.exists(CC_EXAMPLES_LL_PATH), f"CC low-level examples path not found at {CC_EXAMPLES_LL_PATH}"
     assert os.path.exists(LL_EXAMPLES_CONFIG_PATH), f"Low-level examples path not found at {LL_EXAMPLES_CONFIG_PATH}"
     assert os.path.exists(HL_EXAMPLES_CONFIG_PATH), f"High-level examples path not found at {HL_EXAMPLES_CONFIG_PATH}"
-    print(HL_EXAMPLES_CONFIG_PATH)
+    # print(HL_EXAMPLES_CONFIG_PATH)
 
-    query_hl = """
-    Given an initial state in which there are two blocks b1, b2 in position (1,1) and (2,2) 
-    respectively, move the block b1 to position (3,3) and place b2 on top of b1 using an 
-    agent, which is initially available and it will also be available at the end.
-        """
+    query_hl = ""
+    query_ll = ""
 
-    query_ll = """
-    Given an initial state in which there are two blocks b1, b2 in position
-    (1,1) and (2,2) respectively, move the block b1 to position (3,3) and place b2 on top of
-    b1 using 1 agent, which is initially available and it will also be available at the end.
-    The agent is a car-like robot. Its initial position is (0,0) and it does not matter where
-    they are at the end. 
-        """
-
-    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '2', 'query')
+    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '1', 'query')
     assert os.path.exists(GENERAL_DIR), f"General directory not found at {GENERAL_DIR}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_hl.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'query_hl.txt')}"
     assert os.path.exists(os.path.join(GENERAL_DIR, 'query_ll.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'query_ll.txt')}"
     
-    with open(os.path.join(GENERAL_DIR, 'query_hl_corrected.txt'), 'r') as file:
+    with open(os.path.join(GENERAL_DIR, 'query_hl.txt'), 'r') as file:
         query_hl = file.read()
     query_hl+="\nRemember that the tags are in the Markdown form of ```tag and not <tag>"
     with open(os.path.join(GENERAL_DIR, 'query_ll.txt'), 'r') as file:
         query_ll = file.read()
     query_ll+="\nRemember that the tags are in the Markdown form of ```tag and not <tag> and that the low-level actions have the tag ll_actions and not actions"
 
+    '''
     compr, resp = llm_scenario_comprehension(query_hl, query_ll)
-    # if not compr:
-    # FAIL(f"There was a problem with the comprehension of the scenario {resp}")
+    if not compr:
+        FAIL(f"There was a problem with the comprehension of the scenario {resp}")
     
     if WAIT:
         input("Consistency check finished, press enter to continue...")
+    '''
 
     # Use HL LLM to extract HL knowledge base
     hl_kb = hl_llm_multi_step(query_hl)
@@ -523,6 +570,7 @@ def main():
     # use LL LLM to extract LL knowledge base
     kb = ll_llm_multi_step(query_ll, hl_kb)
     write_to_file(kb)
+    add_dynamic_from_resources(OUTPUT_KB_FILE)
 
     if WAIT:
         input("LL finished, press enter to continue...")
@@ -540,6 +588,7 @@ def main():
         sys.exit(1)
 
     # Print kb
+    '''
     INFO("\nPrinting Contents of the Knowledge Base Read from File:")
     print("=" * 80) 
     preferred_order = ["kb", "init", "goal", "actions", "ll_actions", "mappings"] 
@@ -578,6 +627,7 @@ def main():
 
     print("=" * 80)
     INFO("End of printing knowledge base from file.")
+    '''
 
     # Planning phase
     INFO("\nProceeding with Plan Finding...")

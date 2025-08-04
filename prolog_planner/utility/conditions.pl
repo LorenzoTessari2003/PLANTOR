@@ -25,7 +25,7 @@ conditions_met([H|T], S) :-
 	conditions_met(T, S).
 
 which_conditions_not_met([], _S, _R) :- fail.
-which_conditions_not_met([H|T], S, H) :- 
+which_conditions_not_met([H|_T], S, H) :- 
     \+member(H, S).
 which_conditions_not_met([_H|T], S, R) :-
     which_conditions_not_met(T, S, R).
@@ -50,7 +50,7 @@ conditions_not_met([H|T], S) :-
 	conditions_not_met(T, S).
 
 which_conditions_met([], _S, _R) :- fail.
-which_conditions_met([H|T], S, H) :- 
+which_conditions_met([H|_T], S, H) :- 
     member(H, S).
 which_conditions_met([_H|T], S, R) :-
     which_conditions_met(T, S, R).
@@ -77,7 +77,7 @@ verify([H|T]) :-
 is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify) :-
     is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, []).
 
-is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
+is_applicable(State, PreconditionsT, PreconditionsF, _FinalConditionsF, Verify, _Goal) :-
     conditions_met_wrapper(PreconditionsT, State),
     verify(Verify),
     debug_format('Grounded ~w\n', [Verify])
@@ -126,8 +126,8 @@ is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, G
 why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify) :-
     why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, []).
 
-why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Goal) :-
-    format('Checking why action is not applicable\n'),
+why_not_applicable(_State, _PreconditionsT, _PreconditionsF, _FinalConditionsF, _Verify, _Goal) :-
+    /*format('Checking why action is not applicable\n'),
     verify(Verify)
     ->(
         which_conditions_not_met_wrapper(PreconditionsT, State, R)
@@ -145,32 +145,18 @@ why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Veri
         format('Verify conditions are not met\n'),
         fail
     ),
+    */
     true.
-
-
+    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% :brief: Checks if the arguments of a preconditions are inside the verify
-% predicates
-% :details: It runs recursively through the list of arguments of a precondition
-% and through the predicates inside the verify list. For each argument, it 
-% checks if it is inside of the arguments of a verify predicate. If it is, then
-% it returns the verify predicate that contains it, otherwise it continues. If
-% the list of verify predicates is empty, then the call fails. 
-% In the wrapper version, the function arguments are 3 instead of 4, with :#3: 
-% not present and moving :#4: to :#3:.
-% :#1: List of arguments
-% :#2: List of verify predicates
-% :#3: The list of used verify predicates
-% :#4: The first verify predicate that contains the arguments
-% :returns: The first verify predicate that contains the arguments (#3)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-check_in_verify(Pred, [HVer|TVers], Res) :-
+
+check_in_verify(Pred, [HVer|TVers], _Res) :-
     % Check that Pred is not a list
     \+is_list(Pred),
     % debug_format('[check_in_verify0] ~w ~w ~n', [Pred, [HVer|TVers]]),
-    check_in_verify(Pred, [HVer|TVers], Res, HVer).
+    check_in_verify(Pred, [HVer|TVers], _, HVer).
 
-check_in_verify(Pred, [HVer|TVers], Res) :-
+check_in_verify(Pred, [_HVer|_TVers], _Res) :-
     is_list(Pred),
     % debug_format('[check_in_verify0.5] Pred ~w~n', [Pred]),
     halt.
@@ -198,7 +184,7 @@ check_in_verify(Pred, [HVer|TVers], Res, LargeVer) :-
                 % debug_format('[check_in_verify3] ~w ~w ~n', [Pred, [HVer|TVers]]),
                 Res = LargeVer
             );(
-                TVers = [NewHVer | _],
+                TVers = [_NewHVer | _],
                 % debug_format('[check_in_verify4] ~w ~w ~n', [Pred, [HVer|TVers]]),
                 check_in_verify(Pred, TVers, Res, LargeVer)
             )
@@ -207,7 +193,7 @@ check_in_verify(Pred, [HVer|TVers], Res, LargeVer) :-
     % debug_format('[check_in_verify5] ~w ~w ~n', [Pred, [HVer|TVers]]),
     true.
 
-check_in_verify(Pred, [HVer|TVers], Res, LargeVer) :-
+check_in_verify(Pred, [_HVer|TVers], Res, LargeVer) :-
     % debug_format('[check_in_verify6] ~w ~w ~n', [Pred, [HVer|TVers]]),
     check_in_verify(Pred, TVers, Res, LargeVer).
 

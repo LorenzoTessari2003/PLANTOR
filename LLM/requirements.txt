@@ -4,3 +4,13 @@ retry
 pyyaml
 tiktoken
 python-dotenv
+torch
+datasets
+transformers
+sentencepiece
+transformers[torch]
+wandb
+trl
+bitsandbytes 
+accelerate 
+peft

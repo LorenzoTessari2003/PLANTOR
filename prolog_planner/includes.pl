@@ -1,1 +1,1 @@
-# :- include('/home/enrico/Projects/prolog_planner/exps/full_example/kb/kb_ll.pl').
+# :- include('../output/kb_ll.pl').

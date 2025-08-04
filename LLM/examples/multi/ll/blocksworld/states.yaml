@@ -61,7 +61,7 @@ entries:
           Please update the high-level initial and final states to reflect the changes in the 
           description for the low-level.
           Remember to prepend the low-level predicates with "ll_" to avoid conflicts with the 
-          high-level predicates.s
+          high-level predicates.
 
       A:
         role: 'assistant'

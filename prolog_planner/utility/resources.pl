@@ -12,7 +12,7 @@ extract_resources_number([Resource|T], TmpResources, Resources) :-
 
 
 extract_resources_per_action(TTActions, Resources, ActionXResources) :-
-  [H|T] = TTActions,
+  [_H|T] = TTActions,
   extract_resources_per_action(T, Resources, [], ActionXResources).
 
 extract_resources_per_action([], _Resources, ActionXResources, ActionXResources).
@@ -33,7 +33,7 @@ extract_ll_actions([H|T], TmpActionsList, ActionsList) :-
   extract_ll_actions(T, NewTmpActionsList, ActionsList).
 
 
-check_resources_per_action(StartAction, EndAction, [], UsedResources, UsedResources).
+check_resources_per_action(_StartAction, _EndAction, [], UsedResources, UsedResources).
 check_resources_per_action([IDStart-StartAction], [IDEnd-EndAction], [Resource-_Q|T], UsedResources, RetResources) :-
   % format('Checking resources for ~w ~w ~w~n', [StartAction, EndAction, Resource]),
   action(StartAction, _, _, _, Verify, _),
@@ -72,8 +72,8 @@ check_resources_per_action([IDStart-StartAction], [IDEnd-EndAction], [Resource-_
   check_resources_per_action([IDStart-StartAction], [IDEnd-EndAction], T, UsedResources, RetResources),
   true.
 
-check_resource_in_verify(Resource, []) :- fail.
-check_resource_in_verify(Resource, [H|T]) :-
+check_resource_in_verify(_Resource, []) :- fail.
+check_resource_in_verify(Resource, [H|_T]) :-
   % format('Checking resource ~w in ~w~n', [Resource, H]),
   H =.. [Resource | _],
   true.

@@ -18,50 +18,58 @@ apply_mappings(Init, HL_Plan, LL_Plan) :-
   apply_mappings(Init, HL_Plan, [], LL_Plan).
   
 
-apply_mappings(_, [], LL_Plan, LL_Plan) :-
+apply_mappings(_, [], _HL_Plan, _LL_Plan) :-
   % format('[apply_mappings2] Reached this point ~w\n', [LL_Plan]),
   true.
 
 
-apply_mappings(State, [[IDHLAction-HL_Action]|T_HL_Actions], Plan, RetPlan) :-
-  % format('\n\n[apply_mappings3] HL_Action: ~w-~w\n', [IDHLAction, HL_Action]), 
+apply_mappings(State, [[_IDHLAction-HL_Action]|T_HL_Actions], Plan, RetPlan) :-
+  % format('\n\n[apply_mappings3] HL_Action: ~w-~w\n', [_IDHLAction, HL_Action]), 
   
   length(Plan, Length),
-  action(HL_Action, PreconditionsT, PreconditionsF, _FinalConditionsF, Verify, Effects),
+  action(HL_Action, _PreconditionsT, _PreconditionsF, _FinalConditionsF, _Verify, Effects),
   append([Length-HL_Action], Plan, TempPlan),
   change_state(State, Effects, CurrentState),
 
-  % format('[apply_mappings3] Finding last achievers for: ~w\n', [HL_Action]),
-  % format('[apply_mappings3] PreconditionsT: ~w\n', [PreconditionsT]),
-  % format('[apply_mappings3] PreconditionsF: ~w\n', [PreconditionsF]),
-  % format('[apply_mappings3] Verify: ~w\n', [Verify]),
-  % format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
-  % format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]),
+  /*
+  format('[apply_mappings3] Finding last achievers for: ~w\n', [HL_Action]),
+  format('[apply_mappings3] PreconditionsT: ~w\n', [PreconditionsT]),
+  format('[apply_mappings3] PreconditionsF: ~w\n', [PreconditionsF]),
+  format('[apply_mappings3] Verify: ~w\n', [Verify]),
+  format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
+  format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]),
+  */
 
   Pre = '\t',
   (
     % format('[apply_mappings3] Checking if there is a mapping for action ~w\n', [HL_Action]),
     mapping(HL_Action, Mappings) 
-    ->(      
-      % format('[apply_mappings3] Found mapping for action ~w ~w ~w\n', [HL_Action, Mappings, Length]),
-      % format('[apply_mappings3] Calling apply_action_map with'),
-      % format('[apply_mappings3] Mappings: ~w\n', [Mappings]), 
-      % format('[apply_mappings3] Length: ~w\n', [Length]), 
-      % format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]), 
-      % format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
+    ->( 
+      /*     
+      format('[apply_mappings3] Found mapping for action ~w ~w ~w\n', [HL_Action, Mappings, Length]),
+      format('[apply_mappings3] Calling apply_action_map with'),
+      format('[apply_mappings3] Mappings: ~w\n', [Mappings]), 
+      format('[apply_mappings3] Length: ~w\n', [Length]), 
+      format('[apply_mappings3] CurrentState: ~w\n', [CurrentState]), 
+      format('[apply_mappings3] TempPlan: ~w\n', [TempPlan]),
+      */
 
       apply_action_map(Mappings, Length, CurrentState, TempPlan, NewState, NewPlan, Pre),
+      /*
       % format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
       % format('[apply_mappings3] Current state: ~w\n', [NewState]),
       % format('[apply_mappings3] NewPlan: ~w\n', [NewPlan]),
+      */
       true
     );(
       % format('[apply_mappings3] No mappings for action ~w\n', [HL_Action]),
       NewState = CurrentState,
       NewPlan = TempPlan,
-      % format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
-      % format('[apply_mappings3] Current state: ~w\n', [NewState]),
-      % format('[apply_mappings3] NewPlan: ~w\n', [TempPlan]),
+      /*
+      format('[apply_mappings3] Action name: ~w\n', [HL_Action]),
+      format('[apply_mappings3] Current state: ~w\n', [NewState]),
+      format('[apply_mappings3] NewPlan: ~w\n', [TempPlan]),
+      */
       true
     )
   ),
@@ -81,7 +89,7 @@ apply_mappings(_, _, _, _, _) :-
 % This function applies the mappings of an action. It also checks that the ll action is applicable and changes the state accordingly 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 apply_action_map([], _IDHLAction, State, Plan, State, Plan, _).
-apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan, Pre) :-
+apply_action_map([HAction|TActions], _IDHLAction, State, Plan, RetState, RetPlan, Pre) :-
   % disable_debug,
   % format('\n~w[apply_action_map] Adding map to ~w ~w\n', [Pre, HAction, State]),
   (
@@ -95,7 +103,7 @@ apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan,
     )
   ),
   % format('~w[apply_action_map] found action ~w ~w ~w ~w ~w ~w \n', [Pre, HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects]),
-  disable_debug,
+  % disable_debug,
   (
     is_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify)
     % true
@@ -118,18 +126,20 @@ apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan,
           append(Mappings, TActions, NewActionList),
           apply_action_map(NewActionList, Length, NewState, NewPlan, RetState, RetPlan, NewPre)
         );(
-          % format('~w[apply_action_map] No mappings for action ~w\n', [Pre, HAction]),
-          % format('~w[apply_action_map] Applying next action\n', [Pre]), 
-          % format('~w[apply_action_map] TActions: ~w\n', [Pre, TActions]),
-          % format('~w[apply_action_map] IDHLAction: ~w\n', [Pre, IDHLAction]),
-          % format('~w[apply_action_map] NewState: ~w\n', [Pre, NewState]),
-          % format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
+          /*
+          format('~w[apply_action_map] No mappings for action ~w\n', [Pre, HAction]),
+          format('~w[apply_action_map] Applying next action\n', [Pre]), 
+          format('~w[apply_action_map] TActions: ~w\n', [Pre, TActions]),
+          format('~w[apply_action_map] IDHLAction: ~w\n', [Pre, IDHLAction]),
+          format('~w[apply_action_map] NewState: ~w\n', [Pre, NewState]),
+          format('~w[apply_action_map] NewPlan: ~w\n', [Pre, NewPlan]),
+          */
           apply_action_map(TActions, Length, NewState, NewPlan, RetState, RetPlan, Pre)
         )
       ),
       true
     );(
-      % format('~w[apply_action_map] Not applicable ~w\n', [Pre, HAction]),
+      format('~w[apply_action_map] Not applicable ~w\n', [Pre, HAction]),
       why_not_applicable(State, PreconditionsT, PreconditionsF, FinalConditionsF, Verify),
       fail
     )
@@ -138,7 +148,7 @@ apply_action_map([HAction|TActions], IDHLAction, State, Plan, RetState, RetPlan,
   .
 
 apply_action_map(_, _, _, _, _, _, _, _, _) :-
-  % format('[apply_action_map] Could not apply action map\n'),
+  format('[apply_action_map] Could not apply action map\n'),
   fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -173,7 +183,7 @@ unstash_resources([H|T]) :-
 % This function generates a plan
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 generate_plan(Init, Goal, Plan, Enablers) :-
-  generate_plan(Init, Goal, Plan, Enablers, 2).
+  generate_plan(Init, Goal, Plan, Enablers, 6).
 
 generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   stash_resources(R),
@@ -181,55 +191,43 @@ generate_plan(Init, Goal, Plan, Enablers, MaxDepth) :-
   unstash_resources(R).
 
 
-generate_plan_stashed(Init, Goal, Plan, Enablers, MaxDepth) :-
+generate_plan_stashed(Init, Goal, _Plan, _Enablers, _MaxDepth) :-
   % enable_debug,
   debug_format('Checking if the initial state is the goal state ~w ~w\n', [Init, Goal]),
   goal_reached(Init, Goal),
   debug_format('Goal reached\n').
 
-generate_plan_stashed(Init, Goal, Plan, Enablers, MaxDepth) :-
-  % enable_debug,
+generate_plan_stashed(Init, Goal, Plan_Output_Arg, Enablers_Output_Arg, MaxDepth) :-
   debug_format('Generating the high-level temporal plan from ~w to ~w\n', [Init, Goal]),
-  (
+  ( % Inizio del grande if-then-else
     call_time(generate_plan_hl(Init, Goal, [], [], MaxDepth, HL_Plan), time{cpu:HL_Time, inferences:_, wall:_})
-    ->(
-      format('High-level plan generated in ~ws\n', [HL_Time]),
-      % Print information on the high-level part
-      % format('High-level plan generated\n'),
-      reverse(HL_Plan, HL_PlanReversed),
-      % print_list(HL_PlanReversed),      
-      debug_format('Applying the mappings to obtain the low-level temporal plan\n'),
-      (
-        % enable_debug,
-        call_time(apply_mappings(Init, HL_PlanReversed, Plan), time{cpu:LL_Time, inferences:_, wall:_})
-        % disable_debug
-        ->(
-          format('Low-level plan generated in ~ws\n', [LL_Time]),
-          debug_format('Plan generated\n'),
-          % print_list(Plan),
-          (
-            % reverse(Plan, PlanReversed),
-            call_time(extract_achievers(Plan, EnablersD), time{cpu:Achievers_Time, inferences:_, wall:_})
-            ->(
-              format('Achievers extracted in ~ws\n', [Achievers_Time]),
-              debug_format('Achievers found ~w\n', [EnablersD]),
-              clean_achievers(EnablersD, Plan, Enablers),
-              debug_format('Cleaned achievers\n'),
-              true
-            );(
-              format('Could not extract achievers\n'), fail
-            )
-          )
-        );(
-          format('Could not apply mappings\n'), fail
-        )
-      ),
-      true
-    );(
-      format('Could not generate a HL plan\n'), fail
-    )
-  ),
-  true.
+    -> ( 
+         format('High-level plan generated in ~ws\n', [HL_Time]),
+         reverse(HL_Plan, HL_PlanReversed),
+         debug_format('Applying the mappings to obtain the low-level temporal plan\n'),
+         ( call_time(apply_mappings(Init, HL_PlanReversed, Plan_LL_Calcolato), time{cpu:LL_Time, inferences:_, wall:_})
+           -> ( 
+                format('Low-level plan generated in ~ws\n', [LL_Time]),
+                ( call_time(extract_achievers(Plan_LL_Calcolato, EnablersD_Calcolati), time{cpu:Achievers_Time, inferences:_, wall:_})
+                  -> ( 
+                       format('Achievers extracted in ~ws\n', [Achievers_Time]),
+                       debug_format('Achievers found ~w\n', [EnablersD_Calcolati]),
+                       clean_achievers(EnablersD_Calcolati, Plan_LL_Calcolato, Enablers_Calcolati),
+                       debug_format('Cleaned achievers\n'),
+                       Plan_Output_Arg = Plan_LL_Calcolato, 
+                       Enablers_Output_Arg = Enablers_Calcolati,
+                       format('Plan generated! ~n')
+                       % format('    Plan: ~p~n', [Plan_Output_Arg]),
+                       % format('    Enablers: ~p~n~n', [Enablers_Output_Arg])
+                      )
+                  ; (format('Could not extract achievers\n'), fail) % extract_achievers fallito
+                )
+              )
+           ; (format('Could not apply mappings\n'), fail) % apply_mappings fallito
+         )
+       )
+    ; (format('Could not generate a HL plan\n'), fail) % generate_plan_hl fallito
+  ).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -254,7 +252,7 @@ add_hl_to_ll_enablers(ID, PassedPlanActions, AchieversD, RetAchieversD) :-
   debug_format('\t[add_hl_to_ll_enablers0]\n\t\tID: ~w\n\t\tUsed: ~w\n\t\tRetAchieversD: ~w\n', [ID, PassedPlanActions, RetAchieversD]),
   add_hl_to_ll_enablers(ID, PassedPlanActions, [], AchieversD, RetAchieversD, 0).
 
-add_hl_to_ll_enablers(HL_ID, [LL_ID-HAction|TActions], Used, AchieversD, RetAchieversD, 0) :-
+add_hl_to_ll_enablers(HL_ID, [_LL_ID-HAction|TActions], Used, AchieversD, RetAchieversD, 0) :-
   action(HAction, _, _, _, _, _),
   debug_format('\t[add_hl_to_ll_enablers2] Action ~w is HL -> continuing\n', [HAction]),
   add_hl_to_ll_enablers(HL_ID, TActions, Used, AchieversD, RetAchieversD, 0).
@@ -281,7 +279,7 @@ extract_achievers(Plan, AchieversD):-
 extract_achievers([], _, AchieversD, AchieversD).
 
 extract_achievers([ID-HAction|TActions], Used, AchieversD, RetAchieversD) :-
-  action(HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
+  action(HAction, PreconditionsT, PreconditionsF, _FinalConditionsF, Verify, _Effects),
   functor(HAction, ActionName, _),
   sub_string(ActionName, _, _, _, '_end'),
   debug_format('\n[extract_achievers-2]action [~w][~w] is END and HL~n', [ID, HAction]),
@@ -317,7 +315,7 @@ extract_achievers([ID-HAction|TActions], Used, AchieversD, RetAchieversD) :-
   extract_achievers(TActions, NewUsed, NewAchieversD, RetAchieversD).
 
 extract_achievers([ID-HAction|TActions], Used, AchieversD, RetAchieversD) :-
-  action(HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
+  action(HAction, PreconditionsT, PreconditionsF, _FinalConditionsF, Verify, _Effects),
   functor(HAction, ActionName, _),
   sub_string(ActionName, _, _, _, '_start'),
   debug_format('\n[extract_achievers-3]action [~w][~w] is START and HL~n', [ID, HAction]),
@@ -351,7 +349,7 @@ extract_achievers([ID-HAction|TActions], Used, AchieversD, RetAchieversD) :-
 
 
 extract_achievers([ID-HAction|TActions], Used, AchieversD, RetAchieversD) :-
-  ll_action(HAction, PreconditionsT, PreconditionsF, FinalConditionsF, Verify, Effects),
+  ll_action(HAction, _PreconditionsT, _PreconditionsF, _FinalConditionsF, _Verify, _Effects),
   (
     \+(_ = AchieversD.get(ID))
     ->(
@@ -381,7 +379,7 @@ generate_plan_hl(State, Goal, _Been_list, Plan, _MaxDepth, Plan) :-
   goal_reached(State, Goal),
   debug_format('Goal reached\n').
 
-generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
+generate_plan_hl(_State, _Goal, _Been_list, Plan, MaxDepth, _FinalPlan) :-
   % enable_debug,
   length(Plan, Length), 
   Length >= MaxDepth,
@@ -418,7 +416,7 @@ generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
     )
   ).
 
-generate_plan_hl(State, Goal, Been_list, Plan, MaxDepth, FinalPlan) :-
+generate_plan_hl(_State, _Goal, _Been_list, _Plan, _MaxDepth, _FinalPlan) :-
   fail. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -436,7 +434,7 @@ find_action_name_from_plan([], _, _) :-
 clean_achievers(EnablersD, Plan, RetEnablers) :-
   clean_achievers(EnablersD, Plan, [], RetEnablers, 0).
 
-clean_achievers(EnablersD, Plan, RetEnablers, RetEnablers, Counter) :-
+clean_achievers(_EnablersD, Plan, RetEnablers, RetEnablers, Counter) :-
   length(Plan, Counter).
 clean_achievers(EnablersD, Plan, Enablers, RetEnablers, Counter):-
   TempActionEnablers = EnablersD.get(Counter),

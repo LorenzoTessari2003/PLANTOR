@@ -1,0 +1,9 @@
+API_TYPE: "local_qwen"
+MODEL_NAME_DISPLAY: "Fine-tuned Qwen Coder 0.5B"
+MODEL_PATH: "model_training/qwen_coder_prolog_finetuned_final"
+IS_QLORA_MODEL: false
+BASE_MODEL_NAME_OR_PATH: null 
+MAX_NEW_TOKENS: 4096
+TEMPERATURE: 0.01
+TOP_P: 0.95
+DO_SAMPLE: true
