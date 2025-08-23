@@ -1,7 +1,7 @@
 import torch
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from trl import SFTConfig, SFTTrainer, DataCollatorForCompletionOnlyLM
+from trl import SFTConfig, SFTTrainer
 from hl.hl_kb_examples import kb_training_data_samples, kb_evaluation_data_samples
 from hl.hl_states_examples import states_training_data_samples, states_evaluation_data_samples
 from hl.hl_actions_examples import actions_training_data_samples, actions_evaluation_data_samples
@@ -168,10 +168,6 @@ sft_training_args = SFTConfig(
     max_seq_length=4096,
 )
 
-# Data Collator
-print("Data Collator definition...", flush=True)
-data_collator_LM = DataCollatorForCompletionOnlyLM(response_template=response_template_ids, tokenizer=tokenizer)
-
 # Trainer
 print("Trainer defintion...", flush=True)
 trainer = SFTTrainer(
@@ -179,7 +175,7 @@ trainer = SFTTrainer(
     args=sft_training_args,
     train_dataset=train_dataset_hf,
     eval_dataset=eval_dataset_hf,
-    data_collator=data_collator_LM
+    completion_only_loss = True
 )
 
 # Info pre-training
