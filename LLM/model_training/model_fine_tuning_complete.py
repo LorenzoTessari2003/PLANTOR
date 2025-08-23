@@ -164,7 +164,8 @@ sft_training_args = SFTConfig(
     save_strategy="epoch",
     bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
     report_to="none", #"wandb" if you want data and graphs about the training
-    dataset_text_field="text"
+    dataset_text_field="text",
+    completion_only_loss=True
 )
 
 # Trainer
