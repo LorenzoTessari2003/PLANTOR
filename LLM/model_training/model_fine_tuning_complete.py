@@ -174,9 +174,7 @@ trainer = SFTTrainer(
     model=model,
     args=sft_training_args,
     train_dataset=train_dataset_hf,
-    eval_dataset=eval_dataset_hf,
-    completion_only_loss = True,
-    max_seq_length=4096
+    eval_dataset=eval_dataset_hf
 )
 
 # Info pre-training

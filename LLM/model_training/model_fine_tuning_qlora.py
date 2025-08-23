@@ -188,8 +188,7 @@ trainer = SFTTrainer(
     args=sft_training_args,
     train_dataset=train_dataset_hf,
     eval_dataset=eval_dataset_hf,
-    peft_config=lora_config,
-    max_seq_length=4096
+    peft_config=lora_config
 )
 
 # Info pre-training
