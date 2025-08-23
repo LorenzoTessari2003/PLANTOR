@@ -10,7 +10,7 @@ try:
     import utility
 except ImportError:
     from . import utility
-from .local_qwen import LocalQwenModel
+from .local_model import LocalModel
 
 class LLM:
     llm_default_config = {
@@ -77,7 +77,7 @@ class LLM:
                     print(f"[LLM Init] Ollama Config - Base URL: {self.BASE_URL}, Model Name: {self.MODEL_NAME}")
                     if not self.BASE_URL or not self.MODEL_NAME:
                          print("[WARNING][LLM Init] BASE_URL or MODEL_NAME missing for Ollama configuration!")
-                elif self.API_TYPE == "local_qwen": 
+                elif self.API_TYPE == "local": 
                     self.MODEL_NAME = llm_connection_config.get("MODEL_NAME_DISPLAY", "local_qwen_default")
                     model_path = llm_connection_config.get("MODEL_PATH")
                     is_qlora = llm_connection_config.get("IS_QLORA_MODEL", False)
@@ -89,7 +89,7 @@ class LLM:
                         raise ValueError("[LLM Init] BASE_MODEL_NAME_OR_PATH missing for local_qwen QLoRA configuration!")
                     
                     print(f"[LLM Init] Local Qwen Config - Display Name: {self.MODEL_NAME}, Path: {model_path}, Is QLoRA: {is_qlora}, Base Model: {base_model_name}")
-                    self.local_qwen_instance = LocalQwenModel(
+                    self.local_qwen_instance = LocalModel(
                         model_path=model_path,
                         is_qlora_model=is_qlora,
                         base_model_name_or_path=base_model_name,
@@ -115,7 +115,7 @@ class LLM:
                         self.local_qwen_instance.do_sample = llm_connection_config["DO_SAMPLE"]
 
                 else:
-                    raise ValueError(f"API_TYPE non valido: {self.API_TYPE}. Deve essere 'azure_openai', 'ollama', or 'local_qwen'.")
+                    raise ValueError(f"API_TYPE non valido: {self.API_TYPE}. Deve essere 'azure_openai', 'ollama', o 'local'.")
         else:
             raise FileNotFoundError(f"The selected file {llm_connection_config_file} does not exist or is not a yaml file")
 
@@ -164,7 +164,7 @@ class LLM:
                     llm_output = self.__connect_openai(messages_for_api_call)
                 elif self.API_TYPE == "ollama":
                     llm_output = self.__connect_ollama(messages_for_api_call)
-                elif self.API_TYPE == "local_qwen":
+                elif self.API_TYPE == "local":
                     if not self.local_qwen_instance:
                         raise ConnectionError("[LLM Query] LocalQwenModel instance not initialized.")
                     llm_output = self.local_qwen_instance.generate(prompt)

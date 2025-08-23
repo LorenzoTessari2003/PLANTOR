@@ -20,7 +20,8 @@ from python_interface.utility.utility import INFO, MSG, FAIL
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/deepseek-r1-7b.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/gemma3.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/qwen2.5.yaml') #it works
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-qwen-0.5B.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-qwen-0.5B.yaml')
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-gemma3-0.3B_qlora.yaml')
 
 # Examples Path
 EXAMPLES_PATH           = os.path.join(os.path.dirname(__file__), 'LLM', 'examples')
