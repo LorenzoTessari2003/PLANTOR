@@ -13,8 +13,8 @@ from general.reasoning_examples import reasoning_examples_training_data_samples,
 
 # Model definition
 #model_name = "LiquidAI/LFM2-350M" #0.5B
-model_name = "google/gemma-3-270m" #0.3B
-#model_name = "Qwen/Qwen3-8B" #8B
+#model_name = "google/gemma-3-270m" #0.3B
+model_name = "Qwen/Qwen3-8B" #8B
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 model_type = "unknown"
 if model_name:
@@ -149,16 +149,14 @@ print(f"Response template IDs: {response_template_ids}")
 # Training Args
 print("Training Args definition...", flush=True)
 sft_training_args = SFTConfig(
-    output_dir="./qwen3_06B_checkpoints",
-    num_train_epochs=10,
+    num_train_epochs=20,
     per_device_train_batch_size=1,
     per_device_eval_batch_size=1,
-    gradient_accumulation_steps=4, #Number of steps before changing the gradient
+    gradient_accumulation_steps=8, #Number of steps before changing the gradient
     gradient_checkpointing=True,
     learning_rate=2e-5,
     weight_decay=0.01,
     warmup_ratio=0.1,
-    logging_dir='./logs_qwen3_06B',
     logging_steps=1, #Number of steps before logging update of the training in the terminal
     eval_strategy="epoch",
     save_strategy="epoch",
@@ -194,7 +192,7 @@ print("End training.", flush=True)
 
 # Save model trained on the dataset
 print("Saving model...", flush=True)
-final_qwen_model_path = "./qwen3_06B_final"
+final_qwen_model_path = "./qwen3_8B_final"
 trainer.save_model(final_qwen_model_path)
 tokenizer.save_pretrained(final_qwen_model_path)
 print(f"Model and Tokenizer saved at: {final_qwen_model_path}", flush=True)
