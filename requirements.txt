@@ -6,4 +6,4 @@
 
 art
 networkx
-graphvizpy
+graphviz
