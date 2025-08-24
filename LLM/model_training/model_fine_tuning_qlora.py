@@ -14,8 +14,8 @@ from general.reasoning_examples import reasoning_examples_training_data_samples,
 
 # Model definition
 #model_name = "LiquidAI/LFM2-350M" #0.5B
-model_name = "google/gemma-3-270m" #0.3B
-#model_name = "Qwen/Qwen3-8B" #8B
+#model_name = "google/gemma-3-270m" #0.3B
+model_name = "Qwen/Qwen3-8B" #8B
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 model_type = "unknown"
 if model_name:
@@ -163,7 +163,7 @@ print(f"Response template string: '{response_template_str}'")
 print(f"Response template IDs: {response_template_ids}")
 
 sft_training_args = SFTConfig(
-    output_dir="./gemma3_0.3B_qlora_checkpoints",
+    #output_dir="./gemma3_0.3B_qlora_checkpoints",
     num_train_epochs=20,
     per_device_train_batch_size=1,
     per_device_eval_batch_size=1,
@@ -172,7 +172,7 @@ sft_training_args = SFTConfig(
     learning_rate=2e-5,
     weight_decay=0.01,
     warmup_ratio=0.1,
-    logging_dir='./logs_gemma3_0.3B_qlora',
+    #logging_dir='./logs_gemma3_0.3B_qlora',
     logging_steps=1, #Number of steps before logging update of the training in the terminal
     eval_strategy="epoch",
     save_strategy="epoch", 
@@ -207,7 +207,7 @@ trainer.train()
 print("End training.")
 
 # Save model trained on the dataset
-final_qwen_model_path = "./gemma3_0.3B_qlora_final"
+final_qwen_model_path = "./qwen3_8B_qlora_final"
 trainer.save_model(final_qwen_model_path) # Save adaptors LoRA
 tokenizer.save_pretrained(final_qwen_model_path)
 print(f"Adaptors saved at: {final_qwen_model_path}")

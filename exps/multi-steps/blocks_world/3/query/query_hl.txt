@@ -1,7 +1,0 @@
-There are 4 blocks. In a first time the block A is on the table in position (1,1) block B is on top of block A, C on top of B and D on top of C. 
-After some rearrangements A is in the same position, B is on the table in position (2,1), C is on the table in position (3,1) and D is on top of A.
-There are 2 agents  with a robotic arm, at the beginning, the arms are in positions (0,0) and (3,3), respectively.
-They can:
-- Move a block from a position to another position in the table
-- Move a block that is on the table to the top of another one 
-- Move a block on top of a block to another position

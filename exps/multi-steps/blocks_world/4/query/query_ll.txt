@@ -1,6 +1,0 @@
-Let the blocks and their positions be described in the high-level part.
-There is 1 available agent that can carry out the task. It is available at the beginning and will be available at the end. The agent is actually robotic arm that can pick up blocks and move them around. At the beginning, the arm is in positions (10,10), while we do not care were they are at the end. The low_level actions that they can perform are:
-- move_arm(arm, x1, y1, x2, y2), which makes the robotic arm move from position (x1,y1) to position (x2,y2).
-- close(arm), which makes the gripper close.
-- open(arm), which makes the gripper open.
-Remember to use the appropriate tags for the code you produce and not to use Prolog tags.

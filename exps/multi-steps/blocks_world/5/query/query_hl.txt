@@ -1,9 +1,0 @@
-There are 20 blocks on a table, named in the form b# where # is a number from 1 to 20. Each block is in 
-position (x, 1), where x is a number from 1 to 20. The blocks are ordered from left to right in increasing
-order of x. There are three agents that have to move the blocks from the initial configuration, i.e.,
-all blocks on the table, to a final configuration in which b1 is on the table in position (4,4), b2 
-is on top of b1 and b3 is on top of b2. Each agent is available at the beginning and will be available at the end. Moreover, they can:
-- Move a block from a position on the table to another position in the table
-- Move a block that is on the table to the top of another block
-- Move a block on top of a block to another position on the table
-- Move a block on top of a block to the top of another block
