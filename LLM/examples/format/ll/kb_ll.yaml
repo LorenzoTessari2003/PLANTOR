@@ -1,0 +1,91 @@
+'''
+Example 1:
+
+```kb
+% Positions
+pos(0,0).
+pos(1,1).
+pos(2,2).
+
+% Blocks
+block(b1).
+
+% Agents
+agent(a1).
+
+% Arms
+ll_arm(a1).
+
+% Grippers
+ll_gripper(a1).
+
+% Resources
+resources(agent(_)).
+resources(ll_arm(_)).
+resources(ll_gripper(_)).
+```
+
+Example 2:
+
+```kb
+% Positions
+pos(0,0).
+pos(1,1).
+pos(2,2).
+pos(3,3).
+
+% Blocks
+block(b1).
+block(b2).
+block(b3).
+
+% Agents
+agent(a1).
+
+% Arms
+ll_arm(a1).
+
+% Grippers
+ll_gripper(a1).
+
+% Resources
+resources(agent(_)).
+resources(ll_arm(_)).
+resources(ll_gripper(_)).
+```
+
+Example 3:
+
+```kb
+% Positions
+pos(0,0).
+pos(1,1).
+pos(2,2).
+pos(3,3).
+pos(4,4).
+pos(10,10).
+
+% Blocks
+block(b1).
+block(b2).
+block(b3).
+block(b4).
+
+% Agents
+agent(a1).
+agent(a2).
+
+% Arms
+ll_arm(a1).
+ll_arm(a2).
+
+% Grippers
+ll_gripper(a1).
+ll_gripper(a2).
+
+% Resources
+resources(agent(_)).
+resources(ll_arm(_)).
+resources(ll_gripper(_)).
+```
+'''

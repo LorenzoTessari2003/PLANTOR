@@ -1,0 +1,79 @@
+'''
+Example 1:
+
+```init
+init_state([
+  ontable(b1),
+  at(b1,1,1),
+  clear(b1),
+  available(a1),
+  ll_arm_at(a1,0,0),
+  ll_gripper(a1,open)
+]).
+```
+
+```goal
+goal_state([
+  ontable(b1),
+  at(b1,2,2),
+  clear(b1),
+  available(a1),
+  ll_arm_at(a1,_,_),
+  ll_gripper(a1,_)
+]).
+```
+
+Example 2:
+
+```init
+init_state([
+  ontable(b1), ontable(b2), ontable(b3),
+  at(b1,1,1), at(b2,2,2), at(b3,3,3),
+  clear(b1), clear(b2), clear(b3),
+  available(a1),
+  ll_arm_at(a1,0,0),
+  ll_gripper(a1,open)
+]).
+```
+
+```goal
+goal_state([
+  ontable(b1),
+  on(b2, b1),
+  on(b3, b2),
+  at(b1,1,1), at(b2,1,1), at(b3,1,1),
+  clear(b3),
+  available(a1),
+  ll_arm_at(a1,_,_),
+  ll_gripper(a1,_)
+]).
+```
+
+Example 3:
+
+```init
+init_state([
+  ontable(b1), ontable(b3),
+  on(b2, b1), on(b4, b3),
+  at(b1,1,1), at(b2,1,1),
+  at(b3,2,2), at(b4,2,2),
+  clear(b2), clear(b4),
+  available(a1), available(a2),
+  ll_arm_at(a1,0,0), ll_arm_at(a2,10,10),
+  ll_gripper(a1,open), ll_gripper(a2,open)
+]).
+```
+
+```goal
+goal_state([
+  ontable(b1), ontable(b2),
+  on(b4, b1), on(b3, b2),
+  at(b1,3,3), at(b4,3,3),
+  at(b2,4,4), at(b3,4,4),
+  clear(b4), clear(b3),
+  available(a1), available(a2),
+  ll_arm_at(a1,_,_), ll_arm_at(a2,_,_),
+  ll_gripper(a1,_), ll_gripper(a2,_)
+]).
+```
+'''

@@ -1,0 +1,55 @@
+'''
+```mappings
+mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 0, 0, X1, Y1),
+    ll_move_arm_end(Agent, 0, 0, X1, Y1),
+    ll_grip_start(Agent),
+    ll_grip_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_release_start(Agent),
+    ll_release_end(Agent)
+  ]
+).
+
+mapping(move_table_to_block_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 0, 0, X1, Y1),
+    ll_move_arm_end(Agent, 0, 0, X1, Y1),
+    ll_grip_start(Agent),
+    ll_grip_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_release_start(Agent),
+    ll_release_end(Agent)
+  ]
+).
+
+mapping(move_onblock_to_table_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 0, 0, X1, Y1),
+    ll_move_arm_end(Agent, 0, 0, X1, Y1),
+    ll_grip_start(Agent),
+    ll_grip_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_release_start(Agent),
+    ll_release_end(Agent)
+  ]
+).
+
+mapping(move_onblock_to_block_start(Agent, Block1, Block2, Block3, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 0, 0, X1, Y1),
+    ll_move_arm_end(Agent, 0, 0, X1, Y1),
+    ll_grip_start(Agent),
+    ll_grip_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_release_start(Agent),
+    ll_release_end(Agent)
+  ]
+).
+```
+'''

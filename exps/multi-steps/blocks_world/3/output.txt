@@ -1,0 +1,132 @@
+% Positions
+pos(0,0).
+pos(1,1).
+pos(2,2).
+
+% Blocks
+block(b1).
+block(b2).
+
+% Agents
+agent(a1).
+
+% Arms
+ll_arm(a1).
+
+% Grippers
+ll_gripper(a1).
+
+% Resources
+resources(agent(_)).
+resources(ll_arm(_)).
+resources(ll_gripper(_)).
+
+init_state([
+  ontable(b1),
+  on(b2, b1),
+  at(b1,1,1),
+  at(b2,1,1),
+  clear(b2),
+  available(a1),
+  ll_arm_at(a1,0,0),
+  ll_gripper(a1,open)
+]).
+
+goal_state([
+  ontable(b1), ontable(b2),
+  at(b1,1,1), at(b2,2,2),
+  clear(b1), clear(b2),
+  available(a1),
+  ll_arm_at(a1,_,_),
+  ll_gripper(a1,_)
+]).
+
+action(move_onblock_to_table(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [agent(Agent), block(Block1), block(Block2), pos(X1, Y1), pos(X2, Y2)],
+  [available(Agent), on(Block1, Block2), clear(Block1), at(Block1, X1, Y1), at(Block2, X1, Y1)],
+  [
+    add(ontable(Block1)),
+    add(at(Block1, X2, Y2)),
+    add(clear(Block2)),
+    del(on(Block1, Block2))
+  ]
+).
+
+ll_action(ll_move_arm_start(Arm, X1, Y1, X2, Y2),
+  [ll_arm_at(Arm, X1, Y1)],
+  [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
+  [],
+  [ll_arm(Arm), pos(X1, Y1), pos(X2, Y2)],
+  [
+    add(ll_moving_arm(Arm, X1, Y1, X2, Y2)),
+    del(ll_arm_at(Arm, X1, Y1))
+  ]
+).
+
+ll_action(ll_move_arm_end(Arm, X1, Y1, X2, Y2),
+  [ll_moving_arm(Arm, X1, Y1, X2, Y2)],
+  [],
+  [],
+  [],
+  [
+    del(ll_moving_arm(Arm, X1, Y1, X2, Y2)),
+    add(ll_arm_at(Arm, X2, Y2))
+  ]
+).
+
+ll_action(ll_grip_start(Arm),
+  [ll_gripper(Arm, open)],
+  [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
+  [],
+  [ll_gripper(Arm)],
+  [
+    del(ll_gripper(Arm, open)),
+    add(ll_gripping(Arm))
+  ]
+).
+
+ll_action(ll_grip_end(Arm),
+  [ll_gripping(Arm)],
+  [],
+  [],
+  [ll_gripper(Arm)],
+  [
+    del(ll_gripping(Arm)),
+    add(ll_gripper(Arm, close))
+  ]
+).
+
+ll_action(ll_release_start(Arm),
+  [ll_gripper(Arm, close)],
+  [ll_moving_arm(Arm, _, _, _, _), ll_gripping(Arm, _), ll_releasing(Arm)],
+  [],
+  [ll_gripper(Arm)],
+  [
+    del(ll_gripper(Arm, close)),
+    add(ll_releasing(Arm))
+  ]
+).
+
+ll_action(ll_release_end(Arm),
+  [ll_releasing(Arm)],
+  [],
+  [],
+  [ll_gripper(Arm)],
+  [
+    del(ll_releasing(Arm)),
+    add(ll_gripper(Arm, open))
+  ]
+).
+
+mapping(move_onblock_to_table_start(Agent, Block1, Block2, X1, Y1, X2, Y2),
+  [
+    ll_move_arm_start(Agent, 0, 0, X1, Y1),
+    ll_move_arm_end(Agent, 0, 0, X1, Y1),
+    ll_grip_start(Agent),
+    ll_grip_end(Agent),
+    ll_move_arm_start(Agent, X1, Y1, X2, Y2),
+    ll_move_arm_end(Agent, X1, Y1, X2, Y2),
+    ll_release_start(Agent),
+    ll_release_end(Agent)
+  ]
+).

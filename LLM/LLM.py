@@ -14,13 +14,13 @@ from .local_model import LocalModel
 
 class LLM:
     llm_default_config = {
-        "max_tokens": 4096,
-        "temperature": 0.01,
-        "top_p": 1.0,
+        "max_tokens": 8192,
+        "temperature": 0.0,
+        "top_p": 0.95,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
         "stop": None,
-        "seed": 42
+        "seed": 0
     }
 
     def __init__(self, llm_connection_config_file = os.path.join(os.path.dirname(__file__), "conf/gpt4o.yaml"), examples_yaml_file = [""], llm_config = None):
@@ -28,7 +28,7 @@ class LLM:
         load_dotenv()
 
         self.initial_examples = [] #Examples for OpenAI and Ollama
-        self.local_qwen_instance = None # Model local instance
+        self.local_instance = None # Model local instance
 
         if examples_yaml_file:
             if isinstance(examples_yaml_file, str):
@@ -88,8 +88,8 @@ class LLM:
                     if is_qlora and not base_model_name:
                         raise ValueError("[LLM Init] BASE_MODEL_NAME_OR_PATH missing for local_qwen QLoRA configuration!")
                     
-                    print(f"[LLM Init] Local Qwen Config - Display Name: {self.MODEL_NAME}, Path: {model_path}, Is QLoRA: {is_qlora}, Base Model: {base_model_name}")
-                    self.local_qwen_instance = LocalModel(
+                    print(f"[LLM Init] Local Config - Display Name: {self.MODEL_NAME}, Path: {model_path}, Is QLoRA: {is_qlora}, Base Model: {base_model_name}")
+                    self.local_instance = LocalModel(
                         model_path=model_path,
                         is_qlora_model=is_qlora,
                         base_model_name_or_path=base_model_name,
@@ -98,21 +98,21 @@ class LLM:
                     
                     #Specific config parameters
                     if "MAX_NEW_TOKENS" in llm_connection_config:
-                        self.local_qwen_instance.max_new_tokens = llm_connection_config["MAX_NEW_TOKENS"]
+                        self.local_instance.max_new_tokens = llm_connection_config["MAX_NEW_TOKENS"]
                     if "NUM_BEAMS" in llm_connection_config:
-                        self.local_qwen_instance.num_beams = llm_connection_config["NUM_BEAMS"]
+                        self.local_instance.num_beams = llm_connection_config["NUM_BEAMS"]
                     if "TEMPERATURE" in llm_connection_config:
-                        self.local_qwen_instance.temperature = llm_connection_config["TEMPERATURE"]
-                        if self.local_qwen_instance.temperature < 0.01: 
-                             self.local_qwen_instance.do_sample = False
-                             self.local_qwen_instance.num_beams = 1 # Greedy se temp è ~0
+                        self.local_instance.temperature = llm_connection_config["TEMPERATURE"]
+                        if self.local_instance.temperature < 0.01: 
+                             self.local_instance.do_sample = False
+                             self.local_instance.num_beams = 1 # Greedy se temp è ~0
                         else:
-                             self.local_qwen_instance.do_sample = True
+                             self.local_instance.do_sample = True
 
                     if "TOP_P" in llm_connection_config: # Sovrascrive quello globale
-                        self.local_qwen_instance.top_p = llm_connection_config["TOP_P"]
+                        self.local_instance.top_p = llm_connection_config["TOP_P"]
                     if "DO_SAMPLE" in llm_connection_config:
-                        self.local_qwen_instance.do_sample = llm_connection_config["DO_SAMPLE"]
+                        self.local_instance.do_sample = llm_connection_config["DO_SAMPLE"]
 
                 else:
                     raise ValueError(f"API_TYPE non valido: {self.API_TYPE}. Deve essere 'azure_openai', 'ollama', o 'local'.")
@@ -165,9 +165,9 @@ class LLM:
                 elif self.API_TYPE == "ollama":
                     llm_output = self.__connect_ollama(messages_for_api_call)
                 elif self.API_TYPE == "local":
-                    if not self.local_qwen_instance:
-                        raise ConnectionError("[LLM Query] LocalQwenModel instance not initialized.")
-                    llm_output = self.local_qwen_instance.generate(prompt)
+                    if not self.local_instance:
+                        raise ConnectionError("[LLM Query] LocalModel instance not initialized.")
+                    llm_output = self.local_instance.generate(prompt)
                 else:
                     raise ValueError(f"API_TYPE non valido: {self.API_TYPE}.")
                 conn_success = True
@@ -297,9 +297,9 @@ class LLM:
                 except Exception as close_err:
                     print(f"[ERROR][Connect Ollama] Error closing response connection: {close_err}")
 
-    def clear_qwen_history(self): # Clear history for qwen
-        if self.local_qwen_instance:
-            self.local_qwen_instance.clear_history()
-            print("[LLM] LocalQwenModel history cleared.")
+    def clear_history(self): # Clear history
+        if self.local_instance:
+            self.local_instance.clear_history()
+            print("[LLM] LocalModel history cleared.")
         else:
-            print("[LLM] No LocalQwenModel instance to clear history from.")
+            print("[LLM] No LocalModel instance to clear history from.")
