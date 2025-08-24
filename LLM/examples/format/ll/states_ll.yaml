@@ -1,56 +1,3 @@
-'''
-Example 1:
-
-```init
-init_state([
-  ontable(b1),
-  at(b1,1,1),
-  clear(b1),
-  available(a1),
-  ll_arm_at(a1,0,0),
-  ll_gripper(a1,open)
-]).
-```
-
-```goal
-goal_state([
-  ontable(b1),
-  at(b1,2,2),
-  clear(b1),
-  available(a1),
-  ll_arm_at(a1,_,_),
-  ll_gripper(a1,_)
-]).
-```
-
-Example 2:
-
-```init
-init_state([
-  ontable(b1), ontable(b2), ontable(b3),
-  at(b1,1,1), at(b2,2,2), at(b3,3,3),
-  clear(b1), clear(b2), clear(b3),
-  available(a1),
-  ll_arm_at(a1,0,0),
-  ll_gripper(a1,open)
-]).
-```
-
-```goal
-goal_state([
-  ontable(b1),
-  on(b2, b1),
-  on(b3, b2),
-  at(b1,1,1), at(b2,1,1), at(b3,1,1),
-  clear(b3),
-  available(a1),
-  ll_arm_at(a1,_,_),
-  ll_gripper(a1,_)
-]).
-```
-
-Example 3:
-
 ```init
 init_state([
   ontable(b1), ontable(b3),
@@ -76,4 +23,3 @@ goal_state([
   ll_gripper(a1,_), ll_gripper(a2,_)
 ]).
 ```
-'''

@@ -1,6 +1,3 @@
-'''
-Example:
-
 ```ll_actions
 action(move_table_to_table(Agent, Block, X1, Y1, X2, Y2),
   [agent(Agent), block(Block), pos(X1, Y1), pos(X2, Y2)],
@@ -77,4 +74,3 @@ ll_action(ll_release_end(Arm),
   ]
 ).
 ```
-'''

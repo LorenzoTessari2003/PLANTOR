@@ -1,4 +1,3 @@
-'''
 ```mappings
 mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
   [
@@ -52,4 +51,3 @@ mapping(move_onblock_to_block_start(Agent, Block1, Block2, Block3, X1, Y1, X2, Y
   ]
 ).
 ```
-'''
