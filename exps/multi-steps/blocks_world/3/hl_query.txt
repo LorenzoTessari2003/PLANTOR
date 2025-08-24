@@ -1,0 +1,4 @@
+There are 2 blocks. In the initial state of the simulation, block b2 is on top of block b1, and b1 is on the table in position (1,1). After the execution of the plan, b1 is on the table in position (1,1) and b2 is on the table in position (2,2). There is one available agent that can carry out the task. It is available at the beginning and will be available at the end.
+Each agent can move a block:
+from the top of a block, to a position on the table.
+Remember to use the appropriate tags ``` ``` for the code you produce.

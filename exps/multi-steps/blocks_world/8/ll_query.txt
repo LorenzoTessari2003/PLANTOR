@@ -1,0 +1,9 @@
+Let the blocks be in the same position as the high-level description.
+There are 2 available agents that can carry out the task. They are available at the beginning and will be available at the end. The agents are actually robotic arms that can pick up blocks and move them around. At the beginning, the arms are in positions (0,0) and (5,5) for agents a1, a2, respectively, while we do not care where they are at the end. The low_level actions that they can perform are:
+move_arm_start(arm, x1, y1, x2, y2), which makes the robotic arm starting to move from position (x1,y1) to position (x2,y2).
+move_arm_end(arm, x1, y1, x2, y2), which completes the movement of the robotic arm from position (x1,y1) to position (x2,y2).
+grip_start(arm), which makes the gripper starting to close.
+grip_end(arm), which indicates the gripper has closed.
+release_start(arm), which makes the gripper starting to open.
+release_end(arm), which indicates the gripper has opened.
+Remember to use the appropriate tags ``` ``` for the code you produce.

@@ -1,5 +1,0 @@
-Planning from: [ontable(b1),ontable(b2),ontable(b3),at(b1,1,1),at(b2,2,2),at(b3,3,3),clear(b1),clear(b2),clear(b3),available(a1),available(a2),ll_arm_at(a1,4,4),ll_arm_at(a2,5,5),ll_gripper(a1,open),ll_gripper(a2,open)] to: [ontable(b1),ontable(b2),on(b3,b1),at(b1,1,1),at(b2,2,2),at(b3,1,1),clear(b2),clear(b3),available(a1),available(a2),ll_arm_at(a1,_23160,_23162),ll_arm_at(a2,_23174,_23176),ll_gripper(a1,_23188),ll_gripper(a2,_23200)]
-Plan: 
-[0] [0-move_table_to_block_start(a1,b3,b1,3,3,1,1)]
-[1] [1-move_table_to_block_end(a1,b3,b1,3,3,1,1)]
-% 714,974 inferences, 0.022 CPU in 0.022 seconds (100% CPU, 33099940 Lips)

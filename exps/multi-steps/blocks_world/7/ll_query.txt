@@ -1,0 +1,9 @@
+Let the blocks be in the same position as the high-level description.
+The agent is a robotic arm equipped with a gripper. At the beginning, the end-effector of agent a1 is in position (0,0). Each agent has the following APIs:
+move_arm_start(arm, x1, y1, x2, y2), which makes the robotic arm starting to move from position (x1,y1) to position (x2,y2).
+move_arm_end(arm, x1, y1, x2, y2), which completes the movement of the robotic arm from position (x1,y1) to position (x2,y2).
+grip_start(arm), which makes the gripper starting to close.
+grip_end(arm), which indicates the gripper has closed.
+release_start(arm), which makes the gripper starting to open.
+release_end(arm), which indicates the gripper has opened.
+Remember to use the appropriate tags ``` ``` for the code you produce.

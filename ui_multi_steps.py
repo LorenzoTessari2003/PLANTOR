@@ -22,7 +22,8 @@ from python_interface.utility.utility import INFO, MSG, FAIL
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/qwen2.5.yaml') #it works
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-qwen-0.5B.yaml')
 # LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-gemma3-0.3B_qlora.yaml')
-LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-gemma3-0.3B.yaml')
+# LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-gemma3-0.3B.yaml')
+LLM_CONF_PATH    = os.path.join(os.path.dirname(__file__), 'LLM', 'conf/local-qwen3-8B_qlora.yaml')
 
 
 # Examples Path
@@ -541,15 +542,15 @@ def main():
     query_hl = ""
     query_ll = ""
 
-    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '1', 'query')
+    GENERAL_DIR = os.path.join(os.path.dirname(__file__), 'exps', 'multi-steps', 'blocks_world', '1')
     assert os.path.exists(GENERAL_DIR), f"General directory not found at {GENERAL_DIR}"
-    assert os.path.exists(os.path.join(GENERAL_DIR, 'query_hl.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'query_hl.txt')}"
-    assert os.path.exists(os.path.join(GENERAL_DIR, 'query_ll.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'query_ll.txt')}"
+    assert os.path.exists(os.path.join(GENERAL_DIR, 'hl_query.txt')), f"High-level query file not found at {os.path.join(GENERAL_DIR, 'hl_query.txt')}"
+    assert os.path.exists(os.path.join(GENERAL_DIR, 'll_query.txt')), f"Low-level query file not found at {os.path.join(GENERAL_DIR, 'll_query.txt')}"
     
-    with open(os.path.join(GENERAL_DIR, 'query_hl.txt'), 'r') as file:
+    with open(os.path.join(GENERAL_DIR, 'hl_query.txt'), 'r') as file:
         query_hl = file.read()
     query_hl+="\nRemember that the tags are in the Markdown form of ```tag and not <tag>"
-    with open(os.path.join(GENERAL_DIR, 'query_ll.txt'), 'r') as file:
+    with open(os.path.join(GENERAL_DIR, 'll_query.txt'), 'r') as file:
         query_ll = file.read()
     query_ll+="\nRemember that the tags are in the Markdown form of ```tag and not <tag> and that the low-level actions have the tag ll_actions and not actions"
 

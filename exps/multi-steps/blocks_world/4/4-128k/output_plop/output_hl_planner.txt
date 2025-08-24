@@ -1,9 +1,0 @@
-Planning from: [ontable(b1),ontable(b2),ontable(b3),at(b1,1,1),at(b2,2,3),at(b3,3,4),clear(b1),clear(b2),clear(b3),available(a1)] to: [ontable(b1),on(b2,b1),on(b3,b2),at(b1,5,5),at(b2,5,5),at(b3,5,5),clear(b3),available(a1)]
-Plan: 
-[0] [0-move_block_start(a1,b1,1,1,5,5)]
-[1] [1-move_block_end(a1,b1,1,1,5,5)]
-[2] [2-move_block_to_top_start(a1,b2,b1,2,3,5,5)]
-[3] [3-move_block_to_top_end(a1,b2,b1,2,3,5,5)]
-[4] [4-move_block_to_top_start(a1,b3,b2,3,4,5,5)]
-[5] [5-move_block_to_top_end(a1,b3,b2,3,4,5,5)]
-% 506,928 inferences, 0.018 CPU in 0.018 seconds (100% CPU, 27445447 Lips)
