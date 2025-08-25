@@ -14,8 +14,8 @@ from .local_model import LocalModel
 
 class LLM:
     llm_default_config = {
-        "max_tokens": 4096,
-        "temperature": 0.1,
+        "max_tokens": 8192,
+        "temperature": 0.01,
         "top_p": 1.0,
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,

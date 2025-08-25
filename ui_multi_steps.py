@@ -88,7 +88,7 @@ def hl_llm_multi_step(query, llm) -> dict:
     file = open(OUTPUT_FILE_HL, "w+")
     kb = {}
     examples = ""
-    LLM_HL_WARNING = "You are an expert Prolog programming assistant. Your task is to ALWAYS output ONLY a Markdown code block with the tag needed. Do not write explanations, notes, or comments outside the block. Never output <think> or any other tags. Always use the correct tag."
+    LLM_WARNING = "You are an expert Prolog programming assistant. Your task is to ALWAYS output ONLY a Markdown code block with the tag needed. Do not write explanations, notes, or comments outside the block. Never output <think> or any other tags. Always use the correct tag."
 
     # --- 1. Generate Knowledge Base ---
     INFO("\r[HL] Generating knowledge base")
@@ -99,9 +99,9 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\n{query}\n" +
         "\nWrite the static knowledge base. Remember to specify all the correct predicates and identify which are "
         "the predicates that are resources and to wrap it into Markdown tags \"```kb\" and NOT with \"```Prolog\" or other tags."
-        "Use this format as response:\n"
+        " Use this format as response:\n"
         f"\n{examples}\n" +
-        f"\n{LLM_HL_WARNING}\n"
+        f"\n{LLM_WARNING}\n"
     )
     succ, tmp_response = llm.query(kb_query)
     assert succ, f"Failed to generate static knowledge base. Response: {tmp_response}"
@@ -119,9 +119,9 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\nGiven the following static knowledge base\n```kb\n{kb['kb']}\n```"
         "\nWrite the initial and final states, minding to include all the correct predicates. "
         "Remember to wrap it into Markdown tags \"```init\" and \"```goal\" and NOT with \"```prolog\" or other tags."
-        "Use this format as response:\n"
+        " Use this format as response:\n"
         f"\n{examples}\n" +
-        f"\n{LLM_HL_WARNING}\n"
+        f"\n{LLM_WARNING}\n"
     )
     succ, tmp_response = llm.query(states_query)
     assert succ, f"Failed to generate initial and final states. Response: {tmp_response}"
@@ -141,9 +141,9 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\nKnowing that the goal state is the following\n```goal\n{kb['goal']}\n```" +
         "\nWrite the set of temporal actions divided into _start and _end actions. "
         "Remember to wrap it into Markdown tags \"```actions\" and NOT with \"```prolog\" or other tags."
-        "Use this format as response:\n"
+        " Use this format as response:\n"
         f"\n{examples}\n" +
-        f"\n{LLM_HL_WARNING}\n"
+        f"\n{LLM_WARNING}\n"
     )
     succ, response = llm.query(actions_query)
     assert succ, f"Failed to generate actions. Response: {response}"
@@ -183,16 +183,16 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     llm.clear_history()
     examples = read_example_file(FORMAT_EXAMPLES_LL_KB)
     kb_query = (
-        "Use this format as response:\n"
-        f"\n{examples}\n" +
-        "Given that the previous messages are format examples, you know have to produce code for the task that follows.\n" 
+        "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
         "Given the following high-level knowledge-base:\n{}\n".format(kb['kb']) + 
         "\n**Your task is to update the general knowledge base to include the new low-level predicates and resources.**" +
         f"\n**Wrap the COMPLETE updated knowledge base (including blocks, agents, positions, ll_predicates, etc.) within Markdown tags ```kb ... ```.**" + 
         f"\n**CRITICAL: Use the tag ```kb``` for the entire updated knowledge base.**" + 
+        " Use this format as response:\n"
+        f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
-        "\nNow, generate the updated low-level knowledge base:"
+        "\nNow, generate the updated low-level knowledge base for the current problem:"
     )
     succ, response = llm.query(kb_query)
     assert succ, f"Failed to generate LL KB. Response: {response}"
@@ -205,9 +205,7 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     llm.clear_history()
     examples = read_example_file(FORMAT_EXAMPLES_LL_STATES)
     states_query = (
-        "Use this format as response:\n"
-        f"\n{examples}\n" +
-        "Given that the previous messages are format examples, you know have to produce code for the task that follows.\n" 
+        "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
         "\nGiven the complete low-level knowledge-base generated previously:\n```kb\n{}\n```\n".format(kb["kb"]) + 
         "And given the high-level initial and final states as reference:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + 
@@ -217,9 +215,10 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
         "\n**CRITICAL: Output ONLY these two blocks (`init` and `goal`).**" + 
         "\n**Do NOT include the knowledge base (`kb`), actions (`ll_actions`), resources, or any other information.**" +
         f"\n**Do NOT use ```python``` or any other tags besides ```init``` and ```goal```.**" + 
+        " Use this format as response:\n"
+        f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
-        "\nExample format:\n```init\n% Low-level initial state predicates...\ninitial_state([...]).\n```\n\n```goal\n% Low-level goal state predicates...\ngoal_state([...]).\n```\n" + 
-        "\nNow, generate the updated low-level initial and final states:" 
+        "\nNow, generate the updated low-level initial and final state for the current problem:"
     )
     succ, response = llm.query(states_query)
     assert succ, f"Failed to query LLM for LL init/goal states. Response: {response}"
@@ -232,9 +231,7 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     llm.clear_history()
     examples = read_example_file(FORMAT_EXAMPLES_LL_ACTIONS)
     ll_actions_query = (
-        "Use this format as response:\n"
-        f"\n{examples}\n" +
-        "Given that the previous messages are format examples, you know have to produce code for the task that follows.\n" 
+        "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
         "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) +
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) +
@@ -245,6 +242,8 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
         "\n**CRITICAL: Use the tag ```ll_actions``` and NOT ```actions``` or any other tag.**" + 
         "\n**Do NOT include initial state, goal state, knowledge base, or any other information.**" +
         "\n**Just provide the list of low-level actions inside the ```ll_actions``` tag.**" + 
+        " Use this format as response:\n"
+        f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
         "\nNow, generate the specific low-level actions for the current problem:" 
     )
@@ -259,9 +258,7 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     llm.clear_history()
     examples = read_example_file(FORMAT_EXAMPLES_LL_MAPPINGS)
     mappings_query = (
-        "Use this format as response:\n"
-        f"\n{examples}\n" +
-        "Given that the previous messages are format examples, you know have to produce code for the task that follows.\n" 
+        "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
         "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
@@ -272,8 +269,10 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
         "\n**Remember that the mappings are only for the start actions.**" +
         "\n**Wrap the mappings within Markdown tags ```mappings ... ```.**" + 
         "\n**CRITICAL: Use the tag ```mappings``` and NOT ```kb``` or any other tag.**" + 
+        " Use this format as response:\n"
+        f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
-        "\nNow, generate the mappings:"
+        "\nNow, generate the mappings for the current problem:"
     )
     succ, response = llm.query(mappings_query)
     assert succ, f"Failed to generate LL Mappings. Response: {response}"
