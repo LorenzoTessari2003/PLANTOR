@@ -99,7 +99,7 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\n{query}\n" +
         "\nWrite the static knowledge base. Remember to specify all the correct predicates and identify which are "
         "the predicates that are resources and to wrap it into Markdown tags \"```kb\" and NOT with \"```Prolog\" or other tags."
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_WARNING}\n"
     )
@@ -119,7 +119,7 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\nGiven the following static knowledge base\n```kb\n{kb['kb']}\n```"
         "\nWrite the initial and final states, minding to include all the correct predicates. "
         "Remember to wrap it into Markdown tags \"```init\" and \"```goal\" and NOT with \"```prolog\" or other tags."
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_WARNING}\n"
     )
@@ -141,7 +141,7 @@ def hl_llm_multi_step(query, llm) -> dict:
         f"\nKnowing that the goal state is the following\n```goal\n{kb['goal']}\n```" +
         "\nWrite the set of temporal actions divided into _start and _end actions. "
         "Remember to wrap it into Markdown tags \"```actions\" and NOT with \"```prolog\" or other tags."
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_WARNING}\n"
     )
@@ -176,7 +176,7 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
 
     file = open(OUTPUT_FILE_LL, "w+")
     LLM_WARNING = "You are an expert Prolog programming assistant. Your task is to ALWAYS output ONLY a Markdown code block with the tag needed. Do not write explanations, notes, or comments outside the block. Never output <think> or any other tags. Always use the correct tag."
-    LLM_LL_WARNING = "Remember to prepend the low-level predicates with `ll_` and also to not use the high-level predicates inside the low-level actions as they may lead to errors."
+    LLM_LL_WARNING = "Remember to prepend the low-level predicates with `ll_`."
 
     # --- 1. Generate LL KB ---
     INFO("\r[LL] Generating knowledge base")
@@ -189,7 +189,7 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
         "\n**Your task is to update the general knowledge base to include the new low-level predicates and resources.**" +
         f"\n**Wrap the COMPLETE updated knowledge base (including blocks, agents, positions, ll_predicates, etc.) within Markdown tags ```kb ... ```.**" + 
         f"\n**CRITICAL: Use the tag ```kb``` for the entire updated knowledge base.**" + 
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
         "\nNow, generate the updated low-level knowledge base for the current problem:"
@@ -208,14 +208,14 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
         "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
         "\nGiven the complete low-level knowledge-base generated previously:\n```kb\n{}\n```\n".format(kb["kb"]) + 
-        "And given the high-level initial and final states as reference:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + 
+        "Given the high-level initial and final states as reference:\n```init\n{}\n```\n```goal\n{}\n```\n".format(kb["init"], kb["goal"]) + 
         "\n**Your task is to update ONLY the initial and final states to reflect the low-level details.**" +
         "\n**Wrap the updated initial state within Markdown tags ```init ... ```.**" + 
         "\n**Wrap the updated final state within Markdown tags ```goal ... ```.**" + 
         "\n**CRITICAL: Output ONLY these two blocks (`init` and `goal`).**" + 
         "\n**Do NOT include the knowledge base (`kb`), actions (`ll_actions`), resources, or any other information.**" +
         f"\n**Do NOT use ```python``` or any other tags besides ```init``` and ```goal```.**" + 
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
         "\nNow, generate the updated low-level initial and final state for the current problem:"
@@ -233,18 +233,17 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     ll_actions_query = (
         "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
-        "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) +
         "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) +
-        "\nGiven the low-level initial state:\n```init\n{}\n```".format(kb["init"]) + 
-        "\nAnd the low-level goal state:\n```goal\n{}\n```".format(kb["goal"]) +
+        "Given the high-level actions:\n```actions\n{}\n```\n".format(hl_kb["actions"]) +
         "\n**Your task is to generate ONLY the set of low-level actions.**" +
         "\n**Wrap the low-level actions within Markdown tags ```ll_actions ... ```.**" + 
         "\n**CRITICAL: Use the tag ```ll_actions``` and NOT ```actions``` or any other tag.**" + 
         "\n**Do NOT include initial state, goal state, knowledge base, or any other information.**" +
         "\n**Just provide the list of low-level actions inside the ```ll_actions``` tag.**" + 
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
+        "Remember also to not use the high-level predicates inside the low-level actions, as they may lead to errors."
         "\nNow, generate the specific low-level actions for the current problem:" 
     )
     succ, response = llm.query(ll_actions_query)
@@ -260,16 +259,13 @@ def ll_llm_multi_step(query, kb, llm) -> dict:
     mappings_query = (
         "You now have to produce code for the task that follows.\n" 
         f"\n{query}\n" +
-        "Given the following high-level knowledge-base:\n{}\n".format(hl_kb) + \
-        "Given the refactored low-level knowledge-base:\n```kb\n{}\n```\n".format(kb["kb"]) + \
-        "Given the initial state:\n```init\n{}\n```\n".format(kb["init"]) + \
-        "Given the final state:\n```goal\n{}\n```\n".format(kb["goal"]) + \
+        "Given the high-level actions:\n```actions\n{}\n```\n".format(hl_kb["actions"]) +
         "Given the low-level actions set:\n```actions\n{}\n```\n".format(kb["ll_actions"]) + \
         "\n**Provide the mappings from high-level actions to low-level actions.**" +
         "\n**Remember that the mappings are only for the start actions.**" +
         "\n**Wrap the mappings within Markdown tags ```mappings ... ```.**" + 
         "\n**CRITICAL: Use the tag ```mappings``` and NOT ```kb``` or any other tag.**" + 
-        " Use this format as response:\n"
+        "\nUse this format as response:\n"
         f"\n{examples}\n" +
         f"\n{LLM_LL_WARNING}\n" + f"\n{LLM_WARNING}\n"
         "\nNow, generate the mappings for the current problem:"
