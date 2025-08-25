@@ -177,6 +177,7 @@ def ll_llm_multi_step(hl_query, ll_query, kb, llm) -> dict:
     "kb": "",
     "init": "",
     "goal": "",
+    "actions": hl_kb["actions"], #Not passed
     "ll_actions": "",
     "mappings": ""
     }
