@@ -23,6 +23,8 @@ if model_name:
         model_type = "gemma"
     elif "qwen" in model_id_lower:
         model_type = "qwen"
+    elif "llama" in model_id_lower:
+        model_type = "llama"
 print(f"Detected model type for training: {model_type}")
 
 #Chat template
@@ -59,6 +61,23 @@ if tokenizer.chat_template is None:
             "{% endfor %}"
             "{% if add_generation_prompt %}"
             "{{ '<|im_start|>assistant\n' }}"
+            "{% endif %}"
+        )
+    elif model_type == "llama":
+        print("Setting Llama 3 chat template.")
+        tokenizer.chat_template = (
+            "{{ bos_token }}"
+            "{% for message in messages %}"
+                "{% if message['role'] == 'system' %}"
+                    "{{ '<|start_header_id|>system<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                "{% elif message['role'] == 'user' %}"
+                    "{{ '<|start_header_id|>user<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                "{% elif message['role'] == 'assistant' %}"
+                    "{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                "{% endif %}"
+            "{% endfor %}"
+            "{% if add_generation_prompt %}"
+                "{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}"
             "{% endif %}"
         )
     else:
@@ -138,6 +157,9 @@ if model_type == "gemma":
     response_template_str = "<start_of_turn>model"
 elif model_type == "qwen":
     response_template_str = "<|im_start|>assistant"
+elif model_type == "llama":
+    # CORRETTO: Questo è l'inizio esatto del turno dell'assistente per Llama 3
+    response_template_str = "<|start_header_id|>assistant<|end_header_id|>\n\n"
 else:
     # Fallback generico, potrebbe non essere perfetto
     response_template_str = "assistant" 

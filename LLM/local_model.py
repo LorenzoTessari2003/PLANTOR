@@ -24,6 +24,8 @@ class LocalModel:
                 self.model_type = "gemma"
             elif "qwen" in model_id_lower:
                 self.model_type = "qwen"
+            elif "llama" in model_id_lower:
+                self.model_type = "llama"
         print(f"Detected model type: {self.model_type}")
 
         try:
@@ -48,8 +50,6 @@ class LocalModel:
                         "{% endif %}"
                     )
                 elif self.model_type == "qwen":
-                    # Nota: i tokenizer di Qwen di solito hanno già il template. 
-                    # Questo è solo un fallback di sicurezza.
                     print("Setting Qwen (ChatML) chat template.")
                     self.tokenizer.chat_template = (
                         "{% for message in messages %}"
@@ -63,6 +63,24 @@ class LocalModel:
                         "{% endfor %}"
                         "{% if add_generation_prompt %}"
                         "{{ '<|im_start|>assistant\n' }}"
+                        "{% endif %}"
+                    )
+                elif self.model_type == "llama":
+                    print("Setting Llama 3 chat template.")
+                    # Questo è il formato corretto per Llama 3
+                    self.tokenizer.chat_template = (
+                        "{{ bos_token }}"
+                        "{% for message in messages %}"
+                            "{% if message['role'] == 'system' %}"
+                                "{{ '<|start_header_id|>system<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                            "{% elif message['role'] == 'user' %}"
+                                "{{ '<|start_header_id|>user<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                            "{% elif message['role'] == 'assistant' %}"
+                                "{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' + message['content'] + '<|eot_id|>' }}"
+                            "{% endif %}"
+                        "{% endfor %}"
+                        "{% if add_generation_prompt %}"
+                            "{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}"
                         "{% endif %}"
                     )
                 else:

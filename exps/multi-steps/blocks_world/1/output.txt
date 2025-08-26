@@ -113,7 +113,6 @@ ll_action(ll_release_end(Arm),
   ]
 ).
 
-MAPPINGS: 
 mapping(move_table_to_table_start(Agent, Block, X1, Y1, X2, Y2),
   [
     ll_move_arm_start(Agent, 0, 0, X1, Y1),

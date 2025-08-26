@@ -1,0 +1,10 @@
+API_TYPE: "local"
+MODEL_NAME_DISPLAY: "CodeGemma-7B-QLoRA"
+MODEL_PATH: "model_training/codegemma_7B_qlora_final"
+IS_QLORA_MODEL: true
+BASE_MODEL_NAME_OR_PATH: "google/codegemma-7b"
+MAX_NEW_TOKENS: 4096
+NUM_BEAMS: 1
+TEMPERATURE: 0.01
+TOP_P: 0.95
+DO_SAMPLE: true

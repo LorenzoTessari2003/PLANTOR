@@ -86,7 +86,7 @@ def evaluate_knowledge_base(generated_file, gold_standard_file):
     return results
 
 def main():
-    FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'exps', 'multi-steps', 'blocks_world', '1')
+    FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'exps', 'multi-steps', 'blocks_world', '10')
     # --- CONFIGURAZIONE ---
     generated_file = os.path.join(FILE_PATH, 'qwen3_qlora_output.txt')
     gold_standard_file = os.path.join(FILE_PATH, 'output.txt')
