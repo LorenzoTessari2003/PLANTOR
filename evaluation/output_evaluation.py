@@ -15,33 +15,7 @@ def check_parsability(file_path):
     except Exception as e:
         return 0.0, f"Errore di Parsing: Il file non è valido. Dettagli: {e}"
 
-def normalize_prolog_text(text_content):
-    """
-    Normalizza una stringa di testo Prolog per un confronto coerente.
-    """
-    # Rimuovi i commenti multi-riga (/* ... */)
-    content = re.sub(r'/\*.*?\*/', '', text_content, flags=re.DOTALL)
-    
-    lines = content.splitlines()
-    normalized_lines = []
-    
-    for line in lines:
-        # Rimuovi i commenti a riga singola (%)
-        line_no_comment = re.sub(r'%.*$', '', line)
-        # Rimuovi spaziature extra e uniforma la terminazione dei fatti
-        stripped_line = line_no_comment.strip().replace(" ", "")
-        if stripped_line:
-            normalized_lines.append(stripped_line)
-            
-    # Ordina le righe per un confronto indipendente dall'ordine
-    normalized_lines.sort()
-    return "\n".join(normalized_lines)
-
 def calculate_semantic_accuracy_ratio(generated_kb_path, gold_standard_kb_path):
-    """
-    Calcola un rapporto di similarità (0-1) tra due file Prolog.
-    Il confronto ignora commenti, spaziature e ordine dei fatti.
-    """
     try:
         with open(generated_kb_path, 'r', encoding='utf-8') as f:
             generated_content = f.read()
@@ -50,75 +24,77 @@ def calculate_semantic_accuracy_ratio(generated_kb_path, gold_standard_kb_path):
     except FileNotFoundError:
         return 0.0, "Errore: Uno o entrambi i file non sono stati trovati."
 
-    normalized_gen = normalize_prolog_text(generated_content)
-    normalized_gold = normalize_prolog_text(gold_content)
+    generated_facts = extract_normalized_facts_as_set(generated_content)
+    gold_facts = extract_normalized_facts_as_set(gold_content)
 
-    # Usa SequenceMatcher per ottenere un rapporto di similarità
-    matcher = difflib.SequenceMatcher(None, normalized_gold, normalized_gen)
-    ratio = matcher.ratio()
+    if not gold_facts:
+        return 1.0, "Successo: Il file gold standard è vuoto o contiene solo commenti."
+
+    matching_facts_count = len(gold_facts & generated_facts)
     
-    message = f"Successo: Il rapporto di similarità è {ratio:.4f}."
-    if ratio < 1.0:
-        message = f"Discrepanza: Il rapporto di similarità è {ratio:.4f}."
+    total_gold_facts = len(gold_facts)
+    accuracy = matching_facts_count / total_gold_facts
+    
+    message = f"Success: Trovati {matching_facts_count} su {total_gold_facts} fatti richiesti. Accuratezza: {accuracy:.2%}."
+    if accuracy < 1.0:
+        message = f"Discrepanza: Trovati {matching_facts_count} su {total_gold_facts} fatti richiesti. Accuratezza: {accuracy:.2%}."
         
-    return ratio, message
+    return accuracy, message
 
-def check_solvability(kb_path, goal_query):
-    """
-    Verifica se un obiettivo è risolvibile.
-    Restituisce un punteggio (1.0 per successo, 0.0 per fallimento) e un messaggio.
-    """
-    prolog = Prolog()
-    try:
-        prolog.consult(kb_path)
-        solutions = list(prolog.query(goal_query))
+def extract_normalized_facts_as_set(text_content):
+    content = re.sub(r'/\*.*?\*/', '', text_content, flags=re.DOTALL)
+    
+    lines = content.splitlines()
+    normalized_facts = set()
+    
+    for line in lines:
+        line_no_comment = re.sub(r'%.*$', '', line)
+        stripped_line = re.sub(r'\s+', '', line_no_comment)
+        
+        if stripped_line:
+            normalized_facts.add(stripped_line)
+            
+    return normalized_facts
 
-        if solutions:
-            return 1.0, f"Successo: L'obiettivo '{goal_query}' è stato risolto."
-        else:
-            return 0.0, f"Fallimento: Nessuna soluzione trovata per l'obiettivo '{goal_query}'."
-    except Exception as e:
-        return 0.0, f"Errore durante il tentativo di risoluzione: {e}"
-
-def evaluate_knowledge_base(generated_file, gold_standard_file, goal_to_solve):
-    """
-    Esegue la valutazione completa di un file KB e restituisce un dizionario con i punteggi.
-    """
+def evaluate_knowledge_base(generated_file, gold_standard_file):
     results = {}
 
-    # 1. Valutazione della Parsabilità
+    # 1. Parsability
     parsability_score, parsability_msg = check_parsability(generated_file)
     results['parsability'] = {'score': parsability_score, 'message': parsability_msg}
 
-    # Se non è parsabile, le altre metriche sono automaticamente 0
-    if parsability_score == 0.0:
-        results['semantic_accuracy'] = {'score': 0.0, 'message': 'Non valutabile: il file non è parsabile.'}
-        results['solvability'] = {'score': 0.0, 'message': 'Non valutabile: il file non è parsabile.'}
-        return results
-
-    # 2. Valutazione dell'Accuratezza Semantica
+    # 2.Accuracy
     accuracy_score, accuracy_msg = calculate_semantic_accuracy_ratio(generated_file, gold_standard_file)
     results['semantic_accuracy'] = {'score': accuracy_score, 'message': accuracy_msg}
 
-    # 3. Valutazione della Risolvibilità
-    solvability_score, solvability_msg = check_solvability(generated_file, goal_to_solve)
+    # Parsability check for Solvability
+    if parsability_score == 0.0:
+        results['solvability'] = {'score': 0.0, 'message': 'File non parsabile.'}
+        return results
+
+    # 3. Solvability
+    # NOTE: it's not easy to define if it's solvable or not, because it depends on the planner to, so we make it manually checking the code.
+    # Here we pass a value of 1 if it's parsable and if the accuracy is more than 75%
+    if accuracy_score > 0.75:
+        solvability_score = 1.0
+        solvability_msg = "Solvibile: accuratezza semantica > 75%."
+    else:
+        solvability_score = 0.0
+        solvability_msg = f"Non solvibile: accuratezza ({accuracy_score:.2%}) inferiore a 75%."
     results['solvability'] = {'score': solvability_score, 'message': solvability_msg}
     
     return results
 
 def main():
-    """
-    Funzione principale per eseguire il processo di valutazione e stampare i risultati.
-    """
+    FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'exps', 'multi-steps', 'blocks_world', '1')
     # --- CONFIGURAZIONE ---
-    generated_file = "generated_kb_imperfect.txt"
-    gold_standard_file = "gold_standard_kb.txt"
-    goal_to_solve = "can_move(robot, room_a, room_b)"
+    generated_file = os.path.join(FILE_PATH, 'qwen3_qlora_output.txt')
+    gold_standard_file = os.path.join(FILE_PATH, 'output.txt')
 
     print(f"--- Inizio valutazione del file: {generated_file} ---")
 
     # Esegui la valutazione
-    evaluation_results = evaluate_knowledge_base(generated_file, gold_standard_file, goal_to_solve)
+    evaluation_results = evaluate_knowledge_base(generated_file, gold_standard_file)
 
     # Stampa i risultati in modo formattato
     for metric, result in evaluation_results.items():
@@ -133,21 +109,5 @@ def main():
     print("-----------------------------------------")
 
 
-if __name__ == "__main__":
-    
-    # 1. Gold Standard
-    with open("gold_standard_kb.txt", "w", encoding='utf-8') as f:
-        f.write("% Gold standard KB\n")
-        f.write("location(robot, room_a).\n")
-        f.write("object(key).\n")
-        f.write("connected(room_a, room_b).\n")
-        f.write("can_move(Agent, From, To) :- location(Agent, From), connected(From, To).\n")
-
-    # 2. Generato
-    with open("generated_kb_imperfect.txt", "w", encoding='utf-8') as f:
-        f.write("/* KB generata dal modello */\n\n")
-        f.write("can_move(Agent, From, To) :- location(Agent, From), conected(From, To).\n") # ERRORE QUI
-        f.write("object(key).\n")
-        f.write("location(robot, room_a).\n")
-        
+if __name__ == "__main__":   
     main()

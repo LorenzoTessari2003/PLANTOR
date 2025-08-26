@@ -627,7 +627,6 @@ def main():
          sys.exit(1)
     except Exception as e:
          FAIL(f"ERROR during planning or execution: {e}")
-         # Considera di stampare il traceback per errori inaspettati
          import traceback
          traceback.print_exc()
          sys.exit(1)
